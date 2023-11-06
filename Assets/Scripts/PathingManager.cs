@@ -65,7 +65,7 @@ public class PathingManager : MonoBehaviour
         cells[startingPoint] = new Cell(cells[startingPoint].CellPos, cells[startingPoint].Index, -1, 1000);
 
         openCells.Add(cells[startingPoint].Index);
-        currentPoint = cells[startingPoint].Index;
+        currentPoint = openCells.Elements[0];
 
         GetAllCellNeighbors();
     }
@@ -120,35 +120,39 @@ public class PathingManager : MonoBehaviour
 
     private void MoveToTarget()
     {
+        Cell neighborCell;
+        int currentCellIndex;
+
         int neighbor;
         float cost;
 
-        while (openCells.Elements.Length > 0)
+        while (openCells.Size > 0)
         {
-            currentPoint = openCells.Elements[0];
+            currentCellIndex = cells[currentPoint].Index;
 
             if (currentPoint == endPoint)
-            {
                 break;
-            }
 
-            closedCells.Add(cells[currentPoint].Index);
+            closedCells.Add(currentCellIndex);
             openCells.Pop();
 
-            for (int i = 0; i < cellNeighbors[cells[currentPoint].Index].Length; i++)
+            for (int i = 0; i < cellNeighbors[currentCellIndex].Length; i++)
             {
-                neighbor = cellNeighbors[cells[currentPoint].Index][i];
+                neighbor = cellNeighbors[currentCellIndex][i];
+                neighborCell = cells[neighbor];
 
-                if (cells[neighbor].FCost > -1 || closedCells.Contains(cells[neighbor].Index))
+                if (neighborCell.FCost > -1)
                     continue;
 
-                cost = (math.distance(cells[neighbor].CellPos, cells[startingPoint].CellPos) +
-                    math.distance(cells[neighbor].CellPos, targetPos) * 10);
+                cost = (math.distance(neighborCell.CellPos, cells[startingPoint].CellPos) +
+                    math.distance(neighborCell.CellPos, targetPos) * 10);
 
-                cells[neighbor] = new Cell(cells[neighbor].CellPos, cells[neighbor].Index, cells[currentPoint].Index, cost);
+                cells[neighbor] = new Cell(neighborCell.CellPos, neighborCell.Index, currentCellIndex, cost);
 
-                openCells.Add(cells[neighbor].Index);
+                openCells.Add(neighborCell.Index);
             }
+
+            currentPoint = openCells.Elements[0];
         }
 
         SearchOrigin();
@@ -239,16 +243,16 @@ public class PathingManager : MonoBehaviour
         if (Application.isPlaying)
         {
             Gizmos.color = Color.cyan;
-
+    
             foreach (var item in closedCells)
             {
                 Gizmos.DrawCube(cells[item].CellPos, Vector3.one / 10);
             }
-
+    
             Gizmos.color = Color.magenta;
             Gizmos.DrawWireCube(cells[startingPoint].CellPos, (Vector3)cellAmount * cellSize);
         }
-
+    
         if (showGizmos)
         {
             Gizmos.color = Color.red;
