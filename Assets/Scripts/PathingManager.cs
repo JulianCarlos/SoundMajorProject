@@ -26,7 +26,7 @@ public class PathingManager : MonoBehaviour
     private int endPoint;
     
     private Heap openCells;
-    private NativeList<int> closedCells;
+    //private NativeList<int> closedCells;
 
     private NativeArray<Cell> cells;
     private NativeHashMap<float3, int> cellData;
@@ -50,7 +50,7 @@ public class PathingManager : MonoBehaviour
         cellData = new NativeHashMap<float3, int>(totalCells, Allocator.Persistent);
 
         openCells = new(totalCells);
-        closedCells = new NativeList<int>(Allocator.Persistent);
+        //closedCells = new NativeList<int>(Allocator.Persistent);
 
         InitializeDirections();
     }
@@ -131,7 +131,7 @@ public class PathingManager : MonoBehaviour
             if (currentPoint == endPoint)
                 break;
 
-            closedCells.Add(currentCellIndex);
+            //closedCells.Add(currentCellIndex);
             openCells.Pop();
 
             for (int i = 0; i < cellNeighbors[currentCellIndex].Length; i++)
@@ -139,10 +139,10 @@ public class PathingManager : MonoBehaviour
                 neighbor = cellNeighbors[currentCellIndex][i];
                 neighborCell = cells[neighbor];
 
-                if (neighbor == endPoint)
-                    break;
+                if (neighborCell.FCost > -1)
+                    continue;
 
-                cost = math.abs(cells[neighbor].CellPos.x - targetPos.x) + math.abs(cells[neighbor].CellPos.y - targetPos.y) + math.abs(cells[neighbor].CellPos.z - targetPos.z);
+                cost = math.distance(neighborCell.CellPos, targetPos);
 
                 cells[neighbor] = new Cell(neighborCell.CellPos, neighborCell.Index, currentCellIndex, cost);
 
@@ -228,7 +228,7 @@ public class PathingManager : MonoBehaviour
     {
         cells.Dispose();
         cellData.Dispose();
-        closedCells.Dispose();
+        //closedCells.Dispose();
         directions.Dispose();
 
         foreach (var item in cellNeighbors.Values)
@@ -237,40 +237,40 @@ public class PathingManager : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmos()
-    {
-        if (Application.isPlaying)
-        {
-            Gizmos.color = Color.cyan;
-    
-            foreach (var item in closedCells)
-            {
-                Gizmos.DrawCube(cells[item].CellPos, Vector3.one / 10);
-            }
-    
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawWireCube(cells[startingPoint].CellPos, (Vector3)cellAmount * cellSize);
-        }
-    
-        if (showGizmos)
-        {
-            Gizmos.color = Color.red;
-            for (int x = 0; x < cellAmount.x; x++)
-            {
-                for (int y = 0; y < cellAmount.y; y++)
-                {
-                    for (int z = 0; z < cellAmount.z; z++)
-                    {
-                        Vector3 cellCenter = new Vector3(
-                            transform.position.x + (x - (cellAmount.x - 1) / 2) * cellSize,
-                            transform.position.y + (y - (cellAmount.y - 1) / 2) * cellSize,
-                            transform.position.z + (z - (cellAmount.z - 1) / 2) * cellSize
-                        );
-        
-                        Gizmos.DrawWireCube(cellCenter, Vector3.one / 10);
-                    }
-                }
-            }
-        }
-    }
+    //private void OnDrawGizmos()
+    //{
+    //    if (Application.isPlaying)
+    //    {
+    //        Gizmos.color = Color.cyan;
+    //
+    //        //foreach (var item in closedCells)
+    //        //{
+    //        //    Gizmos.DrawCube(cells[item].CellPos, Vector3.one / 10);
+    //        //}
+    //
+    //        Gizmos.color = Color.magenta;
+    //        Gizmos.DrawWireCube(cells[startingPoint].CellPos, (Vector3)cellAmount * cellSize);
+    //    }
+    //
+    //    if (showGizmos)
+    //    {
+    //        Gizmos.color = Color.red;
+    //        for (int x = 0; x < cellAmount.x; x++)
+    //        {
+    //            for (int y = 0; y < cellAmount.y; y++)
+    //            {
+    //                for (int z = 0; z < cellAmount.z; z++)
+    //                {
+    //                    Vector3 cellCenter = new Vector3(
+    //                        transform.position.x + (x - (cellAmount.x - 1) / 2) * cellSize,
+    //                        transform.position.y + (y - (cellAmount.y - 1) / 2) * cellSize,
+    //                        transform.position.z + (z - (cellAmount.z - 1) / 2) * cellSize
+    //                    );
+    //    
+    //                    Gizmos.DrawWireCube(cellCenter, Vector3.one / 10);
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
 }
