@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -27,8 +29,7 @@ public class PathingManager : MonoBehaviour
 
     private NativeArray<Cell> cells;
     private NativeHashMap<float3, int> cellData;
-    private NativeParallelMultiHashMap<int, int> cellNeighbors;
-    private NativeParallelMultiHashMap<int, int>.Enumerator neighborValues;
+    private NeighborData[] cellNeighbors;
 
     private float3 playerPos;
     private float3 targetPos;
@@ -48,7 +49,7 @@ public class PathingManager : MonoBehaviour
         cellData = new NativeHashMap<float3, int>(totalCells, Allocator.Persistent);
         
         openCells = new(totalCells);
-        cellNeighbors = new NativeParallelMultiHashMap<int, int>(totalCells, Allocator.Persistent);
+        cellNeighbors = new NeighborData[totalCells];
 
         InitializeDirections();
     }
@@ -128,14 +129,9 @@ public class PathingManager : MonoBehaviour
         
             openCells.Pop();
 
-            neighborValues = cellNeighbors.GetValuesForKey(currentCellIndex);
-
-            foreach (var item in neighborValues)
+            for (int i = 0; i < cellNeighbors[currentCellIndex].NeighborsCount; i++)
             {
-                if (item == 0)
-                    continue;
-
-                neighbor = item;
+                neighbor = cellNeighbors[currentCellIndex].Neighbors[i];
                 neighborCell = cells[neighbor];
                 
                 if (neighborCell.FCost > -1)
@@ -169,14 +165,16 @@ public class PathingManager : MonoBehaviour
     {
         foreach (var index in cellData)
         {
-            GetNeighbours(cells[index.Value].CellPos);
+            GetNeighbours(cells[index.Value].CellPos, cells[index.Value].Index);
         }
     }
 
-    private void GetNeighbours(float3 position)
+    private void GetNeighbours(float3 position, int index)
     {
         int initialCell;
         int targetCell;
+
+        List<int> neighbors = new List<int>();
 
         cellData.TryGetValue(position, out initialCell);
 
@@ -186,10 +184,12 @@ public class PathingManager : MonoBehaviour
             {
                 if (cellData.TryGetValue((position + (directions[i] * cellSize)), out targetCell))
                 {
-                    cellNeighbors.Add(initialCell, cells[targetCell].Index);
+                    neighbors.Add(targetCell);
                 }
             }
         }
+
+        cellNeighbors[index] = new NeighborData(neighbors.ToArray());
     }
 
     private void InitializeGrid()
@@ -215,7 +215,6 @@ public class PathingManager : MonoBehaviour
         for (int i = 0; i < cells.Length; i++)
         {
             cellData.Add(cells[i].CellPos, cells[i].Index);
-            cellNeighbors.Add(cells[i].Index, 0);
         }
 
         cells.Dispose();
@@ -228,7 +227,6 @@ public class PathingManager : MonoBehaviour
         cells.Dispose();
         cellData.Dispose();
         directions.Dispose();
-        cellNeighbors.Dispose();
     }
 
     private void OnDrawGizmos()
