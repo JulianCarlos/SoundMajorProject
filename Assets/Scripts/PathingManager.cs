@@ -142,8 +142,7 @@ public class PathingManager : MonoBehaviour
                 if (neighborCell.FCost > -1)
                     continue;
 
-                cost = (math.distance(neighborCell.CellPos, cells[startingPoint].CellPos) +
-                    math.distance(neighborCell.CellPos, targetPos) * 10);
+                cost = math.distance(neighborCell.CellPos, targetPos);
 
                 cells[neighbor] = new Cell(neighborCell.CellPos, neighborCell.Index, currentCellIndex, cost);
 
@@ -186,7 +185,7 @@ public class PathingManager : MonoBehaviour
         {
             if (!Physics.Raycast(position, directions[i], cellSize))
             {
-                if (cellData.TryGetValue((position + (float3)(directions[i] * cellSize)), out targetCell))
+                if (cellData.TryGetValue((position + (directions[i] * cellSize)), out targetCell))
                 {
                     cellNeighbors[initialCell].Add(cells[targetCell].Index);
                 }
