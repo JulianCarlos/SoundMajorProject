@@ -12,7 +12,7 @@ using Debug = UnityEngine.Debug;
 
 public class PathingManager : MonoBehaviour
 {
-    [SerializeField, Range(1, 5)] private short cellSize = 1;
+    [SerializeField, Range(1, 5)] private int cellSize = 1;
     [SerializeField] private float3 cellAmount;
 
     [Space]
@@ -219,9 +219,9 @@ public class PathingManager : MonoBehaviour
             cellNeighbors.Add(cells[i].Index, new NativeList<int>(Allocator.Persistent));
         }
 
-        Debug.Log("Generating Grid: " + (Time.realtimeSinceStartup - then) * 1000f);
-
         cells.Dispose();
+
+        Debug.Log("Generating Grid: " + (Time.realtimeSinceStartup - then) * 1000f);
     }
 
     private void OnDestroy()
@@ -237,40 +237,40 @@ public class PathingManager : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmos()
-    {
-        if (Application.isPlaying)
-        {
-            Gizmos.color = Color.cyan;
-    
-            //foreach (var item in closedCells)
-            //{
-            //    Gizmos.DrawCube(cells[item].CellPos, Vector3.one / 10);
-            //}
-    
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawWireCube(cells[startingPoint].CellPos, (Vector3)cellAmount * cellSize);
-        }
-    
-        if (showGizmos)
-        {
-            Gizmos.color = Color.red;
-            for (int x = 0; x < cellAmount.x; x++)
-            {
-                for (int y = 0; y < cellAmount.y; y++)
-                {
-                    for (int z = 0; z < cellAmount.z; z++)
-                    {
-                        Vector3 cellCenter = new Vector3(
-                            transform.position.x + (x - (cellAmount.x - 1) / 2) * cellSize,
-                            transform.position.y + (y - (cellAmount.y - 1) / 2) * cellSize,
-                            transform.position.z + (z - (cellAmount.z - 1) / 2) * cellSize
-                        );
-        
-                        Gizmos.DrawWireCube(cellCenter, Vector3.one / 10);
-                    }
-                }
-            }
-        }
-    }
+    //private void OnDrawGizmos()
+    //{
+    //    if (Application.isPlaying)
+    //    {
+    //        Gizmos.color = Color.cyan;
+    //
+    //        //foreach (var item in closedCells)
+    //        //{
+    //        //    Gizmos.DrawCube(cells[item].CellPos, Vector3.one / 10);
+    //        //}
+    //
+    //        Gizmos.color = Color.magenta;
+    //        Gizmos.DrawWireCube(cells[startingPoint].CellPos, (Vector3)cellAmount * cellSize);
+    //    }
+    //
+    //    if (showGizmos)
+    //    {
+    //        Gizmos.color = Color.red;
+    //        for (int x = 0; x < cellAmount.x; x++)
+    //        {
+    //            for (int y = 0; y < cellAmount.y; y++)
+    //            {
+    //                for (int z = 0; z < cellAmount.z; z++)
+    //                {
+    //                    Vector3 cellCenter = new Vector3(
+    //                        transform.position.x + (x - (cellAmount.x - 1) / 2) * cellSize,
+    //                        transform.position.y + (y - (cellAmount.y - 1) / 2) * cellSize,
+    //                        transform.position.z + (z - (cellAmount.z - 1) / 2) * cellSize
+    //                    );
+    //    
+    //                    Gizmos.DrawWireCube(cellCenter, Vector3.one / 10);
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
 }

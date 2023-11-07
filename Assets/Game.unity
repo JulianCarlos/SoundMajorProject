@@ -95342,7 +95342,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb998247015c1ea41886b9db470cb702, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cellSize: 2
+  cellSize: 3
   cellAmount:
     x: 31
     y: 19
