@@ -124,7 +124,7 @@ public class PathingManager : MonoBehaviour
 
         while (currentPoint != endPoint && openCells.Size > 0)
         {
-            currentCellIndex = cells[currentPoint].Index;
+            currentCellIndex = currentPoint;
         
             openCells.Pop();
 
