@@ -6,6 +6,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using static UnityEditor.Progress;
 using Debug = UnityEngine.Debug;
@@ -38,6 +39,8 @@ public class PathingManager : MonoBehaviour
     private int totalCells;
 
     private NativeArray<float3> directions;
+
+    private int cellNeighborIndex = 0;
 
     private void Awake()
     {
@@ -124,12 +127,9 @@ public class PathingManager : MonoBehaviour
         int neighbor;
         float cost;
 
-        while (openCells.Size > 0)
+        while (currentPoint != endPoint && openCells.Size > 0)
         {
             currentCellIndex = cells[currentPoint].Index;
-
-            if (currentPoint == endPoint)
-                break;
 
             //closedCells.Add(currentCellIndex);
             openCells.Pop();
@@ -217,6 +217,7 @@ public class PathingManager : MonoBehaviour
         {
             cellData.Add(cells[i].CellPos, cells[i].Index);
             cellNeighbors.Add(cells[i].Index, new NativeList<int>(Allocator.Persistent));
+            cellNeighborIndex++;
         }
 
         cells.Dispose();
