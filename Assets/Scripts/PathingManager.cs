@@ -26,7 +26,7 @@ public class PathingManager : MonoBehaviour
     private int endPoint;
     
     private Heap openCells;
-    private NativeList<int> closedCells;
+    //private NativeList<int> closedCells;
 
     private NativeArray<Cell> cells;
     private NativeHashMap<float3, int> cellData;
@@ -50,7 +50,7 @@ public class PathingManager : MonoBehaviour
         cellData = new NativeHashMap<float3, int>(totalCells, Allocator.Persistent);
 
         openCells = new(totalCells);
-        closedCells = new NativeList<int>(Allocator.Persistent);
+        //closedCells = new NativeList<int>(Allocator.Persistent);
 
         InitializeDirections();
     }
@@ -74,11 +74,7 @@ public class PathingManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.P))
         {
-            var then = Time.realtimeSinceStartup;
-
             MoveToTarget();
-
-            Debug.Log("Follow Path: " + ((Time.realtimeSinceStartup - then) * 1000f));
         }
     }
 
@@ -120,6 +116,8 @@ public class PathingManager : MonoBehaviour
 
     private void MoveToTarget()
     {
+        var then = Time.realtimeSinceStartup;
+
         Cell neighborCell;
         int currentCellIndex;
 
@@ -133,7 +131,7 @@ public class PathingManager : MonoBehaviour
             if (currentPoint == endPoint)
                 break;
 
-            closedCells.Add(currentCellIndex);
+            //closedCells.Add(currentCellIndex);
             openCells.Pop();
 
             for (int i = 0; i < cellNeighbors[currentCellIndex].Length; i++)
@@ -154,6 +152,8 @@ public class PathingManager : MonoBehaviour
 
             currentPoint = openCells.Elements[0];
         }
+
+        Debug.Log("Follow Path: " + ((Time.realtimeSinceStartup - then) * 1000f));
 
         SearchOrigin();
     }
@@ -229,7 +229,7 @@ public class PathingManager : MonoBehaviour
     {
         cells.Dispose();
         cellData.Dispose();
-        closedCells.Dispose();
+        //closedCells.Dispose();
         directions.Dispose();
 
         foreach (var item in cellNeighbors.Values)
@@ -244,10 +244,10 @@ public class PathingManager : MonoBehaviour
         {
             Gizmos.color = Color.cyan;
     
-            foreach (var item in closedCells)
-            {
-                Gizmos.DrawCube(cells[item].CellPos, Vector3.one / 10);
-            }
+            //foreach (var item in closedCells)
+            //{
+            //    Gizmos.DrawCube(cells[item].CellPos, Vector3.one / 10);
+            //}
     
             Gizmos.color = Color.magenta;
             Gizmos.DrawWireCube(cells[startingPoint].CellPos, (Vector3)cellAmount * cellSize);
