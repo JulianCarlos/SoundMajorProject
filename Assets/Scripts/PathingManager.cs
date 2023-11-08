@@ -118,30 +118,27 @@ public class PathingManager : MonoBehaviour
     {
         var then = Time.realtimeSinceStartup;
 
-        Cell neighborCell;
-        int currentCellIndex;
-
-        int neighbor;
         float cost;
+        NeighborData neighborData;
+        Cell neighborCell;
 
         while (currentPoint != endPoint && openCells.Size > 0)
         {
-            currentCellIndex = currentPoint;
-            
+            neighborData = cellNeighbors[currentPoint];
+
             openCells.Pop();
             closedCells.Add(cells[currentPoint].Index);
 
-            for (int i = 0; i < cellNeighbors[currentCellIndex].NeighborsCount; i++)
+            for (int i = 0; i < cellNeighbors[currentPoint].NeighborsCount; i++)
             {
-                neighbor = cellNeighbors[currentCellIndex].Neighbors[i];
-                neighborCell = cells[neighbor];
-                
+                neighborCell = cells[neighborData.Neighbors[i]];
+
                 if (neighborCell.FCost > -1)
                     continue;
                 
                 cost = math.distance(neighborCell.CellPos, targetPos);
-                
-                cells[neighbor] = new Cell(neighborCell.CellPos, neighborCell.Index, currentCellIndex, cost);
+
+                cells[cellNeighbors[currentPoint].Neighbors[i]] = new Cell(neighborCell.CellPos, neighborCell.Index, currentPoint, cost);
                 
                 openCells.Add(neighborCell.Index);
             }
