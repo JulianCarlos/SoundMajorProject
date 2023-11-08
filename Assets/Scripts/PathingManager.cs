@@ -30,6 +30,7 @@ public class PathingManager : MonoBehaviour
     private NativeArray<Cell> cells;
     private NativeHashMap<float3, int> cellData;
     private NeighborData[] cellNeighbors;
+    private TempData[] tempData;
     //private List<int> closedCells = new();
 
     private float3 playerPos;
@@ -38,6 +39,8 @@ public class PathingManager : MonoBehaviour
     private int totalCells;
 
     private NativeArray<float3> directions;
+
+    [SerializeField] List<Vector3> Walkpoints;
 
     private void Awake()
     {
@@ -48,9 +51,9 @@ public class PathingManager : MonoBehaviour
 
         cells = new NativeArray<Cell>(totalCells, Allocator.Persistent);
         cellData = new NativeHashMap<float3, int>(totalCells, Allocator.Persistent);
-        
         openCells = new(totalCells);
         cellNeighbors = new NeighborData[totalCells];
+        tempData = new TempData[totalCells];
 
         InitializeDirections();
     }
@@ -62,7 +65,8 @@ public class PathingManager : MonoBehaviour
         startingPoint = FindNearestCell(playerPos);
         endPoint = FindNearestCell(targetPos);
 
-        cells[startingPoint] = new Cell(cells[startingPoint].CellPos, cells[startingPoint].Index, -1, 1000);
+        cells[startingPoint] = new Cell(cells[startingPoint].CellPos, cells[startingPoint].Index);
+        tempData[startingPoint] = new TempData(-1, 1000);
 
         openCells.Add(cells[startingPoint].Index);
         currentPoint = openCells.Elements[0];
@@ -133,13 +137,13 @@ public class PathingManager : MonoBehaviour
             {
                 neighborCell = cells[neighborData.Neighbors[i]];
 
-                if (neighborCell.FCost > -1)
+                if (tempData[neighborCell.Index].FCost > -1)
                     continue;
                 
                 cost = math.distance(neighborCell.CellPos, targetPos);
 
-                cells[neighborData.Neighbors[i]] = new Cell(neighborCell.CellPos, neighborCell.Index, currentPoint, cost);
-                
+                tempData[neighborCell.Index] = new TempData(cells[currentPoint].Index, cost);
+
                 openCells.Add(neighborCell.Index);
             }
 
@@ -153,10 +157,11 @@ public class PathingManager : MonoBehaviour
 
     private void SearchOrigin()
     {
-        while (cells[currentPoint].ParentIndex != -1)
+        while (tempData[currentPoint].ParentIndex != -1)
         {
-            UnityEngine.Debug.DrawLine(cells[currentPoint].CellPos, cells[cells[currentPoint].ParentIndex].CellPos, Color.green, 55f);
-            currentPoint = cells[currentPoint].ParentIndex;
+            UnityEngine.Debug.DrawLine(cells[currentPoint].CellPos, cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 55f);
+            Walkpoints.Add(cells[currentPoint].CellPos);
+            currentPoint = tempData[currentPoint].ParentIndex;
         }
     }
 
@@ -214,6 +219,7 @@ public class PathingManager : MonoBehaviour
         for (int i = 0; i < cells.Length; i++)
         {
             cellData.Add(cells[i].CellPos, cells[i].Index);
+            tempData[i] = new TempData(-1, -1f);
         }
 
         cells.Dispose();
@@ -241,27 +247,33 @@ public class PathingManager : MonoBehaviour
     
             Gizmos.color = Color.magenta;
             Gizmos.DrawWireCube(cells[startingPoint].CellPos, (Vector3)cellAmount * cellSize);
+
+            foreach (var item in Walkpoints)
+            {
+                Gizmos.color = Color.cyan;
+                Gizmos.DrawWireSphere(item, 0.4f);
+            }
         }
     
         if (showGizmos)
         {
-            Gizmos.color = Color.red;
-            for (int x = 0; x < cellAmount.x; x++)
-            {
-                for (int y = 0; y < cellAmount.y; y++)
-                {
-                    for (int z = 0; z < cellAmount.z; z++)
-                    {
-                        Vector3 cellCenter = new Vector3(
-                            transform.position.x + (x - (cellAmount.x - 1) / 2) * cellSize,
-                            transform.position.y + (y - (cellAmount.y - 1) / 2) * cellSize,
-                            transform.position.z + (z - (cellAmount.z - 1) / 2) * cellSize
-                        );
-      
-                        Gizmos.DrawWireCube(cellCenter, Vector3.one / 10);
-                    }
-                }
-            }
+            //Gizmos.color = Color.red;
+            //for (int x = 0; x < cellAmount.x; x++)
+            //{
+            //    for (int y = 0; y < cellAmount.y; y++)
+            //    {
+            //        for (int z = 0; z < cellAmount.z; z++)
+            //        {
+            //            Vector3 cellCenter = new Vector3(
+            //                transform.position.x + (x - (cellAmount.x - 1) / 2) * cellSize,
+            //                transform.position.y + (y - (cellAmount.y - 1) / 2) * cellSize,
+            //                transform.position.z + (z - (cellAmount.z - 1) / 2) * cellSize
+            //            );
+            //
+            //            Gizmos.DrawWireCube(cellCenter, Vector3.one / 10);
+            //        }
+            //    }
+            //}
         }
     }
 }
