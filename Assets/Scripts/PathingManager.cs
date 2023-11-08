@@ -6,6 +6,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using static UnityEditor.Progress;
 using Debug = UnityEngine.Debug;
@@ -17,6 +18,7 @@ public class PathingManager : MonoBehaviour
 
     [Space]
     [SerializeField] private GameObject targetObject;
+    [SerializeField] private GameObject playerObject;
 
     [Space]
     [SerializeField] private bool showGizmos = false;
@@ -44,16 +46,12 @@ public class PathingManager : MonoBehaviour
 
     private void Awake()
     {
-        playerPos = transform.position;
-        targetPos = targetObject.transform.position;
-
         totalCells = (int)(cellAmount.x * cellAmount.y * cellAmount.z);
 
         cells = new NativeArray<Cell>(totalCells, Allocator.Persistent);
         cellData = new NativeHashMap<float3, int>(totalCells, Allocator.Persistent);
-        openCells = new(totalCells);
+        
         cellNeighbors = new NeighborData[totalCells];
-        tempData = new TempData[totalCells];
 
         InitializeDirections();
     }
@@ -62,14 +60,7 @@ public class PathingManager : MonoBehaviour
     {
         InitializeGrid();
 
-        startingPoint = FindNearestCell(playerPos);
-        endPoint = FindNearestCell(targetPos);
-
-        cells[startingPoint] = new Cell(cells[startingPoint].CellPos, cells[startingPoint].Index);
-        tempData[startingPoint] = new TempData(-1, 1000);
-
-        openCells.Add(cells[startingPoint].Index);
-        currentPoint = openCells.Elements[0];
+        //cells[startingPoint] = new Cell(cells[startingPoint].CellPos, cells[startingPoint].Index);
 
         GetAllCellNeighbors();
     }
@@ -78,8 +69,39 @@ public class PathingManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.P))
         {
-            MoveToTarget();
+            AStar();
         }
+    }
+
+    private void AStar()
+    {
+        var then = Time.realtimeSinceStartup;
+
+        InitializeBuffers();
+
+        MoveToTarget();
+
+        SearchOrigin();
+
+        Walkpoints.Clear();
+
+        Debug.Log("Follow Path: " + ((Time.realtimeSinceStartup - then) * 1000f));
+    }
+
+    private void InitializeBuffers()
+    {
+        playerPos = playerObject.transform.position;
+        targetPos = targetObject.transform.position;
+
+        startingPoint = FindNearestCell(playerPos);
+        endPoint = FindNearestCell(targetPos);
+
+        tempData = new TempData[totalCells];
+        tempData[startingPoint] = new TempData(-1, 1000);
+
+        openCells = new(totalCells);
+        openCells.Add(cells[startingPoint].Index);
+        currentPoint = openCells.Elements[0];
     }
 
     private int FindNearestCell(float3 position)
@@ -120,8 +142,6 @@ public class PathingManager : MonoBehaviour
 
     private void MoveToTarget()
     {
-        var then = Time.realtimeSinceStartup;
-
         float cost;
         NeighborData neighborData;
         Cell neighborCell;
@@ -137,7 +157,7 @@ public class PathingManager : MonoBehaviour
             {
                 neighborCell = cells[neighborData.Neighbors[i]];
 
-                if (tempData[neighborCell.Index].FCost > -1)
+                if (tempData[neighborCell.Index].FCost > 0)
                     continue;
                 
                 cost = math.distance(neighborCell.CellPos, targetPos);
@@ -149,17 +169,13 @@ public class PathingManager : MonoBehaviour
 
             currentPoint = openCells.Elements[0];
         }
-
-        Debug.Log("Follow Path: " + ((Time.realtimeSinceStartup - then) * 1000f));
-
-        SearchOrigin();
     }
 
     private void SearchOrigin()
     {
         while (tempData[currentPoint].ParentIndex != -1)
         {
-            UnityEngine.Debug.DrawLine(cells[currentPoint].CellPos, cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 55f);
+            UnityEngine.Debug.DrawLine(cells[currentPoint].CellPos, cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 5f);
             Walkpoints.Add(cells[currentPoint].CellPos);
             currentPoint = tempData[currentPoint].ParentIndex;
         }
@@ -219,7 +235,7 @@ public class PathingManager : MonoBehaviour
         for (int i = 0; i < cells.Length; i++)
         {
             cellData.Add(cells[i].CellPos, cells[i].Index);
-            tempData[i] = new TempData(-1, -1f);
+            //tempData[i] = new TempData(-1, -1f);
         }
 
         cells.Dispose();
