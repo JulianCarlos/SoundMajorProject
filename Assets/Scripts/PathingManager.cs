@@ -30,6 +30,7 @@ public class PathingManager : MonoBehaviour
     private NativeArray<Cell> cells;
     private NativeHashMap<float3, int> cellData;
     private NeighborData[] cellNeighbors;
+    private List<int> closedCells = new();
 
     private float3 playerPos;
     private float3 targetPos;
@@ -126,8 +127,9 @@ public class PathingManager : MonoBehaviour
         while (currentPoint != endPoint && openCells.Size > 0)
         {
             currentCellIndex = currentPoint;
-        
+            
             openCells.Pop();
+            closedCells.Add(cells[currentPoint].Index);
 
             for (int i = 0; i < cellNeighbors[currentCellIndex].NeighborsCount; i++)
             {
@@ -235,10 +237,10 @@ public class PathingManager : MonoBehaviour
         {
             Gizmos.color = Color.cyan;
     
-            //foreach (var item in closedCells)
-            //{
-            //    Gizmos.DrawCube(cells[item].CellPos, Vector3.one / 10);
-            //}
+            foreach (var item in closedCells)
+            {
+                Gizmos.DrawCube(cells[item].CellPos, Vector3.one / 10);
+            }
     
             Gizmos.color = Color.magenta;
             Gizmos.DrawWireCube(cells[startingPoint].CellPos, (Vector3)cellAmount * cellSize);
