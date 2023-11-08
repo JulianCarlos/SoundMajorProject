@@ -31,6 +31,7 @@ public class PathingManager : MonoBehaviour
 
     private NativeArray<Cell> cells;
     private NativeHashMap<float3, int> cellData;
+
     private NeighborData[] cellNeighbors;
     private TempData[] tempData;
     //private List<int> closedCells = new();
@@ -42,7 +43,7 @@ public class PathingManager : MonoBehaviour
 
     private NativeArray<float3> directions;
 
-    [SerializeField] List<Vector3> Walkpoints;
+    private NativeList<float3> Walkpoints;
 
     private void Awake()
     {
@@ -60,22 +61,19 @@ public class PathingManager : MonoBehaviour
     {
         InitializeGrid();
 
-        //cells[startingPoint] = new Cell(cells[startingPoint].CellPos, cells[startingPoint].Index);
-
         GetAllCellNeighbors();
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            AStar();
-        }
+        AStar(playerObject.transform.position, targetObject.transform.position);
     }
 
-    private void AStar()
+    private void AStar(float3 player, float3 target)
     {
         var then = Time.realtimeSinceStartup;
+
+        FindPoints(player, target);
 
         InitializeBuffers();
 
@@ -83,49 +81,29 @@ public class PathingManager : MonoBehaviour
 
         SearchOrigin();
 
-        Walkpoints.Clear();
+        ClearBuffers();
 
-        Debug.Log("Follow Path: " + ((Time.realtimeSinceStartup - then) * 1000f));
+        Debug.Log("Generating Grid: " + (Time.realtimeSinceStartup - then) * 1000f);
+    }
+
+    private void FindPoints(float3 player, float3 target)
+    {
+        playerPos = player;
+        targetPos = target;
+
+        startingPoint = FindNearestCell(playerPos);
+        endPoint = FindNearestCell(targetPos);
     }
 
     private void InitializeBuffers()
     {
-        playerPos = playerObject.transform.position;
-        targetPos = targetObject.transform.position;
-
-        startingPoint = FindNearestCell(playerPos);
-        endPoint = FindNearestCell(targetPos);
-
         tempData = new TempData[totalCells];
         tempData[startingPoint] = new TempData(-1, 1000);
+        Walkpoints = new NativeList<float3>(Allocator.TempJob);
 
         openCells = new(totalCells);
         openCells.Add(cells[startingPoint].Index);
         currentPoint = openCells.Elements[0];
-    }
-
-    private int FindNearestCell(float3 position)
-    {
-        int tempClosest;
-
-        NativeArray<int> closestCellArray = new NativeArray<int>(1, Allocator.TempJob);
-
-        FindNearestCellJob findNearestCell = new FindNearestCellJob()
-        {
-            Cells = this.cells,
-            PlayerPos = position,
-            ClosestCell = closestCellArray,
-        };
-
-        JobHandle handle = findNearestCell.Schedule();
-
-        handle.Complete();
-
-        tempClosest = closestCellArray[0];
-
-        closestCellArray.Dispose();
-
-        return tempClosest;
     }
 
     private void InitializeDirections()
@@ -175,10 +153,39 @@ public class PathingManager : MonoBehaviour
     {
         while (tempData[currentPoint].ParentIndex != -1)
         {
-            UnityEngine.Debug.DrawLine(cells[currentPoint].CellPos, cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 5f);
+            UnityEngine.Debug.DrawLine(cells[currentPoint].CellPos, cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 0.1f);
             Walkpoints.Add(cells[currentPoint].CellPos);
             currentPoint = tempData[currentPoint].ParentIndex;
         }
+    }
+
+    private void ClearBuffers()
+    {
+        Walkpoints.Dispose();
+    }
+
+    private int FindNearestCell(float3 position)
+    {
+        int tempClosest;
+
+        NativeArray<int> closestCellArray = new NativeArray<int>(1, Allocator.TempJob);
+
+        FindNearestCellJob findNearestCell = new FindNearestCellJob()
+        {
+            Cells = this.cells,
+            PlayerPos = position,
+            ClosestCell = closestCellArray,
+        };
+
+        JobHandle handle = findNearestCell.Schedule();
+
+        handle.Complete();
+
+        tempClosest = closestCellArray[0];
+
+        closestCellArray.Dispose();
+
+        return tempClosest;
     }
 
     private void GetAllCellNeighbors()
@@ -235,7 +242,6 @@ public class PathingManager : MonoBehaviour
         for (int i = 0; i < cells.Length; i++)
         {
             cellData.Add(cells[i].CellPos, cells[i].Index);
-            //tempData[i] = new TempData(-1, -1f);
         }
 
         cells.Dispose();
@@ -263,33 +269,33 @@ public class PathingManager : MonoBehaviour
     
             Gizmos.color = Color.magenta;
             Gizmos.DrawWireCube(cells[startingPoint].CellPos, (Vector3)cellAmount * cellSize);
-
-            foreach (var item in Walkpoints)
-            {
-                Gizmos.color = Color.cyan;
-                Gizmos.DrawWireSphere(item, 0.4f);
-            }
+    
+            //foreach (var item in Walkpoints)
+            //{
+            //    Gizmos.color = Color.cyan;
+            //    Gizmos.DrawWireSphere(item, 0.4f);
+            //}
         }
     
         if (showGizmos)
         {
-            //Gizmos.color = Color.red;
-            //for (int x = 0; x < cellAmount.x; x++)
-            //{
-            //    for (int y = 0; y < cellAmount.y; y++)
-            //    {
-            //        for (int z = 0; z < cellAmount.z; z++)
-            //        {
-            //            Vector3 cellCenter = new Vector3(
-            //                transform.position.x + (x - (cellAmount.x - 1) / 2) * cellSize,
-            //                transform.position.y + (y - (cellAmount.y - 1) / 2) * cellSize,
-            //                transform.position.z + (z - (cellAmount.z - 1) / 2) * cellSize
-            //            );
-            //
-            //            Gizmos.DrawWireCube(cellCenter, Vector3.one / 10);
-            //        }
-            //    }
-            //}
+            Gizmos.color = Color.red;
+            for (int x = 0; x < cellAmount.x; x++)
+            {
+                for (int y = 0; y < cellAmount.y; y++)
+                {
+                    for (int z = 0; z < cellAmount.z; z++)
+                    {
+                        Vector3 cellCenter = new Vector3(
+                            transform.position.x + (x - (cellAmount.x - 1) / 2) * cellSize,
+                            transform.position.y + (y - (cellAmount.y - 1) / 2) * cellSize,
+                            transform.position.z + (z - (cellAmount.z - 1) / 2) * cellSize
+                        );
+            
+                        Gizmos.DrawWireCube(cellCenter, Vector3.one / 10);
+                    }
+                }
+            }
         }
     }
 }

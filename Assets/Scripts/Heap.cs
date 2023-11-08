@@ -1,5 +1,3 @@
-using System;
-
 public class Heap
 {
     public int[] Elements;
@@ -35,45 +33,44 @@ public class Heap
 
     private void ReCalculateDown(int index)
     {
-        int leftChildIndex = (index << 1) + 1;
-        int rightChildIndex = (index << 1) + 2;
-        int smallestIndex = index;
+        int leftChildIndex, rightChildIndex, smallestIndex;
+        int element = Elements[index];
 
-        if (leftChildIndex < Size && Elements[leftChildIndex] < Elements[smallestIndex])
+        while (true)
         {
-            smallestIndex = leftChildIndex;
+            leftChildIndex = (index << 1) + 1;
+            rightChildIndex = leftChildIndex + 1;
+            smallestIndex = index;
+
+            if (leftChildIndex < Size && Elements[leftChildIndex] < Elements[smallestIndex])
+                smallestIndex = leftChildIndex;
+            if (rightChildIndex < Size && Elements[rightChildIndex] < Elements[smallestIndex])
+                smallestIndex = rightChildIndex;
+
+            if (smallestIndex == index)
+                break;
+
+            Elements[index] = Elements[smallestIndex];
+            index = smallestIndex;
         }
 
-        if (rightChildIndex < Size && Elements[rightChildIndex] < Elements[smallestIndex])
-        {
-            smallestIndex = rightChildIndex;
-        }
-
-        if (smallestIndex != index)
-        {
-            Swap(index, smallestIndex);
-            ReCalculateDown(smallestIndex);
-        }
+        Elements[index] = element;
     }
 
     private void ReCalculateUp(int index)
     {
+        int element = Elements[index];
+
         while (index > 0)
         {
             int parentIndex = (index - 1) >> 1;
-            if (Elements[index] >= Elements[parentIndex])
-            {
+            if (element >= Elements[parentIndex])
                 break;
-            }
-            Swap(index, parentIndex);
+
+            Elements[index] = Elements[parentIndex];
             index = parentIndex;
         }
-    }
 
-    private void Swap(int firstIndex, int secondIndex)
-    {
-        int temp = Elements[firstIndex];
-        Elements[firstIndex] = Elements[secondIndex];
-        Elements[secondIndex] = temp;
+        Elements[index] = element;
     }
 }

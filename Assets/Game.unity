@@ -95324,7 +95324,7 @@ Transform:
   m_GameObject: {fileID: 1428721012}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.67, y: 2.9, z: 37.82}
+  m_LocalPosition: {x: 8, y: 1.769, z: 26.78}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -95345,12 +95345,12 @@ MonoBehaviour:
   cellSize: 3
   cellAmount:
     x: 31
-    y: 19
-    z: 31
+    y: 9
+    z: 21
   targetObject: {fileID: 1267871733}
   playerObject: {fileID: 1829780361}
   showGizmos: 0
-  Walkpoints: []
+  diagonalPathing: 0
 --- !u!1001 &1430184178
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -120992,7 +120992,7 @@ Transform:
   m_GameObject: {fileID: 1829780361}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.06, y: 2.92, z: 7.54}
+  m_LocalPosition: {x: -0.04, y: 2.92, z: 5.497}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
