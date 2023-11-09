@@ -32,18 +32,16 @@ public class PathingManager : MonoBehaviour
     private NativeArray<Cell> cells;
     private NativeHashMap<float3, int> cellData;
 
-    private NeighborData[] cellNeighbors;
     private TempData[] tempData;
-    //private List<int> closedCells = new();
+    private NeighborData[] cellNeighbors;
 
     private float3 playerPos;
     private float3 targetPos;
 
     private int totalCells;
 
-    private NativeArray<float3> directions;
-
     private NativeList<float3> Walkpoints;
+    private NativeArray<float3> directions;
 
     private void Awake()
     {
@@ -129,7 +127,6 @@ public class PathingManager : MonoBehaviour
             neighborData = cellNeighbors[currentPoint];
 
             openCells.Pop();
-            //closedCells.Add(cells[currentPoint].Index);
 
             for (int i = 0; i < neighborData.NeighborsCount; i++)
             {
@@ -258,25 +255,6 @@ public class PathingManager : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if (Application.isPlaying)
-        {
-            Gizmos.color = Color.cyan;
-    
-            //foreach (var item in closedCells)
-            //{
-            //    Gizmos.DrawCube(cells[item].CellPos, Vector3.one / 10);
-            //}
-    
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawWireCube(cells[startingPoint].CellPos, (Vector3)cellAmount * cellSize);
-    
-            //foreach (var item in Walkpoints)
-            //{
-            //    Gizmos.color = Color.cyan;
-            //    Gizmos.DrawWireSphere(item, 0.4f);
-            //}
-        }
-    
         if (showGizmos)
         {
             Gizmos.color = Color.red;
