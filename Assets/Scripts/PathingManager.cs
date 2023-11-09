@@ -27,12 +27,12 @@ public class PathingManager : MonoBehaviour
     private int currentPoint;
     private int endPoint;
     
-    private Heap openCells;
+    private NativeList<int> openCells;
 
     private NativeArray<Cell> cells;
     private NativeHashMap<float3, int> cellData;
 
-    private TempData[] tempData;
+    private NativeArray<TempData> tempData;
     private NeighborData[] cellNeighbors;
 
     private float3 playerPos;
@@ -49,7 +49,8 @@ public class PathingManager : MonoBehaviour
 
         cells = new NativeArray<Cell>(totalCells, Allocator.Persistent);
         cellData = new NativeHashMap<float3, int>(totalCells, Allocator.Persistent);
-        
+        openCells = new NativeList<int>(Allocator.Persistent);
+        Walkpoints = new NativeList<float3>(totalCells, Allocator.Persistent);
         cellNeighbors = new NeighborData[totalCells];
 
         InitializeDirections();
@@ -95,13 +96,12 @@ public class PathingManager : MonoBehaviour
 
     private void InitializeBuffers()
     {
-        tempData = new TempData[totalCells];
+        tempData = new NativeArray<TempData>(totalCells, Allocator.TempJob);
         tempData[startingPoint] = new TempData(-1, 1000);
-        Walkpoints = new NativeList<float3>(Allocator.TempJob);
 
-        openCells = new(totalCells);
+        //openCells = new(totalCells);
         openCells.Add(cells[startingPoint].Index);
-        currentPoint = openCells.Elements[0];
+        currentPoint = openCells[0];
     }
 
     private void InitializeDirections()
@@ -122,11 +122,13 @@ public class PathingManager : MonoBehaviour
         NeighborData neighborData;
         Cell neighborCell;
 
-        while (currentPoint != endPoint && openCells.Size > 0)
+        while (currentPoint != endPoint && openCells.Length > 0)
         {
+            currentPoint = openCells[0];
+
             neighborData = cellNeighbors[currentPoint];
 
-            openCells.Pop();
+            openCells.RemoveAt(0);
 
             for (int i = 0; i < neighborData.NeighborsCount; i++)
             {
@@ -141,8 +143,6 @@ public class PathingManager : MonoBehaviour
 
                 openCells.Add(neighborCell.Index);
             }
-
-            currentPoint = openCells.Elements[0];
         }
     }
 
@@ -158,7 +158,9 @@ public class PathingManager : MonoBehaviour
 
     private void ClearBuffers()
     {
-        Walkpoints.Dispose();
+        Walkpoints.Clear();
+        openCells.Clear();
+        tempData.Dispose();
     }
 
     private int FindNearestCell(float3 position)
@@ -251,6 +253,8 @@ public class PathingManager : MonoBehaviour
         cells.Dispose();
         cellData.Dispose();
         directions.Dispose();
+        Walkpoints.Dispose();
+        openCells.Dispose();
     }
 
     private void OnDrawGizmos()
