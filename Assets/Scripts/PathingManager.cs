@@ -14,7 +14,7 @@ using Debug = UnityEngine.Debug;
 public class PathingManager : MonoBehaviour
 {
     [SerializeField, Range(1, 5)] private int cellSize = 1;
-    [SerializeField] private float3 cellAmount;
+    [SerializeField] private int3 cellAmount;
 
     [Space]
     [SerializeField] private GameObject targetObject;
@@ -26,30 +26,32 @@ public class PathingManager : MonoBehaviour
     private int startingPoint;
     private int currentPoint;
     private int endPoint;
-    
-    private NativeList<int> openCells;
-
-    private NativeArray<Cell> cells;
-
-    private NativeArray<TempData> tempData;
-    private NeighborData[] cellNeighbors;
 
     private float3 playerPos;
     private float3 targetPos;
 
-    private int totalCells;
+    private NativeArray<Cell> cells;
+    private NativeArray<TempData> tempData;
+    private NativeArray<int3> directions;
 
+    private NativeList<int> openCells;
     private NativeList<float3> Walkpoints;
-    private NativeArray<float3> directions;
+
+    private NeighborData[] cellNeighbors;
+
+    private int totalCells;
 
     private void Awake()
     {
         totalCells = (int)(cellAmount.x * cellAmount.y * cellAmount.z);
 
+        cellNeighbors = new NeighborData[totalCells];
+
         cells = new NativeArray<Cell>(totalCells, Allocator.Persistent);
+        directions = new NativeArray<int3>(6, Allocator.Persistent);
+
         openCells = new NativeList<int>(Allocator.Persistent);
         Walkpoints = new NativeList<float3>(totalCells, Allocator.Persistent);
-        cellNeighbors = new NeighborData[totalCells];
 
         InitializeDirections();
     }
@@ -80,7 +82,7 @@ public class PathingManager : MonoBehaviour
 
         ClearBuffers();
 
-        Debug.Log("Generating Grid: " + (Time.realtimeSinceStartup - then) * 1000f);
+        Debug.Log("Finding Path: " + (Time.realtimeSinceStartup - then) * 1000f);
     }
 
     private void FindPoints(float3 player, float3 target)
@@ -104,14 +106,12 @@ public class PathingManager : MonoBehaviour
 
     private void InitializeDirections()
     {
-        directions = new NativeArray<float3>(6, Allocator.Persistent);
-
-        directions[0] = transform.forward;
-        directions[1] = -transform.forward;
-        directions[2] = transform.right;
-        directions[3] = -transform.right;
-        directions[4] = transform.up;
-        directions[5] = -transform.up;
+        directions[0] = new int3(0, 0, 1);
+        directions[1] = new int3(0, 0, -1);
+        directions[2] = new int3(1, 0, 0);
+        directions[3] = new int3(-1, 0 , 0);
+        directions[4] = new int3(0, 1, 0);
+        directions[5] = new int3(0, -1, 0);
     }
 
     private void MoveToTarget()
@@ -199,7 +199,7 @@ public class PathingManager : MonoBehaviour
 
         for (int i = 0; i < directions.Length; i++)
         {
-            if (!Physics.Raycast(position, directions[i], cellSize))
+            if (!Physics.Raycast(position, Int3ToVector3(directions[i]), cellSize))
             {
                 int targetCellIndex = FindNearestCell(position + (directions[i] * cellSize));
                 neighbors.Add(targetCellIndex);
@@ -207,6 +207,11 @@ public class PathingManager : MonoBehaviour
         }
 
         cellNeighbors[index] = new NeighborData(neighbors.ToArray());
+    }
+
+    private float3 Int3ToVector3(int3 int3Direction)
+    {
+        return new float3(int3Direction.x, int3Direction.y, int3Direction.z);
     }
 
     private void InitializeGrid()

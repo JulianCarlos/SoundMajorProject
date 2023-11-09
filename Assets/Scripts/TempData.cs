@@ -1,7 +1,7 @@
 public unsafe struct TempData
 {
-    public int ParentIndex;
-    public float FCost;
+    public readonly int ParentIndex;
+    public readonly float FCost;
 
     public TempData(int index, float cost)
     {

@@ -3,9 +3,8 @@ using Unity.Mathematics;
 
 public struct Cell
 {
-    public int Index;
-
-    public float3 CellPos;
+    public readonly int Index;
+    public readonly float3 CellPos;
 
     public Cell(float3 cellPos, int index)
     {

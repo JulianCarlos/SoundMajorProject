@@ -1,8 +1,8 @@
 
 public unsafe struct NeighborData
 {
-    public int NeighborsCount;
-    public int[] Neighbors;
+    public readonly int NeighborsCount;
+    public readonly int[] Neighbors;
 
     public NeighborData(int[] size)
     {

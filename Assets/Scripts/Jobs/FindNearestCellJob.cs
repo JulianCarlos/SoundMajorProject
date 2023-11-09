@@ -11,10 +11,9 @@ using UnityEngine;
 [BurstCompile]
 public struct FindNearestCellJob : IJob
 {
-    public NativeArray<Cell> Cells;
-
     public float3 PlayerPos;
 
+    public NativeArray<Cell> Cells;
     public NativeArray<int> ClosestCell;
 
     public void Execute()

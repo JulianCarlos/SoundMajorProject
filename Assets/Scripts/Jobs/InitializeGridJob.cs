@@ -6,9 +6,9 @@ using Unity.Mathematics;
 [BurstCompile]
 public struct InitializeGridJob : IJobParallelFor
 {
-    public float3 TransformPosition;
-    public int3 CellAmount;
     public float CellSize;
+    public int3 CellAmount;
+    public float3 TransformPosition;
     public NativeArray<Cell> Cells;
 
     public void Execute(int index)
