@@ -30,7 +30,6 @@ public class PathingManager : MonoBehaviour
     private NativeList<int> openCells;
 
     private NativeArray<Cell> cells;
-    private NativeHashMap<float3, int> cellData;
 
     private NativeArray<TempData> tempData;
     private NeighborData[] cellNeighbors;
@@ -48,7 +47,6 @@ public class PathingManager : MonoBehaviour
         totalCells = (int)(cellAmount.x * cellAmount.y * cellAmount.z);
 
         cells = new NativeArray<Cell>(totalCells, Allocator.Persistent);
-        cellData = new NativeHashMap<float3, int>(totalCells, Allocator.Persistent);
         openCells = new NativeList<int>(Allocator.Persistent);
         Walkpoints = new NativeList<float3>(totalCells, Allocator.Persistent);
         cellNeighbors = new NeighborData[totalCells];
@@ -189,29 +187,22 @@ public class PathingManager : MonoBehaviour
 
     private void GetAllCellNeighbors()
     {
-        foreach (var index in cellData)
+        for (int i = 0; i < cells.Length; i++)
         {
-            GetNeighbours(cells[index.Value].CellPos, cells[index.Value].Index);
+            GetNeighbours(cells[i].CellPos, i);
         }
     }
 
     private void GetNeighbours(float3 position, int index)
     {
-        int initialCell;
-        int targetCell;
-
         List<int> neighbors = new List<int>();
-
-        cellData.TryGetValue(position, out initialCell);
 
         for (int i = 0; i < directions.Length; i++)
         {
             if (!Physics.Raycast(position, directions[i], cellSize))
             {
-                if (cellData.TryGetValue((position + (directions[i] * cellSize)), out targetCell))
-                {
-                    neighbors.Add(targetCell);
-                }
+                int targetCellIndex = FindNearestCell(position + (directions[i] * cellSize));
+                neighbors.Add(targetCellIndex);
             }
         }
 
@@ -238,11 +229,6 @@ public class PathingManager : MonoBehaviour
 
         this.cells.CopyFrom(cells);
 
-        for (int i = 0; i < cells.Length; i++)
-        {
-            cellData.Add(cells[i].CellPos, cells[i].Index);
-        }
-
         cells.Dispose();
 
         Debug.Log("Generating Grid: " + (Time.realtimeSinceStartup - then) * 1000f);
@@ -251,7 +237,6 @@ public class PathingManager : MonoBehaviour
     private void OnDestroy()
     {
         cells.Dispose();
-        cellData.Dispose();
         directions.Dispose();
         Walkpoints.Dispose();
         openCells.Dispose();
