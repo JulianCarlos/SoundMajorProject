@@ -95324,7 +95324,7 @@ Transform:
   m_GameObject: {fileID: 1428721012}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.4, y: 1.769, z: 26.78}
+  m_LocalPosition: {x: 8.24, y: 1.769, z: 26.79}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -95344,12 +95344,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cellSize: 3
   cellAmount:
-    x: 31
-    y: 9
+    x: 30
+    y: 7
     z: 21
   targetObject: {fileID: 1267871733}
   playerObject: {fileID: 1829780361}
-  showGizmos: 0
+  showGizmos: 1
 --- !u!1001 &1430184178
 PrefabInstance:
   m_ObjectHideFlags: 0

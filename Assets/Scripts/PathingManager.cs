@@ -13,7 +13,7 @@ using Debug = UnityEngine.Debug;
 
 public class PathingManager : MonoBehaviour
 {
-    [SerializeField, Range(1, 5)] private int cellSize = 1;
+    [SerializeField, Range(1, 15)] private int cellSize = 1;
     [SerializeField] private int3 cellAmount;
 
     [Space]
@@ -45,13 +45,13 @@ public class PathingManager : MonoBehaviour
     {
         totalCells = (int)(cellAmount.x * cellAmount.y * cellAmount.z);
 
-        cellNeighbors = new NeighborData[totalCells];
+        openCells = new NativeList<int>(Allocator.Persistent);
+        Walkpoints = new NativeList<float3>(totalCells, Allocator.Persistent);
 
         cells = new NativeArray<Cell>(totalCells, Allocator.Persistent);
         directions = new NativeArray<int3>(6, Allocator.Persistent);
 
-        openCells = new NativeList<int>(Allocator.Persistent);
-        Walkpoints = new NativeList<float3>(totalCells, Allocator.Persistent);
+        cellNeighbors = new NeighborData[totalCells];
 
         InitializeDirections();
     }
@@ -96,10 +96,9 @@ public class PathingManager : MonoBehaviour
 
     private void InitializeBuffers()
     {
-        tempData = new NativeArray<TempData>(totalCells, Allocator.TempJob);
+        tempData = new NativeArray<TempData>(totalCells, Allocator.Temp);
         tempData[startingPoint] = new TempData(-1, 1000);
 
-        //openCells = new(totalCells);
         openCells.Add(cells[startingPoint].Index);
         currentPoint = openCells[0];
     }
@@ -218,12 +217,12 @@ public class PathingManager : MonoBehaviour
     {
         var then = Time.realtimeSinceStartup;
 
-        NativeArray<Cell> cells = new NativeArray<Cell>(totalCells, Allocator.Persistent);
+        NativeArray<Cell> cells = new NativeArray<Cell>(totalCells, Allocator.TempJob);
 
         var job = new InitializeGridJob
         {
             TransformPosition = transform.position,
-            CellAmount = (int3)cellAmount,
+            CellAmount = cellAmount,
             CellSize = cellSize,
             Cells = cells,
         };
