@@ -11,7 +11,7 @@ using UnityEngine;
 using static UnityEditor.Progress;
 using Debug = UnityEngine.Debug;
 
-public class PathingManager : MonoBehaviour
+public unsafe class PathingManager : MonoBehaviour
 {
     [SerializeField, Range(1, 15)] private int cellSize = 1;
     [SerializeField] private int3 cellAmount;
@@ -37,7 +37,7 @@ public class PathingManager : MonoBehaviour
     private NativeList<int> openCells;
     private NativeList<float3> Walkpoints;
 
-    private NeighborData[] cellNeighbors;
+    private NativeArray<NeighborData> cellNeighbors;
 
     private int totalCells;
 
@@ -51,7 +51,7 @@ public class PathingManager : MonoBehaviour
         cells = new NativeArray<Cell>(totalCells, Allocator.Persistent);
         directions = new NativeArray<int3>(6, Allocator.Persistent);
 
-        cellNeighbors = new NeighborData[totalCells];
+        cellNeighbors = new NativeArray<NeighborData>(totalCells, Allocator.Persistent);
 
         InitializeDirections();
     }
@@ -127,13 +127,21 @@ public class PathingManager : MonoBehaviour
 
             openCells.RemoveAt(0);
 
-            for (int i = 0; i < neighborData.NeighborsCount; i++)
+            // Use Neighbors array directly, as it's now a fixed-size array
+            for (int i = 0; i < 6; i++)
             {
-                neighborCell = cells[neighborData.Neighbors[i]];
+                // Access the fixed-size array element
+                int neighborIndex = neighborData.Neighbors[i];
+
+                // Check if the index is within bounds
+                if (neighborIndex < 0 || neighborIndex >= cells.Length)
+                    continue;
+
+                neighborCell = cells[neighborIndex];
 
                 if (tempData[neighborCell.Index].FCost > 0)
                     continue;
-                
+
                 cost = math.distance(neighborCell.CellPos, targetPos);
 
                 tempData[neighborCell.Index] = new TempData(cells[currentPoint].Index, cost);
@@ -194,18 +202,25 @@ public class PathingManager : MonoBehaviour
 
     private void GetNeighbours(float3 position, int index)
     {
-        List<int> neighbors = new List<int>();
+        int[] neighbors = new int[6]; // Use a fixed-size array
 
-        for (int i = 0; i < directions.Length; i++)
+        for (int i = 0; i < directions.Length && i < 6; i++)
         {
             if (!Physics.Raycast(position, Int3ToVector3(directions[i]), cellSize))
             {
                 int targetCellIndex = FindNearestCell(position + (directions[i] * cellSize));
-                neighbors.Add(targetCellIndex);
+
+                // Assign the index directly to the fixed-size array
+                neighbors[i] = targetCellIndex;
+            }
+            else
+            {
+                neighbors[i] = -1;
             }
         }
 
-        cellNeighbors[index] = new NeighborData(neighbors.ToArray());
+        // Create NeighborData using the fixed-size array
+        cellNeighbors[index] = new NeighborData(neighbors);
     }
 
     private float3 Int3ToVector3(int3 int3Direction)
@@ -244,6 +259,7 @@ public class PathingManager : MonoBehaviour
         directions.Dispose();
         Walkpoints.Dispose();
         openCells.Dispose();
+        cellNeighbors.Dispose();
     }
 
     private void OnDrawGizmos()
