@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -19,6 +21,8 @@ public unsafe class PathingManager : MonoBehaviour
     [Space]
     [SerializeField] private GameObject targetObject;
     [SerializeField] private GameObject playerObject;
+
+    [SerializeField] private TextMeshProUGUI msText;
 
     [Space]
     [SerializeField] private bool showGizmos = false;
@@ -43,7 +47,7 @@ public unsafe class PathingManager : MonoBehaviour
 
     private void Awake()
     {
-        totalCells = (int)(cellAmount.x * cellAmount.y * cellAmount.z);
+        totalCells = (cellAmount.x * cellAmount.y * cellAmount.z);
 
         openCells = new NativeList<int>(Allocator.Persistent);
         Walkpoints = new NativeList<float3>(totalCells, Allocator.Persistent);
@@ -61,28 +65,30 @@ public unsafe class PathingManager : MonoBehaviour
         InitializeGrid();
 
         GetAllCellNeighbors();
+
+        StartCoroutine(AStar(playerObject.transform.position, targetObject.transform.position));
     }
 
-    private void Update()
+    private IEnumerator AStar(float3 player, float3 target)
     {
-        AStar(playerObject.transform.position, targetObject.transform.position);
-    }
+        while (true)
+        {
+            var then = Time.realtimeSinceStartup;
 
-    private void AStar(float3 player, float3 target)
-    {
-        var then = Time.realtimeSinceStartup;
+            FindPoints(player, target);
 
-        FindPoints(player, target);
+            InitializeBuffers();
 
-        InitializeBuffers();
+            MoveToTarget();
 
-        MoveToTarget();
+            SearchOrigin();
 
-        SearchOrigin();
+            ClearBuffers();
 
-        ClearBuffers();
+            msText.text = "ms: " + ((Time.realtimeSinceStartup - then) * 1000f);
 
-        Debug.Log("Finding Path: " + (Time.realtimeSinceStartup - then) * 1000f);
+            yield return new WaitForSeconds(0.1f);
+        }
     }
 
     private void FindPoints(float3 player, float3 target)
@@ -131,7 +137,7 @@ public unsafe class PathingManager : MonoBehaviour
             {
                 int neighborIndex = neighborData.Neighbors[i];
 
-                if (neighborIndex < 0 || neighborIndex >= cells.Length)
+                if (neighborIndex < 0 || neighborIndex >= totalCells)
                     continue;
 
                 neighborCell = cells[neighborIndex];
@@ -191,7 +197,7 @@ public unsafe class PathingManager : MonoBehaviour
 
     private void GetAllCellNeighbors()
     {
-        for (int i = 0; i < cells.Length; i++)
+        for (int i = 0; i < totalCells; i++)
         {
             GetNeighbours(cells[i].CellPos, i);
         }
@@ -201,7 +207,7 @@ public unsafe class PathingManager : MonoBehaviour
     {
         NativeArray<int> neighbors = new NativeArray<int>(6, Allocator.Temp);
 
-        for (int i = 0; i < directions.Length && i < 6; i++)
+        for (int i = 0;  i < 6; i++)
         {
             if (!Physics.Raycast(position, Int3ToVector3(directions[i]), cellSize))
             {
@@ -267,12 +273,12 @@ public unsafe class PathingManager : MonoBehaviour
                     for (int z = 0; z < cellAmount.z; z++)
                     {
                         Vector3 cellCenter = new Vector3(
-                            transform.position.x + (x - (cellAmount.x - 1) / 2) * cellSize,
-                            transform.position.y + (y - (cellAmount.y - 1) / 2) * cellSize,
-                            transform.position.z + (z - (cellAmount.z - 1) / 2) * cellSize
+                            transform.position.x + (x - (cellAmount.x - 1) * 0.5f) * cellSize,
+                            transform.position.y + (y - (cellAmount.y - 1) * 0.5f) * cellSize,
+                            transform.position.z + (z - (cellAmount.z - 1) * 0.5f) * cellSize
                         );
             
-                        Gizmos.DrawWireCube(cellCenter, Vector3.one / 10);
+                        Gizmos.DrawWireCube(cellCenter, Vector3.one * 0.1f);
                     }
                 }
             }
