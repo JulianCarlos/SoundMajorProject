@@ -105,12 +105,12 @@ public unsafe class PathingManager : MonoBehaviour
 
     private void InitializeDirections()
     {
-        directions[0] = new int3(0, 0, 1);
-        directions[1] = new int3(0, 0, -1);
-        directions[2] = new int3(1, 0, 0);
-        directions[3] = new int3(-1, 0 , 0);
-        directions[4] = new int3(0, 1, 0);
-        directions[5] = new int3(0, -1, 0);
+        directions[0] = new int3( 0,  0,  1);
+        directions[1] = new int3( 0,  0, -1);
+        directions[2] = new int3( 1,  0,  0);
+        directions[3] = new int3(-1,  0 , 0);
+        directions[4] = new int3( 0,  1,  0);
+        directions[5] = new int3( 0, -1,  0);
     }
 
     private void MoveToTarget()
@@ -127,13 +127,10 @@ public unsafe class PathingManager : MonoBehaviour
 
             openCells.RemoveAt(0);
 
-            // Use Neighbors array directly, as it's now a fixed-size array
             for (int i = 0; i < 6; i++)
             {
-                // Access the fixed-size array element
                 int neighborIndex = neighborData.Neighbors[i];
 
-                // Check if the index is within bounds
                 if (neighborIndex < 0 || neighborIndex >= cells.Length)
                     continue;
 
@@ -202,7 +199,7 @@ public unsafe class PathingManager : MonoBehaviour
 
     private void GetNeighbours(float3 position, int index)
     {
-        int[] neighbors = new int[6]; // Use a fixed-size array
+        NativeArray<int> neighbors = new NativeArray<int>(6, Allocator.Temp);
 
         for (int i = 0; i < directions.Length && i < 6; i++)
         {
@@ -210,7 +207,6 @@ public unsafe class PathingManager : MonoBehaviour
             {
                 int targetCellIndex = FindNearestCell(position + (directions[i] * cellSize));
 
-                // Assign the index directly to the fixed-size array
                 neighbors[i] = targetCellIndex;
             }
             else
@@ -219,8 +215,9 @@ public unsafe class PathingManager : MonoBehaviour
             }
         }
 
-        // Create NeighborData using the fixed-size array
-        cellNeighbors[index] = new NeighborData(neighbors);
+        cellNeighbors[index] = new NeighborData(neighbors.ToArray());
+
+        neighbors.Dispose();
     }
 
     private float3 Int3ToVector3(int3 int3Direction)
@@ -230,8 +227,6 @@ public unsafe class PathingManager : MonoBehaviour
 
     private void InitializeGrid()
     {
-        var then = Time.realtimeSinceStartup;
-
         NativeArray<Cell> cells = new NativeArray<Cell>(totalCells, Allocator.TempJob);
 
         var job = new InitializeGridJob
@@ -249,8 +244,6 @@ public unsafe class PathingManager : MonoBehaviour
         this.cells.CopyFrom(cells);
 
         cells.Dispose();
-
-        Debug.Log("Generating Grid: " + (Time.realtimeSinceStartup - then) * 1000f);
     }
 
     private void OnDestroy()
