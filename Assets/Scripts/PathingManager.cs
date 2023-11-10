@@ -11,7 +11,6 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using static UnityEditor.Progress;
-using Debug = UnityEngine.Debug;
 
 public unsafe class PathingManager : MonoBehaviour
 {
@@ -145,7 +144,7 @@ public unsafe class PathingManager : MonoBehaviour
                 if (tempData[neighborCell.Index].FCost > 0)
                     continue;
 
-                cost = math.distance(neighborCell.CellPos, targetPos);
+                cost = CalculateSquaredDistance(neighborCell.CellPos, targetPos);
 
                 tempData[neighborCell.Index] = new TempData(cells[currentPoint].Index, cost);
 
@@ -154,11 +153,20 @@ public unsafe class PathingManager : MonoBehaviour
         }
     }
 
+    private float CalculateSquaredDistance(float3 point1, float3 point2)
+    {
+        float dx = point2.x - point1.x;
+        float dy = point2.y - point1.y;
+        float dz = point2.z - point1.z;
+
+        return dx * dx + dy * dy + dz * dz;
+    }
+
     private void SearchOrigin()
     {
         while (tempData[currentPoint].ParentIndex != -1)
         {
-            UnityEngine.Debug.DrawLine(cells[currentPoint].CellPos, cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 0.1f);
+            //UnityEngine.Debug.DrawLine(cells[currentPoint].CellPos, cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 0.1f);
             Walkpoints.Add(cells[currentPoint].CellPos);
             currentPoint = tempData[currentPoint].ParentIndex;
         }
