@@ -1,76 +1,75 @@
+using System;
+
 public class Heap
 {
-    public int[] Elements;
-    public int Size;
+    private int[] elements;
+    private int count;
 
-    public Heap(int size)
+    public int Count => count;
+
+    public Heap(int capacity)
     {
-        Elements = new int[size];
-        Size = 0;
+        elements = new int[capacity];
+        count = 0;
     }
 
     public int Peek()
     {
-        return Elements[0];
+        if (count > 0) return elements[0];
+        throw new InvalidOperationException("Heap is empty");
     }
 
     public void Add(int element)
     {
-        Elements[Size] = element;
-        ReCalculateUp(Size);
-        Size++;
+        if (count == elements.Length) Resize();
+        elements[count] = element;
+        HeapifyUp(count++);
     }
 
     public int Pop()
     {
-        int result = Elements[0];
-        Elements[0] = Elements[Size - 1];
-        Size--;
-        ReCalculateDown(0);
-
-        return result;
-    }
-
-    private void ReCalculateDown(int index)
-    {
-        int leftChildIndex, rightChildIndex, smallestIndex;
-        int element = Elements[index];
-
-        while (true)
+        if (count > 0)
         {
-            leftChildIndex = (index << 1) + 1;
-            rightChildIndex = leftChildIndex + 1;
-            smallestIndex = index;
-
-            if (leftChildIndex < Size && Elements[leftChildIndex] < Elements[smallestIndex])
-                smallestIndex = leftChildIndex;
-            if (rightChildIndex < Size && Elements[rightChildIndex] < Elements[smallestIndex])
-                smallestIndex = rightChildIndex;
-
-            if (smallestIndex == index)
-                break;
-
-            Elements[index] = Elements[smallestIndex];
-            index = smallestIndex;
+            int result = elements[0];
+            elements[0] = elements[--count];
+            HeapifyDown(0);
+            return result;
         }
-
-        Elements[index] = element;
+        throw new InvalidOperationException("Heap is empty");
     }
 
-    private void ReCalculateUp(int index)
+    private void Resize()
     {
-        int element = Elements[index];
+        System.Array.Resize(ref elements, elements.Length << 1);
+    }
 
+    private void HeapifyUp(int index)
+    {
+        int element = elements[index];
         while (index > 0)
         {
             int parentIndex = (index - 1) >> 1;
-            if (element >= Elements[parentIndex])
-                break;
-
-            Elements[index] = Elements[parentIndex];
+            int parentElement = elements[parentIndex];
+            if (element >= parentElement) break;
+            elements[index] = parentElement;
             index = parentIndex;
         }
+        elements[index] = element;
+    }
 
-        Elements[index] = element;
+    private void HeapifyDown(int index)
+    {
+        int element = elements[index];
+        while (true)
+        {
+            int leftChildIndex = (index << 1) + 1;
+            if (leftChildIndex >= count) break;
+            int rightChildIndex = leftChildIndex + 1;
+            int smallestIndex = (rightChildIndex < count && elements[rightChildIndex] < elements[leftChildIndex]) ? rightChildIndex : leftChildIndex;
+            if (elements[smallestIndex] >= element) break;
+            elements[index] = elements[smallestIndex];
+            index = smallestIndex;
+        }
+        elements[index] = element;
     }
 }

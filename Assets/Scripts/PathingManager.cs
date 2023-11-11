@@ -1,16 +1,9 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using TMPro;
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 public unsafe class PathingManager : MonoBehaviour
 {
@@ -33,7 +26,7 @@ public unsafe class PathingManager : MonoBehaviour
     private float3 playerPos;
     private float3 targetPos;
 
-    private NativeArray<Cell> cells;
+    private NativeList<Cell> cells;
     private NativeArray<TempData> tempData;
     private NativeArray<int3> directions;
 
@@ -51,7 +44,7 @@ public unsafe class PathingManager : MonoBehaviour
         openCells = new NativeList<int>(Allocator.Persistent);
         Walkpoints = new NativeList<float3>(totalCells, Allocator.Persistent);
 
-        cells = new NativeArray<Cell>(totalCells, Allocator.Persistent);
+        cells = new NativeList<Cell>(totalCells, Allocator.Persistent);
         directions = new NativeArray<int3>(6, Allocator.Persistent);
 
         cellNeighbors = new NativeArray<NeighborData>(totalCells, Allocator.Persistent);
@@ -65,29 +58,24 @@ public unsafe class PathingManager : MonoBehaviour
 
         GetAllCellNeighbors();
 
-        StartCoroutine(AStar(playerObject.transform.position, targetObject.transform.position));
+        InvokeRepeating(nameof(AStar), 0, 0.1f);
     }
 
-    private IEnumerator AStar(float3 player, float3 target)
+    private void AStar()
     {
-        while (true)
-        {
-            var then = Time.realtimeSinceStartup;
+        var then = Time.realtimeSinceStartup;
 
-            FindPoints(player, target);
+        FindPoints(playerObject.transform.position, targetObject.transform.position);
 
-            InitializeBuffers();
+        InitializeBuffers();
 
-            MoveToTarget();
+        MoveToTarget();
 
-            SearchOrigin();
+        SearchOrigin();
 
-            ClearBuffers();
+        ClearBuffers();
 
-            msText.text = "ms: " + ((Time.realtimeSinceStartup - then) * 1000f);
-
-            yield return new WaitForSeconds(0.1f);
-        }
+        msText.text = "ms: " + ((Time.realtimeSinceStartup - then) * 1000f);
     }
 
     private void FindPoints(float3 player, float3 target)
@@ -105,6 +93,7 @@ public unsafe class PathingManager : MonoBehaviour
         tempData[startingPoint] = new TempData(-1, 1000);
 
         openCells.Add(cells[startingPoint].Index);
+
         currentPoint = openCells[0];
     }
 
@@ -166,7 +155,7 @@ public unsafe class PathingManager : MonoBehaviour
     {
         while (tempData[currentPoint].ParentIndex != -1)
         {
-            //UnityEngine.Debug.DrawLine(cells[currentPoint].CellPos, cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 0.1f);
+            UnityEngine.Debug.DrawLine(cells[currentPoint].CellPos, cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 0.1f);
             Walkpoints.Add(cells[currentPoint].CellPos);
             currentPoint = tempData[currentPoint].ParentIndex;
         }
@@ -175,8 +164,8 @@ public unsafe class PathingManager : MonoBehaviour
     private void ClearBuffers()
     {
         Walkpoints.Clear();
-        openCells.Clear();
         tempData.Dispose();
+        openCells.Clear();
     }
 
     private int FindNearestCell(float3 position)
@@ -187,7 +176,7 @@ public unsafe class PathingManager : MonoBehaviour
 
         FindNearestCellJob findNearestCell = new FindNearestCellJob()
         {
-            Cells = this.cells,
+            Cells = this.cells.AsArray(),
             PlayerPos = position,
             ClosestCell = closestCellArray,
         };
@@ -269,27 +258,27 @@ public unsafe class PathingManager : MonoBehaviour
         cellNeighbors.Dispose();
     }
 
-    private void OnDrawGizmos()
-    {
-        if (showGizmos)
-        {
-            Gizmos.color = Color.red;
-            for (int x = 0; x < cellAmount.x; x++)
-            {
-                for (int y = 0; y < cellAmount.y; y++)
-                {
-                    for (int z = 0; z < cellAmount.z; z++)
-                    {
-                        Vector3 cellCenter = new Vector3(
-                            transform.position.x + (x - (cellAmount.x - 1) * 0.5f) * cellSize,
-                            transform.position.y + (y - (cellAmount.y - 1) * 0.5f) * cellSize,
-                            transform.position.z + (z - (cellAmount.z - 1) * 0.5f) * cellSize
-                        );
-            
-                        Gizmos.DrawWireCube(cellCenter, Vector3.one * 0.1f);
-                    }
-                }
-            }
-        }
-    }
+    //private void OnDrawGizmos()
+    //{
+    //    if (showGizmos)
+    //    {
+    //        Gizmos.color = Color.red;
+    //        for (int x = 0; x < cellAmount.x; x++)
+    //        {
+    //            for (int y = 0; y < cellAmount.y; y++)
+    //            {
+    //                for (int z = 0; z < cellAmount.z; z++)
+    //                {
+    //                    Vector3 cellCenter = new Vector3(
+    //                        transform.position.x + (x - (cellAmount.x - 1) * 0.5f) * cellSize,
+    //                        transform.position.y + (y - (cellAmount.y - 1) * 0.5f) * cellSize,
+    //                        transform.position.z + (z - (cellAmount.z - 1) * 0.5f) * cellSize
+    //                    );
+    //        
+    //                    Gizmos.DrawWireCube(cellCenter, Vector3.one * 0.1f);
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
 }
