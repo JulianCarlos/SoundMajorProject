@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using Unity.Collections;
 using Unity.Jobs;
@@ -9,6 +10,7 @@ public unsafe class PathingManager : MonoBehaviour
 {
     [SerializeField, Range(1, 15)] private int cellSize = 1;
     [SerializeField] private int3 cellAmount;
+    [SerializeField] private int amountOfCellsPerMainCell;
 
     [Space]
     [SerializeField] private GameObject targetObject;
@@ -18,6 +20,7 @@ public unsafe class PathingManager : MonoBehaviour
 
     [Space]
     [SerializeField] private bool showGizmos = false;
+    [SerializeField] private bool ShowGrid = false;
 
     private int startingPoint;
     private int currentPoint;
@@ -27,19 +30,21 @@ public unsafe class PathingManager : MonoBehaviour
     private float3 targetPos;
 
     private NativeList<Cell> cells;
-    private NativeArray<TempData> tempData;
-    private NativeArray<int3> directions;
-
     private NativeList<int> openCells;
     private NativeList<float3> Walkpoints;
 
+    private NativeArray<int3> directions;
+    private NativeArray<TempData> tempData;
     private NativeArray<NeighborData> cellNeighbors;
 
+    private List<GridCore> cores = new List<GridCore>();
+
     private int totalCells;
+    private int openCellsCount = 0;
 
     private void Awake()
     {
-        totalCells = (cellAmount.x * cellAmount.y * cellAmount.z);
+        totalCells = ((cellAmount.x * amountOfCellsPerMainCell) * (cellAmount.y * amountOfCellsPerMainCell) * (cellAmount.z * amountOfCellsPerMainCell));
 
         openCells = new NativeList<int>(Allocator.Persistent);
         Walkpoints = new NativeList<float3>(totalCells, Allocator.Persistent);
@@ -93,6 +98,7 @@ public unsafe class PathingManager : MonoBehaviour
         tempData[startingPoint] = new TempData(-1, 1000);
 
         openCells.Add(cells[startingPoint].Index);
+        openCellsCount++;
 
         currentPoint = openCells[0];
     }
@@ -110,20 +116,22 @@ public unsafe class PathingManager : MonoBehaviour
     private void MoveToTarget()
     {
         float cost;
+        int neighborIndex;
         NeighborData neighborData;
         Cell neighborCell;
 
-        while (currentPoint != endPoint && openCells.Length > 0)
+        while (currentPoint != endPoint && openCellsCount > 0)
         {
             currentPoint = openCells[0];
 
             neighborData = cellNeighbors[currentPoint];
 
             openCells.RemoveAt(0);
+            openCellsCount--;
 
             for (int i = 0; i < 6; i++)
             {
-                int neighborIndex = neighborData.Neighbors[i];
+                neighborIndex = neighborData.Neighbors[i];
 
                 if (neighborIndex < 0 || neighborIndex >= totalCells)
                     continue;
@@ -133,29 +141,23 @@ public unsafe class PathingManager : MonoBehaviour
                 if (tempData[neighborCell.Index].FCost > 0)
                     continue;
 
-                cost = CalculateSquaredDistance(neighborCell.CellPos, targetPos);
+                cost = CalculationHelper.CalculateSquaredDistance(neighborCell.CellPos, targetPos);
 
                 tempData[neighborCell.Index] = new TempData(cells[currentPoint].Index, cost);
 
                 openCells.Add(neighborCell.Index);
+                openCellsCount++;
             }
         }
     }
 
-    private float CalculateSquaredDistance(float3 point1, float3 point2)
-    {
-        float dx = point2.x - point1.x;
-        float dy = point2.y - point1.y;
-        float dz = point2.z - point1.z;
 
-        return dx * dx + dy * dy + dz * dz;
-    }
 
     private void SearchOrigin()
     {
         while (tempData[currentPoint].ParentIndex != -1)
         {
-            UnityEngine.Debug.DrawLine(cells[currentPoint].CellPos, cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 0.1f);
+            //UnityEngine.Debug.DrawLine(cells[currentPoint].CellPos, cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 0.1f);
             Walkpoints.Add(cells[currentPoint].CellPos);
             currentPoint = tempData[currentPoint].ParentIndex;
         }
@@ -166,30 +168,43 @@ public unsafe class PathingManager : MonoBehaviour
         Walkpoints.Clear();
         tempData.Dispose();
         openCells.Clear();
+        openCellsCount = 0;
     }
 
     private int FindNearestCell(float3 position)
     {
-        int tempClosest;
+        int closestCore = 0;
+        float tempDistance;
+        float distance = float.MaxValue;
+        List<Cell> subCells;
 
-        NativeArray<int> closestCellArray = new NativeArray<int>(1, Allocator.TempJob);
-
-        FindNearestCellJob findNearestCell = new FindNearestCellJob()
+        for (int i = 0; i < cores.Count; i++)
         {
-            Cells = this.cells.AsArray(),
-            PlayerPos = position,
-            ClosestCell = closestCellArray,
-        };
+            tempDistance = CalculationHelper.CalculateSquaredDistance(cores[i].CorePos, position);
+        
+            if (tempDistance < distance)
+            {
+                distance = tempDistance;
+                closestCore = i;
+            }
+        }
+        
+        distance = float.MaxValue;
+        int closestCell = 0;
+        subCells = cores[closestCore].SubCells;
 
-        JobHandle handle = findNearestCell.Schedule();
-
-        handle.Complete();
-
-        tempClosest = closestCellArray[0];
-
-        closestCellArray.Dispose();
-
-        return tempClosest;
+        for (int i = 0; i < subCells.Count; i++)
+        {
+            tempDistance = CalculationHelper.CalculateSquaredDistance(subCells[i].CellPos, position);
+        
+            if (tempDistance < distance)
+            {
+                distance = tempDistance;
+                closestCell = subCells[i].Index;
+            }
+        }
+        
+        return closestCell;
     }
 
     private void GetAllCellNeighbors()
@@ -206,7 +221,7 @@ public unsafe class PathingManager : MonoBehaviour
 
         for (int i = 0;  i < 6; i++)
         {
-            if (!Physics.Raycast(position, Int3ToVector3(directions[i]), cellSize))
+            if (!Physics.Raycast(position, CalculationHelper.Int3ToVector3(directions[i]), cellSize))
             {
                 int targetCellIndex = FindNearestCell(position + (directions[i] * cellSize));
 
@@ -223,30 +238,53 @@ public unsafe class PathingManager : MonoBehaviour
         neighbors.Dispose();
     }
 
-    private float3 Int3ToVector3(int3 int3Direction)
-    {
-        return new float3(int3Direction.x, int3Direction.y, int3Direction.z);
-    }
+
 
     private void InitializeGrid()
     {
-        NativeArray<Cell> cells = new NativeArray<Cell>(totalCells, Allocator.TempJob);
+        int index = 0;
+        List<Cell> tempCells;
 
-        var job = new InitializeGridJob
+        for (int x = 0; x < cellAmount.x; x++)
         {
-            TransformPosition = transform.position,
-            CellAmount = cellAmount,
-            CellSize = cellSize,
-            Cells = cells,
-        };
+            for (int y = 0; y < cellAmount.y; y++)
+            {
+                for (int z = 0; z < cellAmount.z; z++)
+                {
+                    float3 mainCellCenter = new float3(
+                    transform.position.x + ((x - (cellAmount.x - 1) / 2) * cellSize) * amountOfCellsPerMainCell,
+                    transform.position.y + ((y - (cellAmount.y - 1) / 2) * cellSize) * amountOfCellsPerMainCell,
+                    transform.position.z + ((z - (cellAmount.z - 1) / 2) * cellSize) * amountOfCellsPerMainCell);
 
-        JobHandle jobHandle = job.Schedule(totalCells, 200);
+                    tempCells = new();
 
-        jobHandle.Complete();
+                    for (int a = 0; a < amountOfCellsPerMainCell; a++)
+                    {
+                        for (int b = 0; b < amountOfCellsPerMainCell; b++)
+                        {
+                            for (int c = 0; c < amountOfCellsPerMainCell; c++)
+                            {
+                                float3 subcellCenter = new float3(
+                                    mainCellCenter.x + (a - (amountOfCellsPerMainCell - 1) / 2) * cellSize,
+                                    mainCellCenter.y + (b - (amountOfCellsPerMainCell - 1) / 2) * cellSize,
+                                    mainCellCenter.z + (c - (amountOfCellsPerMainCell - 1) / 2) * cellSize
+                                );
 
-        this.cells.CopyFrom(cells);
+                                Cell cell = new Cell(subcellCenter, index);
 
-        cells.Dispose();
+                                cells.Add(cell);
+                                tempCells.Add(cell);
+
+                                index++;
+                            }
+                        }
+                    }
+
+                    GridCore core = new GridCore(mainCellCenter, tempCells);
+                    cores.Add(core);
+                }
+            }
+        }
     }
 
     private void OnDestroy()
@@ -258,27 +296,44 @@ public unsafe class PathingManager : MonoBehaviour
         cellNeighbors.Dispose();
     }
 
-    //private void OnDrawGizmos()
-    //{
-    //    if (showGizmos)
-    //    {
-    //        Gizmos.color = Color.red;
-    //        for (int x = 0; x < cellAmount.x; x++)
-    //        {
-    //            for (int y = 0; y < cellAmount.y; y++)
-    //            {
-    //                for (int z = 0; z < cellAmount.z; z++)
-    //                {
-    //                    Vector3 cellCenter = new Vector3(
-    //                        transform.position.x + (x - (cellAmount.x - 1) * 0.5f) * cellSize,
-    //                        transform.position.y + (y - (cellAmount.y - 1) * 0.5f) * cellSize,
-    //                        transform.position.z + (z - (cellAmount.z - 1) * 0.5f) * cellSize
-    //                    );
-    //        
-    //                    Gizmos.DrawWireCube(cellCenter, Vector3.one * 0.1f);
-    //                }
-    //            }
-    //        }
-    //    }
-    //}
+    private void OnDrawGizmos()
+    {
+        if (ShowGrid)
+        {
+            for (int x = 0; x < cellAmount.x; x++)
+            {
+                for (int y = 0; y < cellAmount.y; y++)
+                {
+                    for (int z = 0; z < cellAmount.z; z++)
+                    {
+                        Vector3 mainCellCenter = new Vector3(
+                        transform.position.x + ((x - (cellAmount.x - 1) / 2) * cellSize) * amountOfCellsPerMainCell,
+                        transform.position.y + ((y - (cellAmount.y - 1) / 2) * cellSize) * amountOfCellsPerMainCell,
+                        transform.position.z + ((z - (cellAmount.z - 1) / 2) * cellSize) * amountOfCellsPerMainCell);
+
+                        Gizmos.color = Color.blue;
+                        Gizmos.DrawWireCube(mainCellCenter, Vector3.one);
+
+                        for (int a = 0; a < amountOfCellsPerMainCell; a++)
+                        {
+                            for (int b = 0; b < amountOfCellsPerMainCell; b++)
+                            {
+                                for (int c = 0; c < amountOfCellsPerMainCell; c++)
+                                {
+                                    Vector3 subcellCenter = new Vector3(
+                                        mainCellCenter.x + (a - (amountOfCellsPerMainCell - 1) / 2) * cellSize,
+                                        mainCellCenter.y + (b - (amountOfCellsPerMainCell - 1) / 2) * cellSize,
+                                        mainCellCenter.z + (c - (amountOfCellsPerMainCell - 1) / 2) * cellSize
+                                    );
+
+                                    Gizmos.color = Color.red;
+                                    Gizmos.DrawWireCube(subcellCenter, Vector3.one * 0.1f);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

@@ -7,30 +7,12 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
-[BurstCompile]
 public struct FindNearestCellJob : IJob
 {
-    public float3 PlayerPos;
-
-    public NativeArray<Cell> Cells;
-    public NativeArray<int> ClosestCell;
-
     public void Execute()
     {
-        int closestCell = -1;
-        float distance = float.MaxValue;
-
-        for (int i = 0; i < Cells.Length; i++)
-        {
-            float tempDistance = math.distance(Cells[i].CellPos, PlayerPos);
-
-            if (tempDistance < distance)
-            {
-                closestCell = i;
-                distance = tempDistance;
-            }
-        }
-        ClosestCell[0] = closestCell;
+        throw new System.NotImplementedException();
     }
 }
