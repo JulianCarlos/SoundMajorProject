@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
+using System.Runtime.InteropServices;
 
 public unsafe class PathingManager : MonoBehaviour
 {
@@ -42,6 +44,10 @@ public unsafe class PathingManager : MonoBehaviour
     private int totalCells;
     private int openCellsCount = 0;
 
+    private int totalCores;
+    private int totalCellsPerCore;
+
+
     private void Awake()
     {
         totalCells = ((cellAmount.x * amountOfCellsPerMainCell) * (cellAmount.y * amountOfCellsPerMainCell) * (cellAmount.z * amountOfCellsPerMainCell));
@@ -60,6 +66,9 @@ public unsafe class PathingManager : MonoBehaviour
     private void Start()
     {
         InitializeGrid();
+
+        totalCores = cores.Count();
+        totalCellsPerCore = amountOfCellsPerMainCell * amountOfCellsPerMainCell * amountOfCellsPerMainCell;
 
         GetAllCellNeighbors();
 
@@ -118,7 +127,6 @@ public unsafe class PathingManager : MonoBehaviour
         float cost;
         int neighborIndex;
         NeighborData neighborData;
-        Cell neighborCell;
 
         while (currentPoint != endPoint && openCellsCount > 0)
         {
@@ -133,33 +141,29 @@ public unsafe class PathingManager : MonoBehaviour
             {
                 neighborIndex = neighborData.Neighbors[i];
 
-                if (neighborIndex < 0 || neighborIndex >= totalCells)
+                if (neighborIndex < 0 || tempData[neighborIndex].FCost > 0)
                     continue;
 
-                neighborCell = cells[neighborIndex];
+                cost = CalculationHelper.CalculateSquaredDistance(cells[neighborIndex].CellPos, targetPos);
 
-                if (tempData[neighborCell.Index].FCost > 0)
-                    continue;
+                tempData[neighborIndex] = new TempData(currentPoint, cost);
 
-                cost = CalculationHelper.CalculateSquaredDistance(neighborCell.CellPos, targetPos);
-
-                tempData[neighborCell.Index] = new TempData(cells[currentPoint].Index, cost);
-
-                openCells.Add(neighborCell.Index);
+                openCells.Add(neighborIndex);
                 openCellsCount++;
             }
         }
     }
 
-
-
     private void SearchOrigin()
     {
-        while (tempData[currentPoint].ParentIndex != -1)
+        var data = tempData[currentPoint];
+        while (data.ParentIndex != -1)
         {
             //UnityEngine.Debug.DrawLine(cells[currentPoint].CellPos, cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 0.1f);
             Walkpoints.Add(cells[currentPoint].CellPos);
-            currentPoint = tempData[currentPoint].ParentIndex;
+            currentPoint = data.ParentIndex;
+
+            data = tempData[currentPoint];
         }
     }
 
@@ -176,9 +180,9 @@ public unsafe class PathingManager : MonoBehaviour
         int closestCore = 0;
         float tempDistance;
         float distance = float.MaxValue;
-        List<Cell> subCells;
+        Cell[] subCells;
 
-        for (int i = 0; i < cores.Count; i++)
+        for (int i = 0; i < totalCores; i++)
         {
             tempDistance = CalculationHelper.CalculateSquaredDistance(cores[i].CorePos, position);
         
@@ -188,12 +192,12 @@ public unsafe class PathingManager : MonoBehaviour
                 closestCore = i;
             }
         }
-        
+
         distance = float.MaxValue;
         int closestCell = 0;
         subCells = cores[closestCore].SubCells;
 
-        for (int i = 0; i < subCells.Count; i++)
+        for (int i = 0; i < totalCellsPerCore; i++)
         {
             tempDistance = CalculationHelper.CalculateSquaredDistance(subCells[i].CellPos, position);
         
@@ -238,8 +242,6 @@ public unsafe class PathingManager : MonoBehaviour
         neighbors.Dispose();
     }
 
-
-
     private void InitializeGrid()
     {
         int index = 0;
@@ -280,7 +282,7 @@ public unsafe class PathingManager : MonoBehaviour
                         }
                     }
 
-                    GridCore core = new GridCore(mainCellCenter, tempCells);
+                    GridCore core = new GridCore(mainCellCenter, tempCells.ToArray());
                     cores.Add(core);
                 }
             }
