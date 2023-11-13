@@ -104,7 +104,7 @@ public unsafe class PathingManager : MonoBehaviour
 
     private void InitializeBuffers()
     {
-        tempData = new NativeArray<TempData>(totalCells, Allocator.TempJob);
+        tempData = new NativeArray<TempData>(totalCells, Allocator.Temp);
         tempData[startingPoint] = new TempData(-1, 1000);
 
         openCells.Add(cells[startingPoint].Index);
@@ -125,31 +125,31 @@ public unsafe class PathingManager : MonoBehaviour
 
     private void MoveToTarget()
     {
-        NativeArray<int> currentPoint = new NativeArray<int>(1, Allocator.TempJob);
-        NativeArray<int> endPoint = new NativeArray<int>(1, Allocator.TempJob);
+        int neighborIndex;
+        NeighborData neighborData;
 
-        MoveToTargetJob moveJob = new MoveToTargetJob()
+        while (currentPoint != endPoint && openCellsCount > 0)
         {
-            TargetPos = targetPos,
-            CurrentPoint = currentPoint,
-            EndPoint = endPoint,
-            OpenCellsCount = openCellsCount,
+            currentPoint = openCells[0];
 
-            Cells = cells,
-            OpenCells = openCells,
-            TempData = tempData,
-            CellNeighbors = cellNeighbors,
-        };
+            neighborData = cellNeighbors[currentPoint];
 
-        JobHandle handle = moveJob.Schedule();
-        handle.Complete();
+            openCells.RemoveAt(0);
+            openCellsCount--;
 
-        tempData = moveJob.TempData;
-        this.currentPoint = moveJob.CurrentPoint[0];
-        openCellsCount = moveJob.OpenCellsCount;
+            for (int i = 0; i < 6; i++)
+            {
+                neighborIndex = neighborData.Neighbors[i];
 
-        currentPoint.Dispose();
-        endPoint.Dispose();
+                if (neighborIndex < 0 || tempData[neighborIndex].FCost > 0)
+                    continue;
+
+                tempData[neighborIndex] = new TempData(currentPoint, CalculationHelper.CalculateSquaredDistance(cells[neighborIndex].CellPos, targetPos));
+
+                openCells.Add(neighborIndex);
+                openCellsCount++;
+            }
+        }
     }
 
     private void SearchOrigin()
@@ -158,7 +158,7 @@ public unsafe class PathingManager : MonoBehaviour
 
         while (currentPoint != startingPoint)
         {
-            //UnityEngine.Debug.DrawLine(cells[currentPoint].CellPos, cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 0.1f);
+            UnityEngine.Debug.DrawLine(cells[currentPoint].CellPos, cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 0.1f);
             Walkpoints.Add(cells[currentPoint].CellPos);
             currentPoint = data.ParentIndex;
 
