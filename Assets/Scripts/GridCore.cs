@@ -6,9 +6,9 @@ using UnityEngine;
 public struct GridCore
 {
     public float3 CorePos;
-    public Cell[] SubCells;
+    public int[] SubCells;
 
-    public GridCore(float3 corePos, Cell[] subCells)
+    public GridCore(float3 corePos, int[] subCells)
     {
         CorePos = corePos;
         SubCells = subCells;

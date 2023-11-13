@@ -180,7 +180,7 @@ public unsafe class PathingManager : MonoBehaviour
         int closestCore = 0;
         float tempDistance;
         float distance = float.MaxValue;
-        Cell[] subCells;
+        int[] subCells;
 
         for (int i = 0; i < totalCores; i++)
         {
@@ -199,12 +199,12 @@ public unsafe class PathingManager : MonoBehaviour
 
         for (int i = 0; i < totalCellsPerCore; i++)
         {
-            tempDistance = CalculationHelper.CalculateSquaredDistance(subCells[i].CellPos, position);
+            tempDistance = CalculationHelper.CalculateSquaredDistance(cells[subCells[i]].CellPos, position);
         
             if (tempDistance < distance)
             {
                 distance = tempDistance;
-                closestCell = subCells[i].Index;
+                closestCell = subCells[i];
             }
         }
         
@@ -245,7 +245,7 @@ public unsafe class PathingManager : MonoBehaviour
     private void InitializeGrid()
     {
         int index = 0;
-        List<Cell> tempCells;
+        List<int> tempCells;
 
         for (int x = 0; x < cellAmount.x; x++)
         {
@@ -275,7 +275,7 @@ public unsafe class PathingManager : MonoBehaviour
                                 Cell cell = new Cell(subcellCenter, index);
 
                                 cells.Add(cell);
-                                tempCells.Add(cell);
+                                tempCells.Add(cell.Index);
 
                                 index++;
                             }
