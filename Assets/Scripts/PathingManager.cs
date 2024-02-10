@@ -10,6 +10,8 @@ using System.Runtime.InteropServices;
 
 public unsafe class PathingManager : MonoBehaviour
 {
+    public static PathingManager Instance { get; private set; }
+
     [SerializeField, Range(1, 15)] private int cellSize = 1;
     [SerializeField] private int3 cellAmount;
     [SerializeField] private int amountOfCellsPerMainCell;
@@ -47,9 +49,10 @@ public unsafe class PathingManager : MonoBehaviour
     private int totalCores;
     private int totalCellsPerCore;
 
-
     private void Awake()
     {
+        CreateInstance();
+
         totalCells = ((cellAmount.x * amountOfCellsPerMainCell) * (cellAmount.y * amountOfCellsPerMainCell) * (cellAmount.z * amountOfCellsPerMainCell));
 
         openCells = new NativeList<int>(Allocator.Persistent);
@@ -57,6 +60,7 @@ public unsafe class PathingManager : MonoBehaviour
 
         cells = new NativeList<Cell>(totalCells, Allocator.Persistent);
         cores = new GridCore[cellAmount.x * cellAmount.y * cellAmount.z];
+
         directions = new NativeArray<int3>(6, Allocator.Persistent);
 
         cellNeighbors = new NativeArray<NeighborData>(totalCells, Allocator.Persistent);
@@ -74,6 +78,18 @@ public unsafe class PathingManager : MonoBehaviour
         GetAllCellNeighbors();
 
         InvokeRepeating(nameof(AStar), 0, 0.1f);
+    }
+
+    private void CreateInstance()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(this.gameObject);
+        }
     }
 
     private void AStar()
@@ -115,10 +131,13 @@ public unsafe class PathingManager : MonoBehaviour
 
     private void InitializeDirections()
     {
+        //Horizontal
         directions[0] = new int3( 0,  0,  1);
         directions[1] = new int3( 0,  0, -1);
         directions[2] = new int3( 1,  0,  0);
         directions[3] = new int3(-1,  0 , 0);
+
+        //Vertical
         directions[4] = new int3( 0,  1,  0);
         directions[5] = new int3( 0, -1,  0);
     }
