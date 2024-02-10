@@ -20,8 +20,6 @@ public class FlyingAgent : MonoBehaviour
     {
         waypoints = PathingManager.Instance.AStar(transform.position, targetPos);
 
-        //System.Array.Reverse(waypoints);
-
         StartCoroutine(C_MoveTo());
     }
 

@@ -17,12 +17,6 @@ public unsafe class PathingManager : MonoBehaviour
     [SerializeField] private int amountOfCellsPerMainCell;
 
     [Space]
-    [SerializeField] private GameObject targetObject;
-    [SerializeField] private GameObject playerObject;
-
-    [SerializeField] private TextMeshProUGUI msText;
-
-    [Space]
     [SerializeField] private bool showGizmos = false;
     [SerializeField] private bool ShowGrid = false;
 
@@ -98,7 +92,6 @@ public unsafe class PathingManager : MonoBehaviour
         MoveToTarget();
 
         Vector3[] waypoints = SearchOrigin().ToArray();
-
         System.Array.Reverse(waypoints);
 
         ClearBuffers();
