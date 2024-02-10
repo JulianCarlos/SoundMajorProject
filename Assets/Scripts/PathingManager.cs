@@ -35,7 +35,7 @@ public unsafe class PathingManager : MonoBehaviour
 
     private NativeList<Cell> cells;
     private NativeList<int> openCells;
-    private NativeList<float3> Walkpoints;
+    private List<Vector3> Walkpoints = new();
 
     private NativeArray<int3> directions;
     private NativeArray<TempData> tempData;
@@ -56,7 +56,6 @@ public unsafe class PathingManager : MonoBehaviour
         totalCells = ((cellAmount.x * amountOfCellsPerMainCell) * (cellAmount.y * amountOfCellsPerMainCell) * (cellAmount.z * amountOfCellsPerMainCell));
 
         openCells = new NativeList<int>(Allocator.Persistent);
-        Walkpoints = new NativeList<float3>(totalCells, Allocator.Persistent);
 
         cells = new NativeList<Cell>(totalCells, Allocator.Persistent);
         cores = new GridCore[cellAmount.x * cellAmount.y * cellAmount.z];
@@ -76,8 +75,6 @@ public unsafe class PathingManager : MonoBehaviour
         totalCellsPerCore = amountOfCellsPerMainCell * amountOfCellsPerMainCell * amountOfCellsPerMainCell;
 
         GetAllCellNeighbors();
-
-        InvokeRepeating(nameof(AStar), 0, 0.1f);
     }
 
     private void CreateInstance()
@@ -92,30 +89,27 @@ public unsafe class PathingManager : MonoBehaviour
         }
     }
 
-    private void AStar()
+    public Vector3[] AStar(Vector3 initialPos, Vector3 targetPos)
     {
-        var then = Time.realtimeSinceStartup;
-
-        FindPoints(playerObject.transform.position, targetObject.transform.position);
+        FindPoints(initialPos, targetPos);
 
         InitializeBuffers();
 
         MoveToTarget();
 
-        SearchOrigin();
+        Vector3[] waypoints = SearchOrigin().ToArray();
+
+        System.Array.Reverse(waypoints);
 
         ClearBuffers();
 
-        msText.text = "ms: " + ((Time.realtimeSinceStartup - then) * 1000f);
+        return waypoints;
     }
 
     private void FindPoints(float3 player, float3 target)
     {
-        playerPos = player;
-        targetPos = target;
-
-        startingPoint = FindNearestCell(playerPos);
-        endPoint = FindNearestCell(targetPos);
+        startingPoint = FindNearestCell(player);
+        endPoint = FindNearestCell(target);
     }
 
     private void InitializeBuffers()
@@ -171,18 +165,20 @@ public unsafe class PathingManager : MonoBehaviour
         }
     }
 
-    private void SearchOrigin()
+    private List<Vector3> SearchOrigin()
     {
         var data = tempData[currentPoint];
 
         while (currentPoint != startingPoint)
         {
-            UnityEngine.Debug.DrawLine(cells[currentPoint].CellPos, cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 0.1f);
+            UnityEngine.Debug.DrawLine(cells[currentPoint].CellPos, cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 60f);
             Walkpoints.Add(cells[currentPoint].CellPos);
             currentPoint = data.ParentIndex;
 
             data = tempData[currentPoint];
         }
+
+        return Walkpoints;
     }
 
     private void ClearBuffers()
@@ -313,7 +309,6 @@ public unsafe class PathingManager : MonoBehaviour
     {
         cells.Dispose();
         directions.Dispose();
-        Walkpoints.Dispose();
         openCells.Dispose();
         cellNeighbors.Dispose();
     }
