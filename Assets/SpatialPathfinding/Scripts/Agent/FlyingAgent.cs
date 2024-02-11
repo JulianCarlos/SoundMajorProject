@@ -18,7 +18,7 @@ public class FlyingAgent : MonoBehaviour
         MoveTo(targetPos);
     }
 
-    public void UpdateActiveVolume(NavigationVolume activeVolume)
+    public void AddActiveVolume(NavigationVolume activeVolume)
     {
         this.activeVolume = activeVolume;
     }

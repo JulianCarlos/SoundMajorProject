@@ -5,13 +5,18 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider))]
 public class NavigationVolume : MonoBehaviour
 {
-    [SerializeField, Range(1, 15)] private int cellSize = 1;
-    [SerializeField] private int3 cellAmount;
-    [SerializeField] private int amountOfCellsPerMainCell;
+    [SerializeField] private uint cellSize = 1;
+    [SerializeField] private uint amountOfCellsPerMainCell = 5;
+    [SerializeField] private Vector3Int cellAmount = new Vector3Int(3, 3, 3);
     [Space]
     [SerializeField] private bool ShowGrid = false;
     [Space]
     [SerializeField] private Color volumeColor = new Color(0f, 1f, 0.85f, 0.72f);
+
+    private void OnValidate()
+    {
+        GetComponent<BoxCollider>().size = cellAmount * (int)amountOfCellsPerMainCell * (int)cellSize;
+    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -19,7 +24,7 @@ public class NavigationVolume : MonoBehaviour
 
         if (targetAgent != null)
         {
-            targetAgent.UpdateActiveVolume(this);
+            targetAgent.AddActiveVolume(this);
         }
     }
 

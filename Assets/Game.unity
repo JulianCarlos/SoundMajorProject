@@ -31721,7 +31721,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 60, y: 30, z: 60}
+  m_Size: {x: 27, y: 27, z: 27}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &491043493
 MonoBehaviour:
@@ -31736,11 +31736,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cellSize: 3
-  cellAmount:
-    x: 4
-    y: 2
-    z: 4
-  amountOfCellsPerMainCell: 5
+  amountOfCellsPerMainCell: 3
+  cellAmount: {x: 3, y: 3, z: 3}
   ShowGrid: 1
   volumeColor: {r: 0, g: 1, b: 0.85, a: 0.72}
 --- !u!4 &491043494
@@ -89122,7 +89119,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Speed: 5
   targetPos: {x: -14.5, y: -8.52, z: 47.11}
-  waypoints: []
 --- !u!23 &1318697972
 MeshRenderer:
   m_ObjectHideFlags: 0
