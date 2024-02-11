@@ -31721,7 +31721,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 27, y: 27, z: 27}
+  m_Size: {x: 27, y: 9, z: 27}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &491043493
 MonoBehaviour:
@@ -31737,7 +31737,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cellSize: 3
   amountOfCellsPerMainCell: 3
-  cellAmount: {x: 3, y: 3, z: 3}
+  cellAmount:
+    x: 3
+    y: 1
+    z: 3
   ShowGrid: 1
   volumeColor: {r: 0, g: 1, b: 0.85, a: 0.72}
 --- !u!4 &491043494

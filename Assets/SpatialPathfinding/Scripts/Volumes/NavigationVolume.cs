@@ -5,9 +5,9 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider))]
 public class NavigationVolume : MonoBehaviour
 {
-    [SerializeField] private uint cellSize = 1;
-    [SerializeField] private uint amountOfCellsPerMainCell = 5;
-    [SerializeField] private Vector3Int cellAmount = new Vector3Int(3, 3, 3);
+    [SerializeField, Min(1)] private uint cellSize = 1;
+    [SerializeField, Min(1)] private uint amountOfCellsPerMainCell = 5;
+    [SerializeField] private uint3 cellAmount = new uint3(3, 3, 3);
     [Space]
     [SerializeField] private bool ShowGrid = false;
     [Space]
@@ -15,7 +15,7 @@ public class NavigationVolume : MonoBehaviour
 
     private void OnValidate()
     {
-        GetComponent<BoxCollider>().size = cellAmount * (int)amountOfCellsPerMainCell * (int)cellSize;
+        GetComponent<BoxCollider>().size = new Vector3(cellAmount.x, cellAmount.y, cellAmount.z) * amountOfCellsPerMainCell * cellSize;
     }
 
     private void OnTriggerEnter(Collider other)
