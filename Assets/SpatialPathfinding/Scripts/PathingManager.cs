@@ -8,6 +8,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using System.Runtime.InteropServices;
 
+[DefaultExecutionOrder(100)]
 public unsafe class PathingManager : MonoBehaviour
 {
     public static PathingManager Instance { get; private set; }
@@ -317,9 +318,9 @@ public unsafe class PathingManager : MonoBehaviour
                     for (int z = 0; z < cellAmount.z; z++)
                     {
                         Vector3 mainCellCenter = new Vector3(
-                        transform.position.x + ((x - (cellAmount.x - 1) / 2) * cellSize) * amountOfCellsPerMainCell,
-                        transform.position.y + ((y - (cellAmount.y - 1) / 2) * cellSize) * amountOfCellsPerMainCell,
-                        transform.position.z + ((z - (cellAmount.z - 1) / 2) * cellSize) * amountOfCellsPerMainCell);
+                        transform.position.x + ((x - (cellAmount.x - 1f) / 2f) * cellSize) * amountOfCellsPerMainCell,
+                        transform.position.y + ((y - (cellAmount.y - 1f) / 2f) * cellSize) * amountOfCellsPerMainCell,
+                        transform.position.z + ((z - (cellAmount.z - 1f) / 2f) * cellSize) * amountOfCellsPerMainCell);
 
                         Gizmos.color = Color.blue;
                         Gizmos.DrawWireCube(mainCellCenter, Vector3.one);
@@ -331,9 +332,9 @@ public unsafe class PathingManager : MonoBehaviour
                                 for (int c = 0; c < amountOfCellsPerMainCell; c++)
                                 {
                                     Vector3 subcellCenter = new Vector3(
-                                        mainCellCenter.x + (a - (amountOfCellsPerMainCell - 1) / 2) * cellSize,
-                                        mainCellCenter.y + (b - (amountOfCellsPerMainCell - 1) / 2) * cellSize,
-                                        mainCellCenter.z + (c - (amountOfCellsPerMainCell - 1) / 2) * cellSize
+                                        mainCellCenter.x + (a - (amountOfCellsPerMainCell - 1f) / 2f) * cellSize,
+                                        mainCellCenter.y + (b - (amountOfCellsPerMainCell - 1f) / 2f) * cellSize,
+                                        mainCellCenter.z + (c - (amountOfCellsPerMainCell - 1f) / 2f) * cellSize
                                     );
 
                                     Gizmos.color = Color.red;

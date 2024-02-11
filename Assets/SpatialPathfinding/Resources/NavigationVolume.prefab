@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5139878978105177961}
   - component: {fileID: 739910386848343527}
+  - component: {fileID: 393439290820182652}
   m_Layer: 0
   m_Name: NavigationVolume
   m_TagString: Untagged
@@ -44,5 +45,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad790eb4828899c468ceb4fcd1cd19de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  size: {x: 35, y: 35, z: 35}
-  volumeColor: {r: 0, g: 1, b: 0.8509803, a: 0.4392157}
+  cellSize: 3
+  cellAmount:
+    x: 4
+    y: 2
+    z: 4
+  amountOfCellsPerMainCell: 5
+  ShowGrid: 1
+  volumeColor: {r: 0, g: 1, b: 0.85, a: 0.72}
+--- !u!65 &393439290820182652
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7540322199343857884}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 60, y: 30, z: 60}
+  m_Center: {x: 0, y: 0, z: 0}

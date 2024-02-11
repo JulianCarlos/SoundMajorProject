@@ -2,18 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[DefaultExecutionOrder(200)]
 public class FlyingAgent : MonoBehaviour
 {
     [SerializeField] private float Speed = 5f;
     [SerializeField] private Vector3 targetPos;
 
-    [SerializeField] private Vector3[] waypoints;
-
+    private Vector3[] waypoints;
     private int currentWayPoint = 0;
+
+    private NavigationVolume activeVolume;
 
     private void Start()
     {
         MoveTo(targetPos);
+    }
+
+    public void UpdateActiveVolume(NavigationVolume activeVolume)
+    {
+        this.activeVolume = activeVolume;
     }
 
     public void MoveTo(Vector3 targetPos)
