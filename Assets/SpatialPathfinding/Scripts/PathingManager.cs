@@ -32,8 +32,6 @@ public unsafe class PathingManager : MonoBehaviour
 
     private int openCellsCount = 0;
 
-    public NavigationVolume targetVolume = new ();
-
     private void Awake()
     {
         CreateInstance();
@@ -59,18 +57,13 @@ public unsafe class PathingManager : MonoBehaviour
 
     public Vector3[] AStar(Vector3 initialPos, Vector3 targetPos, NavigationVolume targetVolume)
     {
-        this.targetVolume = targetVolume;
-        //targetVolume = FindObjectOfType<NavigationVolume>();
+        FindPoints(initialPos, targetPos, targetVolume);
 
-        Debug.Log(targetVolume != null);
+        InitializeBuffers(targetVolume);
 
-        FindPoints(initialPos, targetPos);
+        MoveToTarget(targetPos, targetVolume);
 
-        InitializeBuffers();
-
-        MoveToTarget(targetPos);
-
-        Vector3[] waypoints = SearchOrigin().ToArray();
+        Vector3[] waypoints = SearchOrigin(targetVolume).ToArray();
         System.Array.Reverse(waypoints);
 
         ClearBuffers();
@@ -78,13 +71,13 @@ public unsafe class PathingManager : MonoBehaviour
         return waypoints;
     }
 
-    private void FindPoints(float3 player, float3 target)
+    private void FindPoints(float3 player, float3 target, NavigationVolume targetVolume)
     {
-        startingPoint = FindNearestCell(player);
-        endPoint = FindNearestCell(target);
+        startingPoint = FindNearestCell(player, targetVolume);
+        endPoint = FindNearestCell(target, targetVolume);
     }
 
-    private void InitializeBuffers()
+    private void InitializeBuffers(NavigationVolume targetVolume)
     {
         tempData = new NativeArray<TempData>(targetVolume.totalCells, Allocator.Temp);
         tempData[startingPoint] = new TempData(-1, 1000);
@@ -108,7 +101,7 @@ public unsafe class PathingManager : MonoBehaviour
         Directions[5] = new int3( 0, -1,  0);
     }
 
-    private void MoveToTarget(Vector3 targetPos)
+    private void MoveToTarget(Vector3 targetPos, NavigationVolume targetVolume)
     {
         int neighborIndex;
         NeighborData neighborData;
@@ -137,7 +130,7 @@ public unsafe class PathingManager : MonoBehaviour
         }
     }
 
-    private List<Vector3> SearchOrigin()
+    private List<Vector3> SearchOrigin(NavigationVolume targetVolume)
     {
         var data = tempData[currentPoint];
 
@@ -161,7 +154,7 @@ public unsafe class PathingManager : MonoBehaviour
         openCellsCount = 0;
     }
 
-    private int FindNearestCell(float3 position)
+    private int FindNearestCell(float3 position, NavigationVolume targetVolume)
     {
         int closestCore = 0;
         float tempDistance;

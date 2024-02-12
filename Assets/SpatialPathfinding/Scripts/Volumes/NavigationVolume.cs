@@ -124,9 +124,9 @@ public class NavigationVolume : MonoBehaviour
                 for (int z = 0; z < cellAmount.z; z++)
                 {
                     float3 mainCellCenter = new float3(
-                    transform.position.x + ((x - (cellAmount.x - 1) / 2) * cellSize) * amountOfCellsPerMainCell,
-                    transform.position.y + ((y - (cellAmount.y - 1) / 2) * cellSize) * amountOfCellsPerMainCell,
-                    transform.position.z + ((z - (cellAmount.z - 1) / 2) * cellSize) * amountOfCellsPerMainCell);
+                    transform.position.x + ((x - (cellAmount.x - 1f) / 2f) * cellSize) * amountOfCellsPerMainCell,
+                    transform.position.y + ((y - (cellAmount.y - 1f) / 2f) * cellSize) * amountOfCellsPerMainCell,
+                    transform.position.z + ((z - (cellAmount.z - 1f) / 2f) * cellSize) * amountOfCellsPerMainCell);
 
                     tempSubCells = new();
 
@@ -137,9 +137,9 @@ public class NavigationVolume : MonoBehaviour
                             for (int c = 0; c < amountOfCellsPerMainCell; c++)
                             {
                                 float3 subcellCenter = new float3(
-                                    mainCellCenter.x + (a - (amountOfCellsPerMainCell - 1) / 2) * cellSize,
-                                    mainCellCenter.y + (b - (amountOfCellsPerMainCell - 1) / 2) * cellSize,
-                                    mainCellCenter.z + (c - (amountOfCellsPerMainCell - 1) / 2) * cellSize
+                                    mainCellCenter.x + (a - (amountOfCellsPerMainCell - 1f) / 2f) * cellSize,
+                                    mainCellCenter.y + (b - (amountOfCellsPerMainCell - 1f) / 2f) * cellSize,
+                                    mainCellCenter.z + (c - (amountOfCellsPerMainCell - 1f) / 2f) * cellSize
                                 );
 
                                 Cell cell = new Cell(subcellCenter, index);
