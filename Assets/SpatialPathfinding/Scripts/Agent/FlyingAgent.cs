@@ -11,10 +11,19 @@ public class FlyingAgent : MonoBehaviour
     private Vector3[] waypoints;
     private int currentWayPoint = 0;
 
-    private NavigationVolume activeVolume;
+    public NavigationVolume activeVolume;
 
     private void Start()
     {
+        //MoveTo(targetPos);
+
+        StartCoroutine(nameof(TestMethod));
+    }
+
+    IEnumerator TestMethod()
+    {
+        yield return new WaitForSeconds(10f);
+
         MoveTo(targetPos);
     }
 
@@ -25,7 +34,7 @@ public class FlyingAgent : MonoBehaviour
 
     public void MoveTo(Vector3 targetPos)
     {
-        waypoints = PathingManager.Instance.AStar(transform.position, targetPos);
+        waypoints = PathingManager.Instance.AStar(transform.position, targetPos, this.activeVolume);
 
         StartCoroutine(C_MoveTo());
     }
