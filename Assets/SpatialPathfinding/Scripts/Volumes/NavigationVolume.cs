@@ -54,9 +54,9 @@ public class NavigationVolume : MonoBehaviour
 
     private void GetNeighbours(float3 position, int index)
     {
-        NativeArray<int> neighbors = new NativeArray<int>(6, Allocator.Temp);
+        NativeArray<int> neighbors = new NativeArray<int>(PathingManager.Instance.Directions.Count(), Allocator.Temp);
 
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < neighbors.Count(); i++)
         {
             if (!Physics.Raycast(position, CalculationHelper.Int3ToVector3(PathingManager.Instance.Directions[i]), cellSize))
             {
