@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [DefaultExecutionOrder(200)]
@@ -15,14 +16,12 @@ public class FlyingAgent : MonoBehaviour
 
     private void Start()
     {
-        //MoveTo(targetPos);
-
         StartCoroutine(nameof(TestMethod));
     }
 
     IEnumerator TestMethod()
     {
-        yield return new WaitForSeconds(10f);
+        yield return new WaitForSeconds(2f);
 
         MoveTo(targetPos);
     }

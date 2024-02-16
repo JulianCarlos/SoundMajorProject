@@ -12,33 +12,21 @@ using System.Runtime.InteropServices;
 public unsafe class PathingManager : MonoBehaviour
 {
     public static PathingManager Instance { get; private set; }
-    public NativeArray<int3> Directions;
+    public NativeArray<int3> Directions = new NativeArray<int3>(6, Allocator.Persistent);
 
-    [Space]
-    [SerializeField] private bool showGizmos = false;
-    [SerializeField] private bool ShowGrid = false;
-
-    private int startingPoint;
-    private int currentPoint;
-    private int endPoint;
-
-    //private GridCore[] cores;
-    //private NativeList<Cell> cells;
-    private NativeList<int> openCells;
-    private List<Vector3> Walkpoints = new();
-
+    private NativeList<int> openCells = new NativeList<int>(Allocator.Persistent);
     private NativeArray<TempData> tempData;
-    //private NativeArray<NeighborData> cellNeighbors;
+    private List<Vector3> walkpoints = new();
 
     private int openCellsCount = 0;
+
+    private int startingPoint = 0;
+    private int currentPoint = 0;
+    private int endPoint = 0;
 
     private void Awake()
     {
         CreateInstance();
-
-        openCells = new NativeList<int>(Allocator.Persistent);
-
-        Directions = new NativeArray<int3>(6, Allocator.Persistent);
 
         InitializeDirections();
     }
@@ -137,18 +125,18 @@ public unsafe class PathingManager : MonoBehaviour
         while (currentPoint != startingPoint)
         {
             UnityEngine.Debug.DrawLine(targetVolume.cells[currentPoint].CellPos, targetVolume.cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 60f);
-            Walkpoints.Add(targetVolume.cells[currentPoint].CellPos);
+            walkpoints.Add(targetVolume.cells[currentPoint].CellPos);
             currentPoint = data.ParentIndex;
 
             data = tempData[currentPoint];
         }
 
-        return Walkpoints;
+        return walkpoints;
     }
 
     private void ClearBuffers()
     {
-        Walkpoints.Clear();
+        walkpoints.Clear();
         tempData.Dispose();
         openCells.Clear();
         openCellsCount = 0;
