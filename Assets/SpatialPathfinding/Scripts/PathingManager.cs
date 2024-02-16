@@ -12,8 +12,9 @@ using System.Runtime.InteropServices;
 public unsafe class PathingManager : MonoBehaviour
 {
     public static PathingManager Instance { get; private set; }
-    public NativeArray<int3> Directions = new NativeArray<int3>(6, Allocator.Persistent);
+    public NativeArray<int3> Directions => directions;
 
+    private NativeArray<int3> directions = new NativeArray<int3>(6, Allocator.Persistent);
     private NativeList<int> openCells = new NativeList<int>(Allocator.Persistent);
     private NativeArray<TempData> tempData;
     private List<Vector3> walkpoints = new();
@@ -79,14 +80,16 @@ public unsafe class PathingManager : MonoBehaviour
     private void InitializeDirections()
     {
         //Horizontal
-        Directions[0] = new int3( 0,  0,  1);
-        Directions[1] = new int3( 0,  0, -1);
-        Directions[2] = new int3( 1,  0,  0);
-        Directions[3] = new int3(-1,  0 , 0);
+        directions[0] = new int3( 0,  0,  1);
+        directions[1] = new int3( 0,  0, -1);
+        directions[2] = new int3( 1,  0,  0);
+        directions[3] = new int3(-1,  0 , 0);
 
         //Vertical
-        Directions[4] = new int3( 0,  1,  0);
-        Directions[5] = new int3( 0, -1,  0);
+        directions[4] = new int3( 0,  1,  0);
+        directions[5] = new int3( 0, -1,  0);
+
+        //Diagonal
     }
 
     private void MoveToTarget(Vector3 targetPos, NavigationVolume targetVolume)
@@ -181,7 +184,7 @@ public unsafe class PathingManager : MonoBehaviour
     private void OnDestroy()
     {
         //cells.Dispose();
-        Directions.Dispose();
+        directions.Dispose();
         openCells.Dispose();
         //cellNeighbors.Dispose();
     }
