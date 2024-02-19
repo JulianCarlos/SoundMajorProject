@@ -7,6 +7,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 [DefaultExecutionOrder(100)]
 public unsafe class PathingManager : MonoBehaviour
@@ -44,8 +45,21 @@ public unsafe class PathingManager : MonoBehaviour
         }
     }
 
+    public void GenerateGrids()
+    {
+        NavigationVolume[] volumes = FindObjectsOfType<NavigationVolume>();
+
+        foreach (var volume in volumes)
+        {
+
+        }
+    }
+
     public Vector3[] AStar(Vector3 initialPos, Vector3 targetPos, NavigationVolume targetVolume)
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+
         FindPoints(initialPos, targetPos, targetVolume);
 
         InitializeBuffers(targetVolume);
@@ -56,6 +70,10 @@ public unsafe class PathingManager : MonoBehaviour
         System.Array.Reverse(waypoints);
 
         ClearBuffers();
+
+        stopwatch.Stop();
+
+        print(stopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency));
 
         return waypoints;
     }
@@ -88,8 +106,6 @@ public unsafe class PathingManager : MonoBehaviour
         //Vertical
         directions[4] = new int3( 0,  1,  0);
         directions[5] = new int3( 0, -1,  0);
-
-        //Diagonal
     }
 
     private void MoveToTarget(Vector3 targetPos, NavigationVolume targetVolume)
@@ -139,10 +155,11 @@ public unsafe class PathingManager : MonoBehaviour
 
     private void ClearBuffers()
     {
-        walkpoints.Clear();
-        tempData.Dispose();
         openCells.Clear();
         openCellsCount = 0;
+
+        walkpoints.Clear();
+        tempData.Dispose();
     }
 
     private int FindNearestCell(float3 position, NavigationVolume targetVolume)
@@ -183,9 +200,7 @@ public unsafe class PathingManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        //cells.Dispose();
         directions.Dispose();
         openCells.Dispose();
-        //cellNeighbors.Dispose();
     }
 }

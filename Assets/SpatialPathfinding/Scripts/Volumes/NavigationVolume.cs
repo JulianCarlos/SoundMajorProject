@@ -16,6 +16,8 @@ public class NavigationVolume : MonoBehaviour
     [Space]
     [SerializeField] private Color volumeColor = new Color(0f, 1f, 0.85f, 0.72f);
 
+    public float DetectionRadius = 1f;
+
     public GridCore[] cores;
     public NativeList<Cell> cells;
     public NativeArray<NeighborData> cellNeighbors;
@@ -58,7 +60,7 @@ public class NavigationVolume : MonoBehaviour
 
         for (int i = 0; i < neighbors.Count(); i++)
         {
-            if (!Physics.Raycast(position, CalculationHelper.Int3ToVector3(PathingManager.Instance.Directions[i]), cellSize))
+            if (!Physics.SphereCast(position, DetectionRadius, CalculationHelper.Int3ToVector3(PathingManager.Instance.Directions[i]), out RaycastHit hit, cellSize))
             {
                 int targetCellIndex = FindNearestCell(position + (PathingManager.Instance.Directions[i] * (int)cellSize));
 
@@ -209,7 +211,7 @@ public class NavigationVolume : MonoBehaviour
                                     );
 
                                     Gizmos.color = Color.red;
-                                    Gizmos.DrawWireCube(subcellCenter, Vector3.one * 0.1f);
+                                    Gizmos.DrawWireCube(subcellCenter, Vector3.one * DetectionRadius * 2);
                                 }
                             }
                         }
