@@ -15,7 +15,7 @@ public class PathingManagerEditor : Editor
 
         if (GUILayout.Button("Generate Grids"))
         {
-            manager.GenerateGrids();
+
         }
     }
 }

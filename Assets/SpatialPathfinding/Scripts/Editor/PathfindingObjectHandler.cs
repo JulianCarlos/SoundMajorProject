@@ -58,4 +58,31 @@ public class PathfindingObjectHandler : Editor
             Debug.LogError("Prefab not found at specified path.");
         }
     }
+
+    [MenuItem("GameObject/Pathfinding/Navigation Volume Culling", false, 1)]
+    static void SpawnNavigationVolumeCulling(MenuCommand menuCommand)
+    {
+        // Load your custom prefab
+        GameObject prefab = Resources.Load<GameObject>("NavigationVolumeCulling");
+        
+        // Check if the prefab is loaded
+        if (prefab != null)
+        {
+            // Create an instance of the prefab
+            GameObject instance = Instantiate(prefab);
+
+            instance.name = prefab.name;
+
+            // Ensure it's not nested under any other GameObject in the scene
+            GameObjectUtility.SetParentAndAlign(instance, menuCommand.context as GameObject);
+
+            // Register the creation in the Undo system
+            Undo.RegisterCreatedObjectUndo(instance, "Spawn Custom Prefab");
+            Selection.activeObject = instance;
+        }
+        else
+        {
+            Debug.LogError("Prefab not found at specified path.");
+        }
+    }
 }

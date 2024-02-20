@@ -45,16 +45,6 @@ public unsafe class PathingManager : MonoBehaviour
         }
     }
 
-    public void GenerateGrids()
-    {
-        NavigationVolume[] volumes = FindObjectsOfType<NavigationVolume>();
-
-        foreach (var volume in volumes)
-        {
-
-        }
-    }
-
     public Vector3[] AStar(Vector3 initialPos, Vector3 targetPos, NavigationVolume targetVolume)
     {
         Stopwatch stopwatch = new Stopwatch();
