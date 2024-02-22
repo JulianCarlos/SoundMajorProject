@@ -3,86 +3,90 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class PathfindingObjectHandler : Editor
+namespace Pathfinding
 {
-    [MenuItem("GameObject/Pathfinding/Pathfinding Manager", false, 1)]
-    static void SpawnNavigationPathfinder(MenuCommand menuCommand)
+    public class PathfindingObjectHandler : Editor
     {
-        // Load your custom prefab
-        GameObject prefab = Resources.Load<GameObject>("PathingManager");
-
-        // Check if the prefab is loaded
-        if (prefab != null)
+        [MenuItem("GameObject/Pathfinding/Pathfinding Manager", false, 1)]
+        static void SpawnNavigationPathfinder(MenuCommand menuCommand)
         {
-            // Create an instance of the prefab
-            GameObject instance = Instantiate(prefab);
+            // Load your custom prefab
+            GameObject prefab = Resources.Load<GameObject>("PathingManager");
 
-            instance.name = prefab.name;
+            // Check if the prefab is loaded
+            if (prefab != null)
+            {
+                // Create an instance of the prefab
+                GameObject instance = Instantiate(prefab);
 
-            // Ensure it's not nested under any other GameObject in the scene
-            GameObjectUtility.SetParentAndAlign(instance, menuCommand.context as GameObject);
+                instance.name = prefab.name;
 
-            // Register the creation in the Undo system
-            Undo.RegisterCreatedObjectUndo(instance, "Spawn Custom Prefab");
-            Selection.activeObject = instance;
+                // Ensure it's not nested under any other GameObject in the scene
+                GameObjectUtility.SetParentAndAlign(instance, menuCommand.context as GameObject);
+
+                // Register the creation in the Undo system
+                Undo.RegisterCreatedObjectUndo(instance, "Spawn Custom Prefab");
+                Selection.activeObject = instance;
+            }
+            else
+            {
+                Debug.LogError("Prefab not found at specified path.");
+            }
         }
-        else
+
+        [MenuItem("GameObject/Pathfinding/Navigation Volume", false, 1)]
+        static void SpawnNavigationVolume(MenuCommand menuCommand)
         {
-            Debug.LogError("Prefab not found at specified path.");
+            // Load your custom prefab
+            GameObject prefab = Resources.Load<GameObject>("NavigationVolume");
+
+            // Check if the prefab is loaded
+            if (prefab != null)
+            {
+                // Create an instance of the prefab
+                GameObject instance = Instantiate(prefab);
+
+                instance.name = prefab.name;
+
+                // Ensure it's not nested under any other GameObject in the scene
+                GameObjectUtility.SetParentAndAlign(instance, menuCommand.context as GameObject);
+
+                // Register the creation in the Undo system
+                Undo.RegisterCreatedObjectUndo(instance, "Spawn Custom Prefab");
+                Selection.activeObject = instance;
+            }
+            else
+            {
+                Debug.LogError("Prefab not found at specified path.");
+            }
         }
-    }
 
-    [MenuItem("GameObject/Pathfinding/Navigation Volume", false, 1)]
-    static void SpawnNavigationVolume(MenuCommand menuCommand)
-    {
-        // Load your custom prefab
-        GameObject prefab = Resources.Load<GameObject>("NavigationVolume");
-
-        // Check if the prefab is loaded
-        if (prefab != null)
+        [MenuItem("GameObject/Pathfinding/Navigation Volume Culling", false, 1)]
+        static void SpawnNavigationVolumeCulling(MenuCommand menuCommand)
         {
-            // Create an instance of the prefab
-            GameObject instance = Instantiate(prefab);
+            // Load your custom prefab
+            GameObject prefab = Resources.Load<GameObject>("NavigationVolumeCulling");
 
-            instance.name = prefab.name;
+            // Check if the prefab is loaded
+            if (prefab != null)
+            {
+                // Create an instance of the prefab
+                GameObject instance = Instantiate(prefab);
 
-            // Ensure it's not nested under any other GameObject in the scene
-            GameObjectUtility.SetParentAndAlign(instance, menuCommand.context as GameObject);
+                instance.name = prefab.name;
 
-            // Register the creation in the Undo system
-            Undo.RegisterCreatedObjectUndo(instance, "Spawn Custom Prefab");
-            Selection.activeObject = instance;
-        }
-        else
-        {
-            Debug.LogError("Prefab not found at specified path.");
-        }
-    }
+                // Ensure it's not nested under any other GameObject in the scene
+                GameObjectUtility.SetParentAndAlign(instance, menuCommand.context as GameObject);
 
-    [MenuItem("GameObject/Pathfinding/Navigation Volume Culling", false, 1)]
-    static void SpawnNavigationVolumeCulling(MenuCommand menuCommand)
-    {
-        // Load your custom prefab
-        GameObject prefab = Resources.Load<GameObject>("NavigationVolumeCulling");
-        
-        // Check if the prefab is loaded
-        if (prefab != null)
-        {
-            // Create an instance of the prefab
-            GameObject instance = Instantiate(prefab);
-
-            instance.name = prefab.name;
-
-            // Ensure it's not nested under any other GameObject in the scene
-            GameObjectUtility.SetParentAndAlign(instance, menuCommand.context as GameObject);
-
-            // Register the creation in the Undo system
-            Undo.RegisterCreatedObjectUndo(instance, "Spawn Custom Prefab");
-            Selection.activeObject = instance;
-        }
-        else
-        {
-            Debug.LogError("Prefab not found at specified path.");
+                // Register the creation in the Undo system
+                Undo.RegisterCreatedObjectUndo(instance, "Spawn Custom Prefab");
+                Selection.activeObject = instance;
+            }
+            else
+            {
+                Debug.LogError("Prefab not found at specified path.");
+            }
         }
     }
 }
+

@@ -29951,9 +29951,12 @@ MonoBehaviour:
     x: 6
     y: 2
     z: 4
-  ShowGrid: 0
-  volumeColor: {r: 0, g: 1, b: 0.8509803, a: 0.3764706}
-  DetectionRadius: 1
+  visualMode: 2
+  volumeColor: {r: 0, g: 1, b: 0.8509803, a: 0.6392157}
+  coreColor: {r: 0, g: 0.0017437935, b: 1, a: 1}
+  cellColor: {r: 0.5943396, g: 0.5943396, b: 0.5943396, a: 1}
+  detectionColor: {r: 1, g: 0.054901965, b: 0, a: 1}
+  DetectionRadius: 0.5
   totalCells: 0
   totalCores: 0
   totalCellsPerCore: 0
@@ -29966,7 +29969,7 @@ Transform:
   m_GameObject: {fileID: 335746453}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.5, y: -1.4, z: 28.1}
+  m_LocalPosition: {x: -1.22, y: -1.4, z: 28.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -132251,12 +132254,12 @@ SceneRoots:
   - {fileID: 804846033}
   - {fileID: 1729915814}
   - {fileID: 1602703535}
-  - {fileID: 1207588980}
-  - {fileID: 335746456}
   - {fileID: 4037510274630030224}
   - {fileID: 335096475}
   - {fileID: 895199207}
   - {fileID: 242170984}
   - {fileID: 1806729130}
+  - {fileID: 1207588980}
+  - {fileID: 335746456}
   - {fileID: 1012453797}
   - {fileID: 1023813864}

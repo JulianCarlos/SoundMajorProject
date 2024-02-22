@@ -46,13 +46,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cellSize: 3
+  amountOfCellsPerMainCell: 5
   cellAmount:
     x: 4
     y: 2
     z: 4
-  amountOfCellsPerMainCell: 5
-  ShowGrid: 1
+  visualMode: 1
   volumeColor: {r: 0, g: 1, b: 0.85, a: 0.72}
+  coreColor: {r: 0, g: 0, b: 1, a: 1}
+  cellColor: {r: 0.35, g: 0.35, b: 0.35, a: 0.35}
+  detectionColor: {r: 1, g: 0, b: 0, a: 1}
+  DetectionRadius: 0.5
+  totalCells: 0
+  totalCores: 0
+  totalCellsPerCore: 0
 --- !u!65 &393439290820182652
 BoxCollider:
   m_ObjectHideFlags: 0
