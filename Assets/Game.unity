@@ -29951,15 +29951,12 @@ MonoBehaviour:
     x: 6
     y: 2
     z: 4
-  visualMode: 2
+  visualMode: 0
   volumeColor: {r: 0, g: 1, b: 0.8509803, a: 0.6392157}
   coreColor: {r: 0, g: 0.0017437935, b: 1, a: 1}
   cellColor: {r: 0.5943396, g: 0.5943396, b: 0.5943396, a: 1}
   detectionColor: {r: 1, g: 0.054901965, b: 0, a: 1}
-  DetectionRadius: 0.5
-  totalCells: 0
-  totalCores: 0
-  totalCellsPerCore: 0
+  detectionRadius: 1
 --- !u!4 &335746456
 Transform:
   m_ObjectHideFlags: 0
@@ -88427,6 +88424,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb998247015c1ea41886b9db470cb702, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  miliseconds: 0
 --- !u!4 &1207588980
 Transform:
   m_ObjectHideFlags: 0

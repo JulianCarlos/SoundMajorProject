@@ -3,6 +3,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using System.Diagnostics;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace Pathfinding
 {
@@ -22,6 +23,8 @@ namespace Pathfinding
         private int startingPoint = 0;
         private int currentPoint = 0;
         private int endPoint = 0;
+
+        [SerializeField] private double miliseconds = 0;
 
         private void Awake()
         {
@@ -59,7 +62,7 @@ namespace Pathfinding
             ClearBuffers();
 
             stopwatch.Stop();
-            print(stopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency));
+            miliseconds = stopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
 
             return waypoints;
         }
@@ -73,6 +76,7 @@ namespace Pathfinding
         private void InitializeBuffers(NavigationVolume targetVolume)
         {
             tempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.Temp);
+
             tempData[startingPoint] = new TempData(-1, 1000);
 
             openCells.Add(targetVolume.cells[startingPoint].Index);
@@ -96,7 +100,7 @@ namespace Pathfinding
 
         private void MoveToTarget(Vector3 targetPos, NavigationVolume targetVolume)
         {
-            int neighborIndex;
+            int neighborIndex = 0;
             NeighborData neighborData;
 
             while (currentPoint != endPoint && openCellsCount > 0)
