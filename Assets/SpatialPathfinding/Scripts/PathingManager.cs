@@ -59,7 +59,6 @@ namespace Pathfinding
             ClearBuffers();
 
             stopwatch.Stop();
-
             print(stopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency));
 
             return waypoints;
@@ -73,7 +72,7 @@ namespace Pathfinding
 
         private void InitializeBuffers(NavigationVolume targetVolume)
         {
-            tempData = new NativeArray<TempData>(targetVolume.totalCells, Allocator.Temp);
+            tempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.Temp);
             tempData[startingPoint] = new TempData(-1, 1000);
 
             openCells.Add(targetVolume.cells[startingPoint].Index);
@@ -155,7 +154,7 @@ namespace Pathfinding
             float tempDistance;
             float distance = float.MaxValue;
 
-            for (int i = 0; i < targetVolume.totalCores; i++)
+            for (int i = 0; i < targetVolume.TotalCores; i++)
             {
                 tempDistance = CalculationHelper.CalculateSquaredDistance(targetVolume.cores[i].CorePos, position);
 
