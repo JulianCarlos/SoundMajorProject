@@ -3,7 +3,7 @@ using UnityEngine;
 
 public unsafe struct NeighborData
 {
-    public readonly int NeighborsCount;
+    public int NeighborsCount;
     public fixed int Neighbors[6];
 
     public NeighborData(int[] size)

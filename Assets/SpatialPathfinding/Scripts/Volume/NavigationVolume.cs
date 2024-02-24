@@ -13,15 +13,13 @@ namespace Pathfinding
     {
         public int TotalCells { get; private set; }
         public int TotalCores { get; private set; }
-        public int totalCellsPerCore { get; private set; }
-
-        public GridCore[] cores;
-        public NativeList<Cell> cells;
-        public NativeArray<NeighborData> cellNeighbors;
+        public int TotalCellsPerCore { get; private set; }
 
         [SerializeField] private uint cellSize = 1;
         [SerializeField] private uint amountOfCellsPerMainCell = 5;
         [SerializeField] private uint3 cellAmount = new uint3(3, 3, 3);
+        [Space]
+        [SerializeField] private float detectionRadius = 1f;
         [Space]
         [SerializeField] private VisualMode visualMode = VisualMode.None;
         [Space]
@@ -29,46 +27,70 @@ namespace Pathfinding
         [SerializeField] private Color coreColor = new Color(0f, 0f, 1f, 1f);
         [SerializeField] private Color cellColor = new Color(0.35f, 0.35f, 0.35f, 0.35f);
         [SerializeField] private Color detectionColor = new Color(1f, 0f, 0f, 1f);
-        [Space]
-        [SerializeField] private float detectionRadius = 1f;
+
+        [ReadOnly] public GridCore[] Cores;
+        [ReadOnly] public NativeList<Cell> Cells;
+        [ReadOnly] public NativeArray<NeighborData> CellNeighbors;
+
+        [ReadOnly] private NativeArray<int3> directions = new NativeArray<int3>(6, Allocator.Persistent);
+        private int directionCount = 0;
+
+        private RaycastHit directionHit;
 
         private void Awake()
         {
-            TotalCells = ((int)((cellAmount.x * amountOfCellsPerMainCell) * (cellAmount.y * amountOfCellsPerMainCell) * (cellAmount.z * amountOfCellsPerMainCell)));
+            TotalCells = (int)(cellAmount.x * amountOfCellsPerMainCell * cellAmount.y * amountOfCellsPerMainCell * cellAmount.z * amountOfCellsPerMainCell);
 
-            cells = new NativeList<Cell>(TotalCells, Allocator.Persistent);
-            cores = new GridCore[cellAmount.x * cellAmount.y * cellAmount.z];
+            Cells = new NativeList<Cell>(TotalCells, Allocator.Persistent);
+            Cores = new GridCore[cellAmount.x * cellAmount.y * cellAmount.z];
 
-            cellNeighbors = new NativeArray<NeighborData>(TotalCells, Allocator.Persistent);
+            CellNeighbors = new NativeArray<NeighborData>(TotalCells, Allocator.Persistent);
         }
 
         private void Start()
         {
+            InitializeDirections();
+
             InitializeGrid();
 
-            TotalCores = cores.Count();
-            totalCellsPerCore = (int)(amountOfCellsPerMainCell * amountOfCellsPerMainCell * amountOfCellsPerMainCell);
+            TotalCores = Cores.Count();
+            TotalCellsPerCore = (int)(amountOfCellsPerMainCell * amountOfCellsPerMainCell * amountOfCellsPerMainCell);
 
             GetAllCellNeighbors();
+        }
+
+        private void InitializeDirections()
+        {
+            //Horizontal
+            directions[0] = new int3(0, 0, 1);
+            directions[1] = new int3(0, 0, -1);
+            directions[2] = new int3(1, 0, 0);
+            directions[3] = new int3(-1, 0, 0);
+
+            //Vertical
+            directions[4] = new int3(0, 1, 0);
+            directions[5] = new int3(0, -1, 0);
+
+            directionCount = directions.Count();
         }
 
         private void GetAllCellNeighbors()
         {
             for (int i = 0; i < TotalCells; i++)
             {
-                GetNeighbours(cells[i].CellPos, i);
+                GetNeighbours(Cells[i].CellPos, i);
             }
         }
 
         private void GetNeighbours(float3 position, int index)
         {
-            NativeArray<int> neighbors = new NativeArray<int>(PathingManager.Instance.Directions.Count(), Allocator.Temp);
+            NativeArray<int> neighbors = new NativeArray<int>(directionCount, Allocator.Temp);
 
-            for (int i = 0; i < neighbors.Count(); i++)
+            for (int i = 0; i < directionCount; i++)
             {
-                if (!Physics.SphereCast(position, detectionRadius, CalculationHelper.Int3ToVector3(PathingManager.Instance.Directions[i]), out RaycastHit hit, cellSize))
+                if (!Physics.BoxCast(position, Vector3.one * detectionRadius, CalculationHelper.Int3ToVector3(directions[i]), out directionHit, transform.rotation,cellSize))
                 {
-                    int targetCellIndex = FindNearestCell(position + (PathingManager.Instance.Directions[i] * (int)cellSize));
+                    int targetCellIndex = FindNearestCell(position + (directions[i] * (int)cellSize));
 
                     neighbors[i] = targetCellIndex;
                 }
@@ -77,8 +99,8 @@ namespace Pathfinding
                     neighbors[i] = -1;
                 }
             }
-
-            cellNeighbors[index] = new NeighborData(neighbors.ToArray());
+            
+            CellNeighbors[index] = new NeighborData(neighbors.ToArray());
 
             neighbors.Dispose();
         }
@@ -91,7 +113,7 @@ namespace Pathfinding
 
             for (int i = 0; i < TotalCores; i++)
             {
-                tempDistance = CalculationHelper.CalculateSquaredDistance(cores[i].CorePos, position);
+                tempDistance = CalculationHelper.CalculateSquaredDistance(Cores[i].CorePos, position);
 
                 if (tempDistance < distance)
                 {
@@ -103,11 +125,11 @@ namespace Pathfinding
             distance = float.MaxValue;
             int closestCell = 0;
 
-            int[] subCells = cores[closestCore].SubCells;
+            int[] subCells = Cores[closestCore].SubCells;
 
-            for (int i = 0; i < totalCellsPerCore; i++)
+            for (int i = 0; i < TotalCellsPerCore; i++)
             {
-                tempDistance = CalculationHelper.CalculateSquaredDistance(cells[subCells[i]].CellPos, position);
+                tempDistance = CalculationHelper.CalculateSquaredDistance(Cells[subCells[i]].CellPos, position);
 
                 if (tempDistance < distance)
                 {
@@ -119,7 +141,7 @@ namespace Pathfinding
             return closestCell;
         }
 
-        private void InitializeGrid()
+        public void InitializeGrid()
         {
             int index = 0;
             int coreIndex = 0;
@@ -152,7 +174,7 @@ namespace Pathfinding
 
                                     Cell cell = new Cell(subcellCenter, index);
 
-                                    cells.Add(cell);
+                                    Cells.Add(cell);
                                     tempSubCells.Add(cell.Index);
 
                                     index++;
@@ -161,7 +183,7 @@ namespace Pathfinding
                         }
 
                         GridCore core = new GridCore(mainCellCenter, tempSubCells.ToArray());
-                        cores[coreIndex] = (core);
+                        Cores[coreIndex] = (core);
                         coreIndex++;
                     }
                 }
@@ -171,6 +193,11 @@ namespace Pathfinding
         private void OnValidate()
         {
             GetComponent<BoxCollider>().size = new Vector3(cellAmount.x, cellAmount.y, cellAmount.z) * amountOfCellsPerMainCell * cellSize;
+        }
+
+        private void OnDisable()
+        {
+            directions.Dispose();
         }
 
         private void OnTriggerEnter(Collider other)

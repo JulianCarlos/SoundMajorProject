@@ -4,6 +4,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using System.Diagnostics;
 using Unity.Collections.LowLevel.Unsafe;
+using System.Linq;
 
 namespace Pathfinding
 {
@@ -11,12 +12,10 @@ namespace Pathfinding
     public unsafe class PathingManager : MonoBehaviour
     {
         public static PathingManager Instance { get; private set; }
-        public NativeArray<int3> Directions => directions;
 
-        private NativeArray<int3> directions = new NativeArray<int3>(6, Allocator.Persistent);
-        private NativeList<int> openCells = new NativeList<int>(Allocator.Persistent);
-        private NativeArray<TempData> tempData;
-        private List<Vector3> walkpoints = new List<Vector3>();
+        [ReadOnly] private List<int> openCells = new List<int>();
+        [ReadOnly] private NativeArray<TempData> tempData;
+        [ReadOnly] private List<Vector3> walkpoints = new List<Vector3>();
 
         private int openCellsCount = 0;
 
@@ -29,11 +28,9 @@ namespace Pathfinding
         private void Awake()
         {
             CreateInstance();
-
-            InitializeDirections();
         }
 
-        private void CreateInstance()
+        public void CreateInstance()
         {
             if (Instance == null)
             {
@@ -79,23 +76,10 @@ namespace Pathfinding
 
             tempData[startingPoint] = new TempData(-1, 1000);
 
-            openCells.Add(targetVolume.cells[startingPoint].Index);
+            openCells.Add(targetVolume.Cells[startingPoint].Index);
             openCellsCount++;
 
             currentPoint = openCells[0];
-        }
-
-        private void InitializeDirections()
-        {
-            //Horizontal
-            directions[0] = new int3(0, 0, 1);
-            directions[1] = new int3(0, 0, -1);
-            directions[2] = new int3(1, 0, 0);
-            directions[3] = new int3(-1, 0, 0);
-
-            //Vertical
-            directions[4] = new int3(0, 1, 0);
-            directions[5] = new int3(0, -1, 0);
         }
 
         private void MoveToTarget(Vector3 targetPos, NavigationVolume targetVolume)
@@ -105,12 +89,13 @@ namespace Pathfinding
 
             while (currentPoint != endPoint && openCellsCount > 0)
             {
+                //openCells = openCells.OrderBy(index => tempData[index].FCost).ToList();
+
                 currentPoint = openCells[0];
-
-                neighborData = targetVolume.cellNeighbors[currentPoint];
-
                 openCells.RemoveAt(0);
                 openCellsCount--;
+
+                neighborData = targetVolume.CellNeighbors[currentPoint];
 
                 for (int i = 0; i < 6; i++)
                 {
@@ -119,7 +104,7 @@ namespace Pathfinding
                     if (neighborIndex < 0 || tempData[neighborIndex].FCost > 0)
                         continue;
 
-                    tempData[neighborIndex] = new TempData(currentPoint, CalculationHelper.CalculateSquaredDistance(targetVolume.cells[neighborIndex].CellPos, targetPos));
+                    tempData[neighborIndex] = new TempData(currentPoint, CalculationHelper.CalculateSquaredDistance(targetVolume.Cells[neighborIndex].CellPos, targetPos));
 
                     openCells.Add(neighborIndex);
                     openCellsCount++;
@@ -133,8 +118,8 @@ namespace Pathfinding
 
             while (currentPoint != startingPoint)
             {
-                UnityEngine.Debug.DrawLine(targetVolume.cells[currentPoint].CellPos, targetVolume.cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 60f);
-                walkpoints.Add(targetVolume.cells[currentPoint].CellPos);
+                UnityEngine.Debug.DrawLine(targetVolume.Cells[currentPoint].CellPos, targetVolume.Cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 60f);
+                walkpoints.Add(targetVolume.Cells[currentPoint].CellPos);
                 currentPoint = data.ParentIndex;
 
                 data = tempData[currentPoint];
@@ -160,7 +145,7 @@ namespace Pathfinding
 
             for (int i = 0; i < targetVolume.TotalCores; i++)
             {
-                tempDistance = CalculationHelper.CalculateSquaredDistance(targetVolume.cores[i].CorePos, position);
+                tempDistance = CalculationHelper.CalculateSquaredDistance(targetVolume.Cores[i].CorePos, position);
 
                 if (tempDistance < distance)
                 {
@@ -172,11 +157,11 @@ namespace Pathfinding
             distance = float.MaxValue;
             int closestCell = 0;
 
-            int[] subCells = targetVolume.cores[closestCore].SubCells;
+            int[] subCells = targetVolume.Cores[closestCore].SubCells;
 
-            for (int i = 0; i < targetVolume.totalCellsPerCore; i++)
+            for (int i = 0; i < targetVolume.TotalCellsPerCore; i++)
             {
-                tempDistance = CalculationHelper.CalculateSquaredDistance(targetVolume.cells[subCells[i]].CellPos, position);
+                tempDistance = CalculationHelper.CalculateSquaredDistance(targetVolume.Cells[subCells[i]].CellPos, position);
 
                 if (tempDistance < distance)
                 {
@@ -190,8 +175,7 @@ namespace Pathfinding
 
         private void OnDestroy()
         {
-            directions.Dispose();
-            openCells.Dispose();
+            //openCells.Dispose();
         }
     }
 }
