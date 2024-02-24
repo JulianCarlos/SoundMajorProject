@@ -29727,7 +29727,7 @@ MonoBehaviour:
     y: 2
     z: 4
   detectionRadius: 0.5
-  visualMode: 2
+  visualMode: 0
   volumeColor: {r: 0, g: 1, b: 0.8509803, a: 0.6392157}
   coreColor: {r: 0, g: 0.0017437935, b: 1, a: 1}
   cellColor: {r: 0.5943396, g: 0.5943396, b: 0.5943396, a: 1}
