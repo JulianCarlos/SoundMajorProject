@@ -14,7 +14,7 @@ namespace Pathfinding
         public static PathingManager Instance { get; private set; }
 
         [ReadOnly] private NativeArray<TempData> tempData;
-        [ReadOnly] private NativeList<int> openCells = new NativeList<int>(Allocator.Persistent);
+        [ReadOnly] private List<int> openCells = new List<int>();
         [ReadOnly] private List<Vector3> walkpoints = new List<Vector3>();
 
         private int openCellsCount = 0;
@@ -90,7 +90,7 @@ namespace Pathfinding
 
             while (currentPoint != endPoint && openCellsCount > 0)
             {
-                //openCells = openCells.OrderBy(index => tempData[index].FCost).ToList();
+                openCells = openCells.OrderBy(index => tempData[index].FCost).ToList();
                 
                 currentPoint = openCells[0];
                 openCells.RemoveAt(0);
@@ -119,7 +119,7 @@ namespace Pathfinding
 
             while (currentPoint != startingPoint)
             {
-                //UnityEngine.Debug.DrawLine(targetVolume.Cells[currentPoint].CellPos, targetVolume.Cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 60f);
+                UnityEngine.Debug.DrawLine(targetVolume.Cells[currentPoint].CellPos, targetVolume.Cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 60f);
                 walkpoints.Add(targetVolume.Cells[currentPoint].CellPos);
                 currentPoint = data.ParentIndex;
 
