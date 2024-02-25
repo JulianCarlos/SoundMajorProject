@@ -13,9 +13,7 @@ namespace Pathfinding
     {
         public static PathingManager Instance { get; private set; }
 
-        [ReadOnly] private NativeArray<TempData> tempData;
-        [ReadOnly] private List<int> openCells = new List<int>();
-        [ReadOnly] private List<Vector3> walkpoints = new List<Vector3>();
+        [SerializeField] private double miliseconds = 0;
 
         private int openCellsCount = 0;
 
@@ -23,7 +21,9 @@ namespace Pathfinding
         private int currentPoint = 0;
         private int endPoint = 0;
 
-        [SerializeField] private double miliseconds = 0;
+        private NativeArray<TempData> tempData;
+        private List<int> openCells = new List<int>();
+        private List<Vector3> walkpoints = new List<Vector3>();
 
         private void Awake()
         {
