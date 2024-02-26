@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -37,6 +38,8 @@ namespace Pathfinding
 
         private RaycastHit directionHit;
 
+        [SerializeField] private double miliseconds = 0;
+
         private void Awake()
         {
             TotalCells = (int)(cellAmount.x * amountOfCellsPerMainCell * cellAmount.y * amountOfCellsPerMainCell * cellAmount.z * amountOfCellsPerMainCell);
@@ -49,6 +52,9 @@ namespace Pathfinding
 
         private void Start()
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             InitializeDirections();
 
             InitializeGrid();
@@ -57,6 +63,9 @@ namespace Pathfinding
             TotalCellsPerCore = (int)(amountOfCellsPerMainCell * amountOfCellsPerMainCell * amountOfCellsPerMainCell);
 
             GetAllCellNeighbors();
+
+            stopwatch.Stop();
+            miliseconds = stopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
         }
 
         private void InitializeDirections()
