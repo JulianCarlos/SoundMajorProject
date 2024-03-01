@@ -25,7 +25,7 @@ namespace Pathfinding
         private int endPoint = 0;
 
         private NativeArray<TempData> tempData;
-        private NativeList<int> openCells;
+        private NativeList<int> openCells = new NativeList<int>(Allocator.Persistent);
         private List<Vector3> walkpoints = new List<Vector3>();
 
         private void Awake()
@@ -79,7 +79,6 @@ namespace Pathfinding
             tempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.Temp);
             tempData[startingPoint] = new TempData(-1, 1000);
 
-            openCells = new NativeList<int>(Allocator.TempJob);
             openCells.Add(targetVolume.Cells[startingPoint].Index);
             openCellsCount++;
 
