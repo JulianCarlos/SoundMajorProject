@@ -6,6 +6,8 @@ using System.Diagnostics;
 using Unity.Collections.LowLevel.Unsafe;
 using System.Linq;
 using System;
+using Unity.Burst;
+using Unity.Jobs;
 
 namespace Pathfinding
 {
@@ -23,7 +25,7 @@ namespace Pathfinding
         private int endPoint = 0;
 
         private NativeArray<TempData> tempData;
-        private List<int> openCells = new List<int>();
+        private NativeList<int> openCells;
         private List<Vector3> walkpoints = new List<Vector3>();
 
         private void Awake()
@@ -77,6 +79,7 @@ namespace Pathfinding
             tempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.Temp);
             tempData[startingPoint] = new TempData(-1, 1000);
 
+            openCells = new NativeList<int>(Allocator.TempJob);
             openCells.Add(targetVolume.Cells[startingPoint].Index);
             openCellsCount++;
 
@@ -90,9 +93,8 @@ namespace Pathfinding
 
             while (currentPoint != endPoint && openCellsCount > 0)
             {
-                openCells.Sort((index1, index2) => tempData[index1].FCost.CompareTo(tempData[index2].FCost));
-
                 currentPoint = openCells[0];
+
                 openCells.RemoveAt(0);
                 openCellsCount--;
 
@@ -129,15 +131,6 @@ namespace Pathfinding
             return walkpoints;
         }
 
-        private void ClearBuffers()
-        {
-            openCellsCount = 0;
-
-            openCells.Clear();
-            walkpoints.Clear();
-            tempData.Dispose();
-        }
-
         private int FindNearestCell(float3 position, NavigationVolume targetVolume)
         {
             float tempDistance;
@@ -172,6 +165,20 @@ namespace Pathfinding
             }
 
             return closestCell;
+        }
+
+        private void ClearBuffers()
+        {
+            openCellsCount = 0;
+
+            openCells.Clear();
+            walkpoints.Clear();
+            tempData.Dispose();
+        }
+
+        private void OnDestroy()
+        {
+            openCells.Dispose();
         }
     }
 }
