@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Diagnostics;
 using Unity.Collections.LowLevel.Unsafe;
 using System.Linq;
+using System;
 
 namespace Pathfinding
 {
@@ -74,7 +75,6 @@ namespace Pathfinding
         private void InitializeBuffers(NavigationVolume targetVolume)
         {
             tempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.Temp);
-
             tempData[startingPoint] = new TempData(-1, 1000);
 
             openCells.Add(targetVolume.Cells[startingPoint].Index);
@@ -90,8 +90,8 @@ namespace Pathfinding
 
             while (currentPoint != endPoint && openCellsCount > 0)
             {
-                openCells = openCells.OrderBy(index => tempData[index].FCost).ToList();
-                
+                openCells.Sort((index1, index2) => tempData[index1].FCost.CompareTo(tempData[index2].FCost));
+
                 currentPoint = openCells[0];
                 openCells.RemoveAt(0);
                 openCellsCount--;
@@ -140,8 +140,8 @@ namespace Pathfinding
 
         private int FindNearestCell(float3 position, NavigationVolume targetVolume)
         {
-            int closestCore = 0;
             float tempDistance;
+            int closestCore = 0;
             float distance = float.MaxValue;
 
             for (int i = 0; i < targetVolume.TotalCores; i++)
@@ -172,11 +172,6 @@ namespace Pathfinding
             }
 
             return closestCell;
-        }
-
-        private void OnDestroy()
-        {
-            //openCells.Dispose();
         }
     }
 }
