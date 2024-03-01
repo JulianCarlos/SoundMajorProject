@@ -8,11 +8,10 @@ namespace Pathfinding
     [DefaultExecutionOrder(200)]
     public class FlyingAgent : MonoBehaviour
     {
-        [SerializeField] private float Speed = 5f;
+        [SerializeField] private float speed = 5f;
         [SerializeField] private Vector3 targetPos;
 
-        private Vector3[] waypoints;
-        private int currentWayPoint = 0;
+        private NavigationPath activePath;
 
         public NavigationVolume activeVolume;
 
@@ -33,24 +32,31 @@ namespace Pathfinding
             this.activeVolume = activeVolume;
         }
 
+        public void MoveTo(Transform transform)
+        {
+            MoveTo(transform.position);
+        }
+
         public void MoveTo(Vector3 targetPos)
         {
-            waypoints = PathingManager.Instance.AStar(transform.position, targetPos, this.activeVolume);
+            activePath = PathingManager.Instance.AStar(transform.position, targetPos, this.activeVolume);
 
             StartCoroutine(C_MoveTo());
         }
 
         private IEnumerator C_MoveTo()
         {
-            while (currentWayPoint < waypoints.Length)
+            int currentWayPointIndex = 0;
+
+            while (currentWayPointIndex < activePath.Waypoints.Length)
             {
-                if (Vector3.Distance(transform.position, waypoints[currentWayPoint]) <= 0.01f)
+                if (Vector3.Distance(transform.position, activePath.Waypoints[currentWayPointIndex]) <= 0.01f)
                 {
-                    currentWayPoint++;
+                    currentWayPointIndex++;
                 }
                 else
                 {
-                    transform.position = Vector3.MoveTowards(transform.position, waypoints[currentWayPoint], Speed * Time.deltaTime);
+                    transform.position = Vector3.MoveTowards(transform.position, activePath.Waypoints[currentWayPointIndex], speed * Time.deltaTime);
                 }
                 yield return null;
             }

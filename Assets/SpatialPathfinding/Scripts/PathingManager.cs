@@ -45,7 +45,7 @@ namespace Pathfinding
             }
         }
 
-        public Vector3[] AStar(Vector3 initialPos, Vector3 targetPos, NavigationVolume targetVolume)
+        public NavigationPath AStar(Vector3 initialPos, Vector3 targetPos, NavigationVolume targetVolume)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -65,7 +65,7 @@ namespace Pathfinding
             stopwatch.Stop();
             miliseconds = stopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
 
-            return waypoints;
+            return new NavigationPath(waypoints);
         }
 
         private void FindPoints(float3 player, float3 target, NavigationVolume targetVolume)
