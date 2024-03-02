@@ -3,49 +3,58 @@ using Pathfinding;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
+[BurstCompile]
 public struct AStarJob : IJob
 {
-    public Vector3 InitialPos;
+    public int TotalCells;
+    public int TotalCores;
+    public int TotalCellsPerCore;
+
     public Vector3 TargetPos;
-    public NavigationVolume TargetVolume;
-    public NativeArray<TempData> TempData;
+    public Vector3 InitialPos;
+
+    public NativeList<Cell> Cells;
     public NativeList<int> OpenCells;
     public NativeList<Vector3> WalkPoints;
 
-    public int startingPoint;
-    public int currentPoint;
-    public int endPoint;
+    public NativeArray<GridCore> Cores;
+    public NativeArray<TempData> TempData;
+    public NativeArray<NeighborData> CellNeighbors;
 
-    public int OpenCellsCount;
+    private int endPoint;
+    private int currentPoint;
+    private int startingPoint;
+    private int OpenCellsCount;
 
     public void Execute()
     {
-        FindPoints(InitialPos, TargetPos, TargetVolume);
-        InitializeBuffers(TargetVolume);
-        MoveToTarget(TargetPos, TargetVolume);
-        SearchOrigin(TargetVolume);
+        FindPoints(InitialPos, TargetPos);
+        InitializeBuffers();
+        MoveToTarget(TargetPos);
+        SearchOrigin();
     }
 
-    private void FindPoints(float3 player, float3 target, NavigationVolume targetVolume)
+    private void FindPoints(float3 player, float3 target)
     {
-        startingPoint = FindNearestCell(player, targetVolume);
-        endPoint = FindNearestCell(target, targetVolume);
+        startingPoint = FindNearestCell(player);
+        endPoint = FindNearestCell(target);
     }
 
-    private int FindNearestCell(float3 position, NavigationVolume targetVolume)
+    private int FindNearestCell(float3 position)
     {
         float tempDistance;
         int closestCore = 0;
         float distance = float.MaxValue;
 
-        for (int i = 0; i < targetVolume.TotalCores; i++)
+        for (int i = 0; i < TotalCores; i++)
         {
-            tempDistance = CalculationHelper.CalculateSquaredDistance(targetVolume.Cores[i].CorePos, position);
+            tempDistance = CalculationHelper.CalculateSquaredDistance(Cores[i].CorePos, position);
 
             if (tempDistance < distance)
             {
@@ -57,14 +66,16 @@ public struct AStarJob : IJob
         distance = float.MaxValue;
         int closestCell = 0;
 
-        NativeArray<int> subCells = new NativeArray<int>(targetVolume.Cores[closestCore].SubCells.Length, Allocator.Temp);
-        subCells.CopyFrom(targetVolume.Cores[closestCore].SubCells);
+        NativeArray<int> subCells = new NativeArray<int>(Cores[closestCore].SubCells.Length, Allocator.Temp);
 
-        //int[] subCells = targetVolume.Cores[closestCore].SubCells;
-
-        for (int i = 0; i < targetVolume.TotalCellsPerCore; i++)
+        for (int i = 0; i < Cores[closestCore].SubCells.Length; i++)
         {
-            tempDistance = CalculationHelper.CalculateSquaredDistance(targetVolume.Cells[subCells[i]].CellPos, position);
+            subCells[i] = Cores[closestCore].SubCells[i];
+        }
+
+        for (int i = 0; i < TotalCellsPerCore; i++)
+        {
+            tempDistance = CalculationHelper.CalculateSquaredDistance(Cells[subCells[i]].CellPos, position);
 
             if (tempDistance < distance)
             {
@@ -78,18 +89,18 @@ public struct AStarJob : IJob
         return closestCell;
     }
 
-    private void InitializeBuffers(NavigationVolume targetVolume)
+    private void InitializeBuffers()
     {
-        TempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.Temp);
+        TempData = new NativeArray<TempData>(TotalCells, Allocator.Temp);
         TempData[startingPoint] = new TempData(-1, 1000);
 
-        OpenCells.Add(targetVolume.Cells[startingPoint].Index);
+        OpenCells.Add(Cells[startingPoint].Index);
         OpenCellsCount++;
 
         currentPoint = OpenCells[0];
     }
 
-    private unsafe void MoveToTarget(Vector3 targetPos, NavigationVolume targetVolume)
+    private unsafe void MoveToTarget(Vector3 targetPos)
     {
         int neighborIndex = 0;
         NeighborData neighborData;
@@ -101,7 +112,7 @@ public struct AStarJob : IJob
             OpenCells.RemoveAt(0);
             OpenCellsCount--;
 
-            neighborData = targetVolume.CellNeighbors[currentPoint];
+            neighborData = CellNeighbors[currentPoint];
 
             for (int i = 0; i < 6; i++)
             {
@@ -110,7 +121,7 @@ public struct AStarJob : IJob
                 if (neighborIndex < 0 || TempData[neighborIndex].FCost > 0)
                     continue;
 
-                TempData[neighborIndex] = new TempData(currentPoint, CalculationHelper.CalculateSquaredDistance(targetVolume.Cells[neighborIndex].CellPos, targetPos));
+                TempData[neighborIndex] = new TempData(currentPoint, CalculationHelper.CalculateSquaredDistance(Cells[neighborIndex].CellPos, targetPos));
 
                 OpenCells.Add(neighborIndex);
                 OpenCellsCount++;
@@ -118,14 +129,14 @@ public struct AStarJob : IJob
         }
     }
 
-    private void SearchOrigin(NavigationVolume targetVolume)
+    private void SearchOrigin()
     {
         var data = TempData[currentPoint];
 
         while (currentPoint != startingPoint)
         {
-            //UnityEngine.Debug.DrawLine(targetVolume.Cells[currentPoint].CellPos, targetVolume.Cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 60f);
-            WalkPoints.Add(targetVolume.Cells[currentPoint].CellPos);
+            //UnityEngine.Debug.DrawLine(Cells[currentPoint].CellPos, Cells[TempData[currentPoint].ParentIndex].CellPos, Color.green, 60f);
+            WalkPoints.Add(Cells[currentPoint].CellPos);
             currentPoint = data.ParentIndex;
 
             data = TempData[currentPoint];

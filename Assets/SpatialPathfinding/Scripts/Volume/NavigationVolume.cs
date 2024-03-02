@@ -29,7 +29,7 @@ namespace Pathfinding
         [SerializeField] private Color cellColor = new Color(0.35f, 0.35f, 0.35f, 0.35f);
         [SerializeField] private Color detectionColor = new Color(1f, 0f, 0f, 1f);
 
-        [ReadOnly] public GridCore[] Cores;
+        [ReadOnly] public NativeArray<GridCore> Cores;
         [ReadOnly] public NativeList<Cell> Cells;
         [ReadOnly] public NativeArray<NeighborData> CellNeighbors;
 
@@ -45,7 +45,7 @@ namespace Pathfinding
             TotalCells = (int)(cellAmount.x * amountOfCellsPerMainCell * cellAmount.y * amountOfCellsPerMainCell * cellAmount.z * amountOfCellsPerMainCell);
 
             Cells = new NativeList<Cell>(TotalCells, Allocator.Persistent);
-            Cores = new GridCore[cellAmount.x * cellAmount.y * cellAmount.z];
+            Cores = new NativeArray<GridCore>((int)(cellAmount.x * cellAmount.y * cellAmount.z), Allocator.Persistent);
 
             CellNeighbors = new NativeArray<NeighborData>(TotalCells, Allocator.Persistent);
         }
@@ -135,7 +135,12 @@ namespace Pathfinding
             int closestCell = 0;
 
             NativeArray<int> subCells = new NativeArray<int>(Cores[closestCore].SubCells.Length, Allocator.Temp);
-            subCells.CopyFrom(Cores[closestCore].SubCells);
+            //subCells.CopyFrom(Cores[closestCore].SubCells);
+
+            for (int i = 0; i < Cores[closestCore].SubCells.Length; i++)
+            {
+                subCells[i] = Cores[closestCore].SubCells[i];
+            }
 
             for (int i = 0; i < TotalCellsPerCore; i++)
             {
@@ -157,7 +162,7 @@ namespace Pathfinding
         {
             int index = 0;
             int coreIndex = 0;
-            NativeList<int> tempSubCells = new NativeList<int>(Allocator.Persistent);
+            List<int> tempSubCells;
 
             for (int x = 0; x < cellAmount.x; x++)
             {
@@ -200,8 +205,6 @@ namespace Pathfinding
                     }
                 }
             }
-
-            tempSubCells.Dispose();
         }
 
         private void OnValidate()
@@ -212,6 +215,7 @@ namespace Pathfinding
         private void OnDisable()
         {
             directions.Dispose();
+            Cores.Dispose();
         }
 
         private void OnTriggerEnter(Collider other)
