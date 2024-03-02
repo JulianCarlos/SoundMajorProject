@@ -58,8 +58,6 @@ namespace Pathfinding
 
             Vector3[] waypoints = SearchOrigin(targetVolume).ToArray();
 
-            System.Array.Reverse(waypoints);
-
             ClearBuffers();
 
             stopwatch.Stop();

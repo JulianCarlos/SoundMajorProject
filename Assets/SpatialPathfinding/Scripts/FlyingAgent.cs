@@ -46,13 +46,13 @@ namespace Pathfinding
 
         private IEnumerator C_MoveTo()
         {
-            int currentWayPointIndex = 0;
+            int currentWayPointIndex = activePath.Waypoints.Length - 1; 
 
-            while (currentWayPointIndex < activePath.Waypoints.Length)
+            while (currentWayPointIndex >= 0)
             {
                 if (Vector3.Distance(transform.position, activePath.Waypoints[currentWayPointIndex]) <= 0.01f)
                 {
-                    currentWayPointIndex++;
+                    currentWayPointIndex--;
                 }
                 else
                 {
