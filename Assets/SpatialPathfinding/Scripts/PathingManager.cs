@@ -51,17 +51,38 @@ namespace Pathfinding
             stopwatch.Start();
 
             FindPoints(initialPos, targetPos, targetVolume);
-
+            
             InitializeBuffers(targetVolume);
-
+            
             MoveToTarget(targetPos, targetVolume);
-
+            
             SearchOrigin(targetVolume);
-
+            
             NativeList<Vector3> tempWayPoints = new NativeList<Vector3>(Allocator.Temp);
             tempWayPoints.CopyFrom(this.walkpoints);
-
+            
             ClearBuffers();
+
+            //AStarJob job = new AStarJob()
+            //{
+            //    InitialPos = initialPos,
+            //    TargetPos = targetPos,
+            //    TargetVolume = targetVolume,
+            //    TempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.TempJob),
+            //    OpenCells = new NativeList<int>(Allocator.TempJob),
+            //    WalkPoints = new NativeList<Vector3>(Allocator.TempJob),
+            //};
+            //
+            //JobHandle handle = job.Schedule();
+            //
+            //handle.Complete();
+            //
+            //NativeList<Vector3> tempWayPoints = new NativeList<Vector3>(Allocator.Temp);
+            //tempWayPoints.CopyFrom(job.WalkPoints);
+            //
+            //job.TempData.Dispose();
+            //job.OpenCells.Dispose();
+            //job.WalkPoints.Dispose();
 
             stopwatch.Stop();
             miliseconds = stopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
