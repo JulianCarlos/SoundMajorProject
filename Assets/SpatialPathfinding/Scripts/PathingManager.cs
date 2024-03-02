@@ -26,7 +26,7 @@ namespace Pathfinding
 
         private NativeArray<TempData> tempData;
         private NativeList<int> openCells = new NativeList<int>(Allocator.Persistent);
-        private List<Vector3> walkpoints = new List<Vector3>();
+        private NativeList<Vector3> walkpoints = new NativeList<Vector3>(Allocator.Persistent);
 
         private void Awake()
         {
@@ -56,14 +56,17 @@ namespace Pathfinding
 
             MoveToTarget(targetPos, targetVolume);
 
-            Vector3[] waypoints = SearchOrigin(targetVolume).ToArray();
+            SearchOrigin(targetVolume);
+
+            NativeList<Vector3> tempWayPoints = new NativeList<Vector3>(Allocator.Temp);
+            tempWayPoints.CopyFrom(this.walkpoints);
 
             ClearBuffers();
 
             stopwatch.Stop();
             miliseconds = stopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
 
-            return new NavigationPath(waypoints);
+            return new NavigationPath(tempWayPoints);
         }
 
         private void FindPoints(float3 player, float3 target, NavigationVolume targetVolume)
@@ -112,7 +115,7 @@ namespace Pathfinding
             }
         }
 
-        private List<Vector3> SearchOrigin(NavigationVolume targetVolume)
+        private void SearchOrigin(NavigationVolume targetVolume)
         {
             var data = tempData[currentPoint];
 
@@ -124,8 +127,6 @@ namespace Pathfinding
 
                 data = tempData[currentPoint];
             }
-
-            return walkpoints;
         }
 
         private int FindNearestCell(float3 position, NavigationVolume targetVolume)
