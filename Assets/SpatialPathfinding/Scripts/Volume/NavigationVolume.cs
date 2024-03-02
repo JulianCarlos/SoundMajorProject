@@ -134,7 +134,8 @@ namespace Pathfinding
             distance = float.MaxValue;
             int closestCell = 0;
 
-            int[] subCells = Cores[closestCore].SubCells;
+            NativeArray<int> subCells = new NativeArray<int>(Cores[closestCore].SubCells.Length, Allocator.Temp);
+            subCells.CopyFrom(Cores[closestCore].SubCells);
 
             for (int i = 0; i < TotalCellsPerCore; i++)
             {
@@ -147,6 +148,8 @@ namespace Pathfinding
                 }
             }
 
+            subCells.Dispose();
+
             return closestCell;
         }
 
@@ -154,7 +157,7 @@ namespace Pathfinding
         {
             int index = 0;
             int coreIndex = 0;
-            List<int> tempSubCells;
+            NativeList<int> tempSubCells = new NativeList<int>(Allocator.Persistent);
 
             for (int x = 0; x < cellAmount.x; x++)
             {
@@ -197,6 +200,8 @@ namespace Pathfinding
                     }
                 }
             }
+
+            tempSubCells.Dispose();
         }
 
         private void OnValidate()

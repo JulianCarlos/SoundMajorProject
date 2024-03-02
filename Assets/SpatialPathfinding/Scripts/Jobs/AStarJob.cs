@@ -57,7 +57,10 @@ public struct AStarJob : IJob
         distance = float.MaxValue;
         int closestCell = 0;
 
-        int[] subCells = targetVolume.Cores[closestCore].SubCells;
+        NativeArray<int> subCells = new NativeArray<int>(targetVolume.Cores[closestCore].SubCells.Length, Allocator.Temp);
+        subCells.CopyFrom(targetVolume.Cores[closestCore].SubCells);
+
+        //int[] subCells = targetVolume.Cores[closestCore].SubCells;
 
         for (int i = 0; i < targetVolume.TotalCellsPerCore; i++)
         {
@@ -69,6 +72,8 @@ public struct AStarJob : IJob
                 closestCell = subCells[i];
             }
         }
+
+        subCells.Dispose();
 
         return closestCell;
     }
