@@ -138,14 +138,14 @@ namespace Pathfinding
 
         private void SearchOrigin(NavigationVolume targetVolume)
         {
-            var data = tempData[currentPoint];
+            TempData data = tempData[currentPoint];
 
             while (currentPoint != startingPoint)
             {
                 UnityEngine.Debug.DrawLine(targetVolume.Cells[currentPoint].CellPos, targetVolume.Cells[tempData[currentPoint].ParentIndex].CellPos, Color.green, 60f);
+                
                 walkpoints.Add(targetVolume.Cells[currentPoint].CellPos);
                 currentPoint = data.ParentIndex;
-
                 data = tempData[currentPoint];
             }
         }
@@ -170,7 +170,8 @@ namespace Pathfinding
             distance = float.MaxValue;
             int closestCell = 0;
 
-            int[] subCells = targetVolume.Cores[closestCore].SubCells;
+            NativeArray<int> subCells = new NativeArray<int>(targetVolume.Cores[closestCore].SubCells.Length, Allocator.Temp);
+            subCells.CopyFrom(targetVolume.Cores[closestCore].SubCells);
 
             for (int i = 0; i < targetVolume.TotalCellsPerCore; i++)
             {
@@ -182,6 +183,8 @@ namespace Pathfinding
                     closestCell = subCells[i];
                 }
             }
+
+            subCells.Dispose();
 
             return closestCell;
         }
