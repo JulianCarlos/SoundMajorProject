@@ -46,8 +46,9 @@ namespace Pathfinding
 
                 InitialPos = initialPos,
                 TargetPos = targetPos,
+
                 TempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.TempJob),
-                OpenCells = new NativeList<int>(Allocator.TempJob),
+                OpenCells = new NativeArray<int>(targetVolume.TotalCells, Allocator.TempJob),
                 WalkPoints = new NativeList<Vector3>(Allocator.TempJob),
             };
 

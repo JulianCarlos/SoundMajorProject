@@ -20,9 +20,9 @@ public struct AStarJob : IJob
     public Vector3 InitialPos;
 
     public NativeList<Cell> Cells;
-    public NativeList<int> OpenCells;
     public NativeList<Vector3> WalkPoints;
 
+    public NativeArray<int> OpenCells;
     public NativeArray<GridCore> Cores;
     public NativeArray<TempData> TempData;
     public NativeArray<NeighborData> CellNeighbors;
@@ -30,7 +30,9 @@ public struct AStarJob : IJob
     private int endPoint;
     private int currentPoint;
     private int startingPoint;
+
     private int OpenCellsCount;
+    private int ClosedCellsCount;
 
     public void Execute()
     {
@@ -91,13 +93,14 @@ public struct AStarJob : IJob
 
     private void InitializeBuffers()
     {
-        TempData = new NativeArray<TempData>(TotalCells, Allocator.Temp);
-        TempData[startingPoint] = new TempData(-1, 1000);
+        OpenCellsCount = 0;
+        ClosedCellsCount = 0;
 
-        OpenCells.Add(Cells[startingPoint].Index);
+        TempData[startingPoint] = new TempData(-1, 1000);
+        OpenCells[OpenCellsCount] = (Cells[startingPoint].Index);
         OpenCellsCount++;
 
-        currentPoint = OpenCells[0];
+        currentPoint = OpenCells[ClosedCellsCount];
     }
 
     private unsafe void MoveToTarget(Vector3 targetPos)
@@ -107,9 +110,9 @@ public struct AStarJob : IJob
 
         while (currentPoint != endPoint && OpenCellsCount > 0)
         {
-            currentPoint = OpenCells[0];
+            currentPoint = OpenCells[ClosedCellsCount];
 
-            OpenCells.RemoveAt(0);
+            ClosedCellsCount++;
             OpenCellsCount--;
 
             neighborData = CellNeighbors[currentPoint];
@@ -123,7 +126,7 @@ public struct AStarJob : IJob
 
                 TempData[neighborIndex] = new TempData(currentPoint, CalculationHelper.CalculateSquaredDistance(Cells[neighborIndex].CellPos, targetPos));
 
-                OpenCells.Add(neighborIndex);
+                OpenCells[ClosedCellsCount + OpenCellsCount] = (neighborIndex);
                 OpenCellsCount++;
             }
         }
