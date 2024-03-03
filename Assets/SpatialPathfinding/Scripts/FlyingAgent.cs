@@ -8,12 +8,12 @@ namespace Pathfinding
     [DefaultExecutionOrder(200)]
     public class FlyingAgent : MonoBehaviour
     {
+        public NavigationVolume ActiveVolume { get; private set; }
+
         [SerializeField] private float speed = 5f;
         [SerializeField] private Vector3 targetPos;
 
         private NavigationPath activePath;
-
-        public NavigationVolume activeVolume;
 
         private void Start()
         {
@@ -29,7 +29,7 @@ namespace Pathfinding
 
         public void AddActiveVolume(NavigationVolume activeVolume)
         {
-            this.activeVolume = activeVolume;
+            this.ActiveVolume = activeVolume;
         }
 
         public void MoveTo(Transform transform)
@@ -39,7 +39,13 @@ namespace Pathfinding
 
         public void MoveTo(Vector3 targetPos)
         {
-            activePath = PathingManager.Instance.AStar(transform.position, targetPos, this.activeVolume);
+            if (ActiveVolume == null)
+            {
+                Debug.LogWarning($"{this.gameObject} is not inside a Navigation Volume");
+                return;
+            }
+
+            activePath = PathingManager.Instance.AStar(transform.position, targetPos, this.ActiveVolume);
 
             StartCoroutine(C_MoveTo());
         }

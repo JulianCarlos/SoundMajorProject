@@ -1,4 +1,5 @@
 
+using Unity.Collections;
 using UnityEngine;
 
 public unsafe struct NeighborData
@@ -6,7 +7,7 @@ public unsafe struct NeighborData
     public int NeighborsCount;
     public fixed int Neighbors[6];
 
-    public NeighborData(int[] size)
+    public NeighborData(NativeArray<int> size)
     {
         NeighborsCount = 6;
 

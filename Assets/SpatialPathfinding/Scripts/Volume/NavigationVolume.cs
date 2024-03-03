@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -29,8 +30,8 @@ namespace Pathfinding
         [SerializeField] private Color cellColor = new Color(0.35f, 0.35f, 0.35f, 0.35f);
         [SerializeField] private Color detectionColor = new Color(1f, 0f, 0f, 1f);
 
+        [ReadOnly] public NativeArray<Cell> Cells;
         [ReadOnly] public NativeArray<GridCore> Cores;
-        [ReadOnly] public NativeList<Cell> Cells;
         [ReadOnly] public NativeArray<NeighborData> CellNeighbors;
 
         [ReadOnly] private NativeArray<int3> directions = new NativeArray<int3>(6, Allocator.Persistent);
@@ -44,7 +45,7 @@ namespace Pathfinding
         {
             TotalCells = (int)(cellAmount.x * amountOfCellsPerMainCell * cellAmount.y * amountOfCellsPerMainCell * cellAmount.z * amountOfCellsPerMainCell);
 
-            Cells = new NativeList<Cell>(TotalCells, Allocator.Persistent);
+            Cells = new NativeArray<Cell>(TotalCells, Allocator.Persistent);
             Cores = new NativeArray<GridCore>((int)(cellAmount.x * cellAmount.y * cellAmount.z), Allocator.Persistent);
 
             CellNeighbors = new NativeArray<NeighborData>(TotalCells, Allocator.Persistent);
@@ -89,6 +90,23 @@ namespace Pathfinding
             {
                 GetNeighbours(Cells[i].CellPos, i);
             }
+
+            //GetNeighborsJob job = new GetNeighborsJob()
+            //{
+            //    TotalCells = this.TotalCells,
+            //    TotalCores = this.TotalCores,
+            //    TotalCellsPerCore = this.TotalCellsPerCore,
+            //
+            //    CellSize = this.cellSize,
+            //    DetectionRadius = this.detectionRadius,
+            //    Cells = this.Cells,
+            //};
+            //
+            //JobHandle dependency = new JobHandle();
+            //JobHandle scheduledependency = job.Schedule(TotalCells, dependency);
+            //JobHandle scheduleparalleljob = job.ScheduleParallel(TotalCells, 1, scheduledependency);
+            //
+            //scheduleparalleljob.Complete();
         }
 
         private void GetNeighbours(float3 position, int index)
@@ -109,7 +127,7 @@ namespace Pathfinding
                 }
             }
             
-            CellNeighbors[index] = new NeighborData(neighbors.ToArray());
+            CellNeighbors[index] = new NeighborData(neighbors);
 
             neighbors.Dispose();
         }
@@ -191,7 +209,7 @@ namespace Pathfinding
 
                                     Cell cell = new Cell(subcellCenter, index);
 
-                                    Cells.Add(cell);
+                                    Cells[index] = (cell);
                                     tempSubCells.Add(cell.Index);
 
                                     index++;

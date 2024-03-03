@@ -9,7 +9,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
-[BurstCompile]
+[BurstCompile(CompileSynchronously = false)]
 public struct AStarJob : IJob
 {
     public int TotalCells;
@@ -19,13 +19,13 @@ public struct AStarJob : IJob
     public Vector3 TargetPos;
     public Vector3 InitialPos;
 
-    public NativeList<Cell> Cells;
-    public NativeList<Vector3> WalkPoints;
-
+    public NativeArray<Cell> Cells;
     public NativeArray<int> OpenCells;
     public NativeArray<GridCore> Cores;
     public NativeArray<TempData> TempData;
     public NativeArray<NeighborData> CellNeighbors;
+
+    public NativeList<Vector3> WalkPoints;
 
     private int endPoint;
     private int currentPoint;
