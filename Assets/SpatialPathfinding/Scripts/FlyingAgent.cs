@@ -11,8 +11,8 @@ namespace Pathfinding
     {
         public NavigationVolume ActiveVolume { get; private set; }
 
-        public float3 TargetPos;
-        public float3 InitialPos => transform.position;
+        public Vector3 TargetPos;
+        public Vector3 InitialPos => transform.position;
 
         [SerializeField] private float speed = 5f;
         [SerializeField] private NavigationPath activePath;

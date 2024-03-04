@@ -39,16 +39,16 @@ namespace Pathfinding
         {
             while (true)
             {
-                stopwatch.Start();
+                //stopwatch.Start();
 
                 for (int i = 0; i < movableAgents.Count; i++)
                 {
                     movableAgents[i].Move();
                 }
 
-                stopwatch.Stop();
-                miliseconds = stopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
-                stopwatch.Reset();
+                //stopwatch.Stop();
+                //miliseconds = stopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
+                //stopwatch.Reset();
 
                 yield return null;
             }
@@ -58,6 +58,8 @@ namespace Pathfinding
         {
             while (true)
             {
+                stopwatch.Start();
+
                 for (int i = 0; i < calculableAgents.Count; i++)
                 {
                     AStar(calculableAgents[i]);
@@ -68,6 +70,10 @@ namespace Pathfinding
                         calculableAgents.Remove(calculableAgents[i]);
                     }
                 }
+
+                stopwatch.Stop();
+                miliseconds = stopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
+                stopwatch.Reset();
 
                 yield return new WaitForSeconds(0.1f);
             }
@@ -126,9 +132,6 @@ namespace Pathfinding
             job.TempData.Dispose();
             job.OpenCells.Dispose();
             job.WalkPoints.Dispose();
-
-            if (!movableAgents.Contains(agent))
-                movableAgents.Add(agent);
         }
     }
 }
