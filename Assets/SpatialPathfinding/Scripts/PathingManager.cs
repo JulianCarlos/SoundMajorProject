@@ -59,7 +59,7 @@ namespace Pathfinding
             {
                 for (int i = 0; i < calculableAgents.Count; i++)
                 {
-                    calculableAgents[i].SetPath(AStar(calculableAgents[i], calculableAgents[i].initialPos, calculableAgents[i].targetPos, calculableAgents[i].ActiveVolume));
+                    AStar(calculableAgents[i]);
 
                     if (!movableAgents.Contains(calculableAgents[i]))
                     {
@@ -94,10 +94,12 @@ namespace Pathfinding
             }
         }
 
-        public NavigationPath AStar(FlyingAgent agent, Vector3 initialPos, Vector3 targetPos, NavigationVolume targetVolume)
+        public void AStar(FlyingAgent agent)
         {
             //Stopwatch stopwatch = new Stopwatch();
             //stopwatch.Start();
+
+            NavigationVolume targetVolume = agent.ActiveVolume;
 
             AStarJob job = new AStarJob()
             {
@@ -109,8 +111,8 @@ namespace Pathfinding
                 Cells = targetVolume.Cells,
                 CellNeighbors = targetVolume.CellNeighbors,
 
-                InitialPos = initialPos,
-                TargetPos = targetPos,
+                InitialPos = agent.initialPos,
+                TargetPos = agent.targetPos,
 
                 TempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.TempJob),
                 OpenCells = new NativeArray<int>(targetVolume.TotalCells, Allocator.TempJob),
@@ -124,6 +126,8 @@ namespace Pathfinding
             NativeList<Vector3> tempWayPoints = new NativeList<Vector3>(Allocator.Temp);
             tempWayPoints.CopyFrom(job.WalkPoints);
 
+            agent.SetPath(new NavigationPath(tempWayPoints));
+
             job.TempData.Dispose();
             job.OpenCells.Dispose();
             job.WalkPoints.Dispose();
@@ -134,7 +138,6 @@ namespace Pathfinding
             //stopwatch.Stop();
             //miliseconds = stopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
 
-            return new NavigationPath(tempWayPoints);
         }
     }
 }
