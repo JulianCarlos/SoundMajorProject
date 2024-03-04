@@ -96,9 +96,6 @@ namespace Pathfinding
 
         public void AStar(FlyingAgent agent)
         {
-            //Stopwatch stopwatch = new Stopwatch();
-            //stopwatch.Start();
-
             NavigationVolume targetVolume = agent.ActiveVolume;
 
             AStarJob job = new AStarJob()
@@ -123,10 +120,7 @@ namespace Pathfinding
 
             handle.Complete();
 
-            NativeList<Vector3> tempWayPoints = new NativeList<Vector3>(Allocator.Temp);
-            tempWayPoints.CopyFrom(job.WalkPoints);
-
-            agent.SetPath(new NavigationPath(tempWayPoints));
+            agent.SetPath(new NavigationPath(job.WalkPoints));
 
             job.TempData.Dispose();
             job.OpenCells.Dispose();
@@ -134,10 +128,6 @@ namespace Pathfinding
 
             if (!movableAgents.Contains(agent))
                 movableAgents.Add(agent);
-
-            //stopwatch.Stop();
-            //miliseconds = stopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
-
         }
     }
 }
