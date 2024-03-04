@@ -5,11 +5,12 @@ using Unity.Jobs;
 using System.Collections.Generic;
 using System.Collections;
 using System;
+using Unity.Mathematics;
 
 namespace Pathfinding
 {
     [DefaultExecutionOrder(100)]
-    public unsafe class PathingManager : MonoBehaviour
+    public class PathingManager : MonoBehaviour
     {
         public static PathingManager Instance { get; private set; }
 
@@ -108,12 +109,12 @@ namespace Pathfinding
                 Cells = targetVolume.Cells,
                 CellNeighbors = targetVolume.CellNeighbors,
 
-                InitialPos = agent.initialPos,
-                TargetPos = agent.targetPos,
+                InitialPos = agent.InitialPos,
+                TargetPos = agent.TargetPos,
 
                 TempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.TempJob),
                 OpenCells = new NativeArray<int>(targetVolume.TotalCells, Allocator.TempJob),
-                WalkPoints = new NativeList<Vector3>(Allocator.TempJob),
+                WalkPoints = new NativeList<float3>(Allocator.TempJob),
             };
 
             JobHandle handle = job.Schedule();

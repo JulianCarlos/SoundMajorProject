@@ -16,16 +16,16 @@ public struct AStarJob : IJob
     public int TotalCores;
     public int TotalCellsPerCore;
 
-    public Vector3 TargetPos;
-    public Vector3 InitialPos;
+    public float3 TargetPos;
+    public float3 InitialPos;
+
+    public NativeList<float3> WalkPoints;
 
     public NativeArray<Cell> Cells;
     public NativeArray<int> OpenCells;
     public NativeArray<GridCore> Cores;
     public NativeArray<TempData> TempData;
     public NativeArray<NeighborData> CellNeighbors;
-
-    public NativeList<Vector3> WalkPoints;
 
     private int endPoint;
     private int currentPoint;

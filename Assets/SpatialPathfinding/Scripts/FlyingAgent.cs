@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -10,26 +11,17 @@ namespace Pathfinding
     {
         public NavigationVolume ActiveVolume { get; private set; }
 
-        [SerializeField] private float speed = 5f;
-        public Vector3 targetPos;
-        public Vector3 initialPos => transform.position;
+        public float3 TargetPos;
+        public float3 InitialPos => transform.position;
 
+        [SerializeField] private float speed = 5f;
         [SerializeField] private NavigationPath activePath;
 
         private int currentWayPointIndex;
 
         private void Start()
         {
-            //StartCoroutine(nameof(TestMethod));
-
-            MoveTo(targetPos);
-        }
-
-        IEnumerator TestMethod()
-        {
-            yield return new WaitForSeconds(0.2f);
-
-            MoveTo(targetPos);
+            MoveTo(TargetPos);
         }
 
         public void AddActiveVolume(NavigationVolume activeVolume)
@@ -44,21 +36,18 @@ namespace Pathfinding
             currentWayPointIndex = activePath.Waypoints.Length - 1;
         }
 
-        public void MoveTo(Vector3 targetPos)
+        public void MoveTo(float3 targetPos)
         {
             RequestPath(targetPos);
         }
 
-        private void RequestPath(Vector3 targetPos)
+        private void RequestPath(float3 targetPos)
         {
             if (ActiveVolume == null)
             {
                 Debug.LogWarning($"{this.gameObject} is not inside a Navigation Volume");
                 return;
             }
-
-            //activePath = PathingManager.Instance.AStar(this, transform.position, targetPos, this.ActiveVolume);
-            //currentWayPointIndex = activePath.Waypoints.Length - 1;
 
             PathingManager.OnAgentStartedPathing(this);
         }
@@ -68,7 +57,7 @@ namespace Pathfinding
             if (currentWayPointIndex <= 0)
                 return;
 
-            if (Vector3.Distance(transform.position, activePath.Waypoints[currentWayPointIndex]) <= 0.01f)
+            if (math.distance(transform.position, activePath.Waypoints[currentWayPointIndex]) <= 0.01f)
             {
                 currentWayPointIndex--;
             }
