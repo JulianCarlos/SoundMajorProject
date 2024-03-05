@@ -30,11 +30,11 @@ namespace Pathfinding
         [SerializeField] private Color cellColor = new Color(0.35f, 0.35f, 0.35f, 0.35f);
         [SerializeField] private Color detectionColor = new Color(1f, 0f, 0f, 1f);
 
-        [ReadOnly] public NativeArray<Cell> Cells;
-        [ReadOnly] public NativeArray<GridCore> Cores;
-        [ReadOnly] public NativeArray<NeighborData> CellNeighbors;
+        public NativeArray<Cell> Cells;
+        public NativeArray<GridCore> Cores;
+        public NativeArray<NeighborData> CellNeighbors;
 
-        [ReadOnly] private NativeArray<int3> directions = new NativeArray<int3>(6, Allocator.Persistent);
+        private NativeArray<int3> directions = new NativeArray<int3>(6, Allocator.Persistent);
         private int directionCount = 0;
 
         private RaycastHit directionHit;

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections;
 using System;
 using Unity.Mathematics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Pathfinding
 {
@@ -58,6 +59,11 @@ namespace Pathfinding
         {
             while (true)
             {
+                yield return null;
+
+                if (calculableAgents.Count <= 0)
+                    continue;
+
                 stopwatch.Start();
 
                 for (int i = 0; i < calculableAgents.Count; i++)
@@ -69,13 +75,12 @@ namespace Pathfinding
                         movableAgents.Add(calculableAgents[i]);
                         calculableAgents.Remove(calculableAgents[i]);
                     }
+
                 }
 
                 stopwatch.Stop();
                 miliseconds = stopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
                 stopwatch.Reset();
-
-                yield return new WaitForSeconds(0.1f);
             }
         }
 

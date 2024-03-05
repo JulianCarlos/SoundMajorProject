@@ -21,6 +21,15 @@ namespace Pathfinding
 
         private void Start()
         {
+            //StartCoroutine(nameof(TestMethod));
+
+            MoveTo(TargetPos);
+        }
+
+        private IEnumerator TestMethod()
+        {
+            yield return new WaitForSeconds(5f);
+
             MoveTo(TargetPos);
         }
 
@@ -55,9 +64,11 @@ namespace Pathfinding
         public void Move()
         {
             if (currentWayPointIndex <= 0)
+            {
+                PathingManager.OnAgentFinishedPathing(this);
                 return;
-
-            if (math.distance(transform.position, activePath.Waypoints[currentWayPointIndex]) <= 0.01f)
+            }
+            else if (math.distance(transform.position, activePath.Waypoints[currentWayPointIndex]) <= 0.01f)
             {
                 currentWayPointIndex--;
             }
