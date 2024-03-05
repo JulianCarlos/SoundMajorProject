@@ -20,10 +20,14 @@ namespace Pathfinding
 
         [SerializeField] private List<FlyingAgent> movableAgents = new List<FlyingAgent>();
         [SerializeField] private List<FlyingAgent> calculableAgents = new List<FlyingAgent>();
+        [Space]
+        [SerializeField] private double movableExecutionTime = 0;
+        [SerializeField] private double calculateExecutionTime = 0;
 
-        [SerializeField] private double miliseconds = 0;
+        Stopwatch moveExecutionStopwatch = new Stopwatch();
+        Stopwatch calculateExecutionStopwatch = new Stopwatch();
 
-        Stopwatch stopwatch = new Stopwatch();
+        private JobHandle aStarHandle;
 
         private void Awake()
         {
@@ -40,18 +44,21 @@ namespace Pathfinding
         {
             while (true)
             {
-                //stopwatch.Start();
+                yield return null;
+
+                if (movableAgents.Count <= 0)
+                    continue;
+
+                moveExecutionStopwatch.Start();
 
                 for (int i = 0; i < movableAgents.Count; i++)
                 {
                     movableAgents[i].Move();
                 }
 
-                //stopwatch.Stop();
-                //miliseconds = stopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
-                //stopwatch.Reset();
-
-                yield return null;
+                moveExecutionStopwatch.Stop();
+                movableExecutionTime = moveExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
+                moveExecutionStopwatch.Reset();
             }
         }
 
@@ -64,7 +71,7 @@ namespace Pathfinding
                 if (calculableAgents.Count <= 0)
                     continue;
 
-                stopwatch.Start();
+                calculateExecutionStopwatch.Start();
 
                 for (int i = 0; i < calculableAgents.Count; i++)
                 {
@@ -75,12 +82,11 @@ namespace Pathfinding
                         movableAgents.Add(calculableAgents[i]);
                         calculableAgents.Remove(calculableAgents[i]);
                     }
-
                 }
 
-                stopwatch.Stop();
-                miliseconds = stopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
-                stopwatch.Reset();
+                calculateExecutionStopwatch.Stop();
+                calculateExecutionTime = calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
+                calculateExecutionStopwatch.Reset();
             }
         }
 
@@ -128,9 +134,9 @@ namespace Pathfinding
                 WalkPoints = new NativeList<float3>(Allocator.TempJob),
             };
 
-            JobHandle handle = job.Schedule();
+            aStarHandle = job.Schedule();
 
-            handle.Complete();
+            aStarHandle.Complete();
 
             agent.SetPath(new NavigationPath(job.WalkPoints));
 
