@@ -145,7 +145,6 @@ namespace Pathfinding
             int closestCell = 0;
 
             NativeArray<int> subCells = new NativeArray<int>(Cores[closestCore].SubCells.Length, Allocator.Temp);
-            //subCells.CopyFrom(Cores[closestCore].SubCells);
 
             for (int i = 0; i < Cores[closestCore].SubCells.Length; i++)
             {

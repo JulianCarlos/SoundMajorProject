@@ -8,6 +8,8 @@ namespace Pathfinding
     public class NavigationSubLink : MonoBehaviour
     {
         public NavigationVolume LinkedVolume;
+
+        public NavigationSubLink NeighborLink;
     }
 }
 

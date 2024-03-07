@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6071978126271349368}
   - component: {fileID: 8324981994264039060}
   - component: {fileID: 7698536086833571240}
-  m_Layer: 2
+  m_Layer: 3
   m_Name: Agent
   m_TagString: Untagged
   m_Icon: {fileID: 2800000, guid: b0b7cfe769257be4fad28040c427831d, type: 3}
@@ -98,9 +98,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d38c11765708f40469f4a5cebb03e5c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Speed: 5
-  targetPos: {x: -14.5, y: -8.52, z: 47.11}
-  activeVolume: {fileID: 0}
+  TargetPos: {x: -4.6, y: -8.6, z: 10.3}
+  speed: 5
 --- !u!54 &8324981994264039060
 Rigidbody:
   m_ObjectHideFlags: 0
