@@ -138,7 +138,7 @@ public struct AStarJob : IJob
 
         while (currentPoint != startingPoint)
         {
-            //UnityEngine.Debug.DrawLine(Cells[currentPoint].CellPos, Cells[TempData[currentPoint].ParentIndex].CellPos, Color.green, 60f);
+            UnityEngine.Debug.DrawLine(Cells[currentPoint].CellPos, Cells[TempData[currentPoint].ParentIndex].CellPos, Color.green, 60f);
             WalkPoints.Add(Cells[currentPoint].CellPos);
             currentPoint = data.ParentIndex;
 

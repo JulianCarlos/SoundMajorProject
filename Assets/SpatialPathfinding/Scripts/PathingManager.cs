@@ -127,7 +127,7 @@ namespace Pathfinding
                 CellNeighbors = targetVolume.CellNeighbors,
 
                 InitialPos = agent.InitialPos,
-                TargetPos = agent.TargetPos,
+                TargetPos = targetVolume.Links[0].transform.position,
 
                 TempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.TempJob),
                 OpenCells = new NativeArray<int>(targetVolume.TotalCells, Allocator.TempJob),

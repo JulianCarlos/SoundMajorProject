@@ -63,7 +63,7 @@ namespace Pathfinding
 
         public void Move()
         {
-            if (currentWayPointIndex <= 0)
+            if (currentWayPointIndex <= 0 && math.distance(transform.position, activePath.Waypoints[currentWayPointIndex]) <= 0.01f)
             {
                 PathingManager.OnAgentFinishedPathing(this);
                 return;

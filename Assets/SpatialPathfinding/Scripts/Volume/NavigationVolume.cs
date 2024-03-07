@@ -41,6 +41,8 @@ namespace Pathfinding
 
         [SerializeField] private double miliseconds = 0;
 
+        public List<NavigationSubLink> Links = new List<NavigationSubLink>();
+
         private void Awake()
         {
             TotalCells = (int)(cellAmount.x * amountOfCellsPerMainCell * cellAmount.y * amountOfCellsPerMainCell * cellAmount.z * amountOfCellsPerMainCell);
@@ -97,23 +99,6 @@ namespace Pathfinding
             {
                 GetNeighbours(Cells[i].CellPos, i);
             }
-
-            //GetNeighborsJob job = new GetNeighborsJob()
-            //{
-            //    TotalCells = this.TotalCells,
-            //    TotalCores = this.TotalCores,
-            //    TotalCellsPerCore = this.TotalCellsPerCore,
-            //
-            //    CellSize = this.cellSize,
-            //    DetectionRadius = this.detectionRadius,
-            //    Cells = this.Cells,
-            //};
-            //
-            //JobHandle dependency = new JobHandle();
-            //JobHandle scheduledependency = job.Schedule(TotalCells, dependency);
-            //JobHandle scheduleparalleljob = job.ScheduleParallel(TotalCells, 1, scheduledependency);
-            //
-            //scheduleparalleljob.Complete();
         }
 
         private void GetNeighbours(float3 position, int index)
