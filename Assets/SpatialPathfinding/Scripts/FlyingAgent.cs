@@ -16,20 +16,13 @@ namespace Pathfinding
 
         [SerializeField] private float speed = 5f;
         [SerializeField] private NavigationPath activePath;
+        [Space]
+        [SerializeField] private bool showPath = false;
 
         private int currentWayPointIndex;
 
         private void Start()
         {
-            //StartCoroutine(nameof(TestMethod));
-
-            MoveTo(TargetPos);
-        }
-
-        private IEnumerator TestMethod()
-        {
-            yield return new WaitForSeconds(5f);
-
             MoveTo(TargetPos);
         }
 
@@ -75,6 +68,19 @@ namespace Pathfinding
             else
             {
                 transform.position = Vector3.MoveTowards(transform.position, activePath.Waypoints[currentWayPointIndex], speed * Time.fixedDeltaTime);
+            }
+        }
+
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.green;
+
+            if (showPath && activePath.Waypoints.Length > 0)
+            {
+                for (int i = 0; i < activePath.Waypoints.Length - 1; i++)
+                {
+                    Gizmos.DrawLine(activePath.Waypoints[i], activePath.Waypoints[i + 1]);
+                }
             }
         }
     }

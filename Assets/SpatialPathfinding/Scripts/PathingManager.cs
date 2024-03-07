@@ -29,8 +29,9 @@ namespace Pathfinding
         Stopwatch calculateExecutionStopwatch = new Stopwatch();
 
         private JobHandle aStarHandle;
-
         private NativeList<float3> wayPoints = new NativeList<float3>(Allocator.Persistent);
+
+        private bool foundTargetVolume = false;
 
         private void Awake()
         {
@@ -117,9 +118,12 @@ namespace Pathfinding
 
         public void AStar(FlyingAgent agent)
         {
+            NavigationVolume targetVolume;
+            NavigationVolume originVolume;
+
             if (BoundingBoxChecker.IsPositionInsideVolume(agent.TargetPos, agent.ActiveVolume))
             {
-                NavigationVolume targetVolume = agent.ActiveVolume;
+                targetVolume = agent.ActiveVolume;
 
                 AStarJob job = new AStarJob()
                 {
@@ -149,18 +153,15 @@ namespace Pathfinding
                 job.OpenCells.Dispose();
                 wayPoints.Clear();
             }
-            else if (agent.ActiveVolume.Links.Count > 0)
+            else
             {
-                NavigationVolume targetVolume;
-                NavigationVolume originVolume;
-
-                bool found = false;
+                foundTargetVolume = false;
 
                 for (int i = 0; i < agent.ActiveVolume.Links.Count; i++)
                 {
                     if (BoundingBoxChecker.IsPositionInsideVolume(agent.TargetPos, agent.ActiveVolume.Links[i].LinkedVolume))
                     {
-                        found = true;
+                        foundTargetVolume = true;
 
                         targetVolume = agent.ActiveVolume.Links[i].LinkedVolume;
 
@@ -223,7 +224,7 @@ namespace Pathfinding
                     }
                 }
 
-                if (!found)
+                if (!foundTargetVolume)
                 {
                     targetVolume = agent.ActiveVolume;
 
