@@ -114,6 +114,8 @@ namespace Pathfinding
 
         public void AStar(FlyingAgent agent)
         {
+            UnityEngine.Debug.Log(BoundingBoxChecker.IsPositionInsideVolume(agent.TargetPos, agent.ActiveVolume));
+
             NavigationVolume targetVolume = agent.ActiveVolume;
 
             AStarJob job = new AStarJob()
