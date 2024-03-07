@@ -117,7 +117,7 @@ namespace Pathfinding
 
         public void AStar(FlyingAgent agent)
         {
-            if(BoundingBoxChecker.IsPositionInsideVolume(agent.TargetPos, agent.ActiveVolume) || agent.ActiveVolume.Links.Count <= 0)
+            if (BoundingBoxChecker.IsPositionInsideVolume(agent.TargetPos, agent.ActiveVolume))
             {
                 NavigationVolume targetVolume = agent.ActiveVolume;
 
@@ -149,13 +149,20 @@ namespace Pathfinding
                 job.OpenCells.Dispose();
                 wayPoints.Clear();
             }
-            else
+            else if (agent.ActiveVolume.Links.Count > 0)
             {
+                NavigationVolume targetVolume;
+                NavigationVolume originVolume;
+
+                bool found = false;
+
                 for (int i = 0; i < agent.ActiveVolume.Links.Count; i++)
                 {
                     if (BoundingBoxChecker.IsPositionInsideVolume(agent.TargetPos, agent.ActiveVolume.Links[i].LinkedVolume))
                     {
-                        NavigationVolume targetVolume = agent.ActiveVolume.Links[i].LinkedVolume;
+                        found = true;
+
+                        targetVolume = agent.ActiveVolume.Links[i].LinkedVolume;
 
                         AStarJob job = new AStarJob()
                         {
@@ -167,7 +174,7 @@ namespace Pathfinding
                             Cells = targetVolume.Cells,
                             CellNeighbors = targetVolume.CellNeighbors,
 
-                            InitialPos = targetVolume.Links[0].transform.position,
+                            InitialPos = agent.ActiveVolume.Links[i].NeighborLink.transform.position,
                             TargetPos = agent.TargetPos,
 
                             TempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.TempJob),
@@ -181,25 +188,25 @@ namespace Pathfinding
                         job.TempData.Dispose();
                         job.OpenCells.Dispose();
 
+                        //--------
 
-
-                        targetVolume = agent.ActiveVolume;
+                        originVolume = agent.ActiveVolume;
 
                         AStarJob originJob = new AStarJob()
                         {
-                            TotalCells = targetVolume.TotalCells,
-                            TotalCellsPerCore = targetVolume.TotalCellsPerCore,
-                            TotalCores = targetVolume.TotalCores,
+                            TotalCells = originVolume.TotalCells,
+                            TotalCellsPerCore = originVolume.TotalCellsPerCore,
+                            TotalCores = originVolume.TotalCores,
 
-                            Cores = targetVolume.Cores,
-                            Cells = targetVolume.Cells,
-                            CellNeighbors = targetVolume.CellNeighbors,
+                            Cores = originVolume.Cores,
+                            Cells = originVolume.Cells,
+                            CellNeighbors = originVolume.CellNeighbors,
 
                             InitialPos = agent.InitialPos,
-                            TargetPos = targetVolume.Links[i].transform.position,
+                            TargetPos = originVolume.Links[i].transform.position,
 
-                            TempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.TempJob),
-                            OpenCells = new NativeArray<int>(targetVolume.TotalCells, Allocator.TempJob),
+                            TempData = new NativeArray<TempData>(originVolume.TotalCells, Allocator.TempJob),
+                            OpenCells = new NativeArray<int>(originVolume.TotalCells, Allocator.TempJob),
                             WalkPoints = wayPoints,
                         };
 
@@ -214,6 +221,39 @@ namespace Pathfinding
 
                         break;
                     }
+                }
+
+                if (!found)
+                {
+                    targetVolume = agent.ActiveVolume;
+
+                    AStarJob job = new AStarJob()
+                    {
+                        TotalCells = targetVolume.TotalCells,
+                        TotalCellsPerCore = targetVolume.TotalCellsPerCore,
+                        TotalCores = targetVolume.TotalCores,
+
+                        Cores = targetVolume.Cores,
+                        Cells = targetVolume.Cells,
+                        CellNeighbors = targetVolume.CellNeighbors,
+
+                        InitialPos = agent.InitialPos,
+                        TargetPos = agent.TargetPos,
+
+                        TempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.TempJob),
+                        OpenCells = new NativeArray<int>(targetVolume.TotalCells, Allocator.TempJob),
+                        WalkPoints = wayPoints,
+                    };
+
+                    aStarHandle = job.Schedule();
+
+                    aStarHandle.Complete();
+
+                    agent.SetPath(new NavigationPath(wayPoints));
+
+                    job.TempData.Dispose();
+                    job.OpenCells.Dispose();
+                    wayPoints.Clear();
                 }
             }
         }

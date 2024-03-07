@@ -15,7 +15,6 @@ namespace Pathfinding
         private void Start()
         {
             GenerateLinks();
-            LinkVolumes();
         }
 
         private void GenerateLinks()
@@ -23,13 +22,27 @@ namespace Pathfinding
             Collider[] collisions;
             int mask = LayerMask.GetMask("NavigationVolume");
 
-            collisions = Physics.OverlapSphere(link1.transform.position, 1f, mask);
-            link2.LinkedVolume = collisions[0].GetComponent<NavigationVolume>();
-            link2.NeighborLink = link1;
+            try
+            {
+                collisions = Physics.OverlapSphere(link1.transform.position, 1f, mask);
+                link2.LinkedVolume = collisions[0].GetComponent<NavigationVolume>();
+                link2.NeighborLink = link1;
 
-            collisions = Physics.OverlapSphere(link2.transform.position, 1f, mask);
-            link1.LinkedVolume = collisions[0].GetComponent<NavigationVolume>();
-            link1.NeighborLink = link2;
+                collisions = Physics.OverlapSphere(link2.transform.position, 1f, mask);
+                link1.LinkedVolume = collisions[0].GetComponent<NavigationVolume>();
+                link1.NeighborLink = link2;
+
+                LinkVolumes();
+            }
+            catch
+            {
+                Debug.LogWarning($"A link is not inside a Navigation Volume, links only work if both links are inside a valid Volume");
+            }
+
+            if (link1.LinkedVolume == link2.LinkedVolume)
+            {
+                Debug.LogWarning($"{link1} and {link2} cant be on the same Volume");
+            }
         }
 
         private void LinkVolumes()
