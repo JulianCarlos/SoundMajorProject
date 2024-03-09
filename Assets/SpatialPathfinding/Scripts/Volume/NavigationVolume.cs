@@ -51,13 +51,6 @@ namespace Pathfinding
             Cores = new NativeArray<GridCore>((int)(cellAmount.x * cellAmount.y * cellAmount.z), Allocator.Persistent);
 
             CellNeighbors = new NativeArray<NeighborData>(TotalCells, Allocator.Persistent);
-
-            Collider[] overlappedAgents = Physics.OverlapBox(transform.position, new Vector3((cellSize * amountOfCellsPerMainCell * cellAmount.x) / 2, (cellSize * amountOfCellsPerMainCell * cellAmount.y) / 2, (cellSize * amountOfCellsPerMainCell * cellAmount.z) / 2), Quaternion.identity, LayerMask.GetMask("FlyingAgent"));
-
-            for (int i = 0; i < overlappedAgents.Length; i++)
-            {
-                overlappedAgents[i].GetComponent<FlyingAgent>().AddActiveVolume(this);
-            }
         }
 
         private void Start()
@@ -76,6 +69,14 @@ namespace Pathfinding
 
             stopwatch.Stop();
             miliseconds = stopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
+
+
+            Collider[] overlappedAgents = Physics.OverlapBox(transform.position, new Vector3((cellSize * amountOfCellsPerMainCell * cellAmount.x) / 2, (cellSize * amountOfCellsPerMainCell * cellAmount.y) / 2, (cellSize * amountOfCellsPerMainCell * cellAmount.z) / 2), Quaternion.identity, LayerMask.GetMask("FlyingAgent"));
+
+            for (int i = 0; i < overlappedAgents.Length; i++)
+            {
+                overlappedAgents[i].GetComponent<FlyingAgent>().AddActiveVolume(this);
+            }
         }
 
         private void InitializeDirections()
