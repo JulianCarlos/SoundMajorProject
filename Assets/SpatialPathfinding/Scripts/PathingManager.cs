@@ -118,40 +118,19 @@ namespace Pathfinding
 
         public void AStar(FlyingAgent agent)
         {
-            NavigationVolume targetVolume;
             NavigationVolume originVolume;
+            NavigationVolume targetVolume;
+
+            AStarJob targetJob;
+            AStarJob originJob;
 
             if (BoundingBoxChecker.IsPositionInsideVolume(agent.TargetPos, agent.ActiveVolume))
             {
-                targetVolume = agent.ActiveVolume;
-
-                AStarJob job = new AStarJob()
-                {
-                    TotalCells = targetVolume.TotalCells,
-                    TotalCellsPerCore = targetVolume.TotalCellsPerCore,
-                    TotalCores = targetVolume.TotalCores,
-
-                    Cores = targetVolume.Cores,
-                    Cells = targetVolume.Cells,
-                    CellNeighbors = targetVolume.CellNeighbors,
-
-                    InitialPos = agent.InitialPos,
-                    TargetPos = agent.TargetPos,
-
-                    TempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.TempJob),
-                    OpenCells = new NativeArray<int>(targetVolume.TotalCells, Allocator.TempJob),
-                    WalkPoints = wayPoints,
-                };
-
-                aStarHandle = job.Schedule();
-
+                targetJob = JobFactory.GenerateAStarJob(agent.ActiveVolume, agent.InitialPos, agent.TargetPos, this.wayPoints);
+                aStarHandle = targetJob.Schedule();
                 aStarHandle.Complete();
-
-                agent.SetPath(new NavigationPath(wayPoints));
-
-                job.TempData.Dispose();
-                job.OpenCells.Dispose();
-                wayPoints.Clear();
+                targetJob.TempData.Dispose();
+                targetJob.OpenCells.Dispose();
             }
             else
             {
@@ -164,61 +143,20 @@ namespace Pathfinding
                         foundTargetVolume = true;
 
                         targetVolume = agent.ActiveVolume.Links[i].LinkedVolume;
-
-                        AStarJob job = new AStarJob()
-                        {
-                            TotalCells = targetVolume.TotalCells,
-                            TotalCellsPerCore = targetVolume.TotalCellsPerCore,
-                            TotalCores = targetVolume.TotalCores,
-
-                            Cores = targetVolume.Cores,
-                            Cells = targetVolume.Cells,
-                            CellNeighbors = targetVolume.CellNeighbors,
-
-                            InitialPos = agent.ActiveVolume.Links[i].NeighborLink.transform.position,
-                            TargetPos = agent.TargetPos,
-
-                            TempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.TempJob),
-                            OpenCells = new NativeArray<int>(targetVolume.TotalCells, Allocator.TempJob),
-                            WalkPoints = wayPoints,
-                        };
-
-                        aStarHandle = job.Schedule();
+                        targetJob = JobFactory.GenerateAStarJob(targetVolume, agent.ActiveVolume.Links[i].NeighborLink.transform.position, agent.TargetPos, this.wayPoints);
+                        aStarHandle = targetJob.Schedule();
                         aStarHandle.Complete();
+                        targetJob.TempData.Dispose();
+                        targetJob.OpenCells.Dispose();
 
-                        job.TempData.Dispose();
-                        job.OpenCells.Dispose();
-
-                        //--------
+                        //----->
 
                         originVolume = agent.ActiveVolume;
-
-                        AStarJob originJob = new AStarJob()
-                        {
-                            TotalCells = originVolume.TotalCells,
-                            TotalCellsPerCore = originVolume.TotalCellsPerCore,
-                            TotalCores = originVolume.TotalCores,
-
-                            Cores = originVolume.Cores,
-                            Cells = originVolume.Cells,
-                            CellNeighbors = originVolume.CellNeighbors,
-
-                            InitialPos = agent.InitialPos,
-                            TargetPos = originVolume.Links[i].transform.position,
-
-                            TempData = new NativeArray<TempData>(originVolume.TotalCells, Allocator.TempJob),
-                            OpenCells = new NativeArray<int>(originVolume.TotalCells, Allocator.TempJob),
-                            WalkPoints = wayPoints,
-                        };
-
+                        originJob = JobFactory.GenerateAStarJob(originVolume, agent.InitialPos, originVolume.Links[i].transform.position, this.wayPoints);
                         aStarHandle = originJob.Schedule();
                         aStarHandle.Complete();
-
-                        agent.SetPath(new NavigationPath(wayPoints));
-
                         originJob.TempData.Dispose();
                         originJob.OpenCells.Dispose();
-                        wayPoints.Clear();
 
                         break;
                     }
@@ -226,37 +164,16 @@ namespace Pathfinding
 
                 if (!foundTargetVolume)
                 {
-                    targetVolume = agent.ActiveVolume;
-
-                    AStarJob job = new AStarJob()
-                    {
-                        TotalCells = targetVolume.TotalCells,
-                        TotalCellsPerCore = targetVolume.TotalCellsPerCore,
-                        TotalCores = targetVolume.TotalCores,
-
-                        Cores = targetVolume.Cores,
-                        Cells = targetVolume.Cells,
-                        CellNeighbors = targetVolume.CellNeighbors,
-
-                        InitialPos = agent.InitialPos,
-                        TargetPos = agent.TargetPos,
-
-                        TempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.TempJob),
-                        OpenCells = new NativeArray<int>(targetVolume.TotalCells, Allocator.TempJob),
-                        WalkPoints = wayPoints,
-                    };
-
-                    aStarHandle = job.Schedule();
-
+                    targetJob = JobFactory.GenerateAStarJob(agent.ActiveVolume, agent.InitialPos, agent.TargetPos, this.wayPoints);
+                    aStarHandle = targetJob.Schedule();
                     aStarHandle.Complete();
-
-                    agent.SetPath(new NavigationPath(wayPoints));
-
-                    job.TempData.Dispose();
-                    job.OpenCells.Dispose();
-                    wayPoints.Clear();
+                    targetJob.TempData.Dispose();
+                    targetJob.OpenCells.Dispose();
                 }
             }
+
+            agent.SetPath(new NavigationPath(wayPoints));
+            wayPoints.Clear();
         }
     }
 }
