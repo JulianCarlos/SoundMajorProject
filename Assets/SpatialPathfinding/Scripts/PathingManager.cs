@@ -123,14 +123,14 @@ namespace Pathfinding
         {
             NavigationVolume originVolume;
             NavigationVolume targetVolume = agent.ActiveVolume;
-            var temp = agent.ActiveVolume.Links[0];
+            int tempLinkIndex = -1;
 
             for (int i = 0; i < agent.ActiveVolume.Links.Count; i++)
             {
                 if (math.distance(agent.TargetPos, agent.ActiveVolume.Links[i].transform.position) <= math.distance(agent.TargetPos, targetVolume.transform.position))
                 {
                     targetVolume = agent.ActiveVolume.Links[i].LinkedVolume;
-                    temp = agent.ActiveVolume.Links[i];
+                    tempLinkIndex = i;
                 }
             }
 
@@ -144,14 +144,14 @@ namespace Pathfinding
             }
             else
             {
-                targetJob = JobFactory.GenerateAStarJob(targetVolume, temp.NeighborLink.transform.position, agent.TargetPos, this.wayPoints);
+                targetJob = JobFactory.GenerateAStarJob(targetVolume, agent.ActiveVolume.Links[tempLinkIndex].NeighborLink.transform.position, agent.TargetPos, this.wayPoints);
                 aStarHandle = targetJob.Schedule();
                 aStarHandle.Complete();
                 targetJob.TempData.Dispose();
                 targetJob.OpenCells.Dispose();
 
                 originVolume = agent.ActiveVolume;
-                originJob = JobFactory.GenerateAStarJob(originVolume, agent.InitialPos, temp.transform.position, this.wayPoints);
+                originJob = JobFactory.GenerateAStarJob(originVolume, agent.InitialPos, agent.ActiveVolume.Links[tempLinkIndex].transform.position, this.wayPoints);
                 aStarHandle = originJob.Schedule();
                 aStarHandle.Complete();
                 originJob.TempData.Dispose();
