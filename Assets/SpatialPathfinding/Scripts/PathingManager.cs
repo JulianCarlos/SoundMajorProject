@@ -28,10 +28,12 @@ namespace Pathfinding
         Stopwatch moveExecutionStopwatch = new Stopwatch();
         Stopwatch calculateExecutionStopwatch = new Stopwatch();
 
-        private JobHandle aStarHandle;
         private NativeList<float3> wayPoints = new NativeList<float3>(Allocator.Persistent);
-
         private bool foundTargetVolume = false;
+
+        private AStarJob targetJob;
+        private AStarJob originJob;
+        private JobHandle aStarHandle;
 
         private void Awake()
         {
@@ -121,55 +123,39 @@ namespace Pathfinding
             NavigationVolume originVolume;
             NavigationVolume targetVolume;
 
-            AStarJob targetJob;
-            AStarJob originJob;
+            foundTargetVolume = false;
 
-            if (BoundingBoxChecker.IsPositionInsideVolume(agent.TargetPos, agent.ActiveVolume))
+            for (int i = 0; i < agent.ActiveVolume.Links.Count; i++)
+            {
+                if (BoundingBoxChecker.IsPositionInsideVolume(agent.TargetPos, agent.ActiveVolume.Links[i].LinkedVolume))
+                {
+                    foundTargetVolume = true;
+
+                    targetVolume = agent.ActiveVolume.Links[i].LinkedVolume;
+                    targetJob = JobFactory.GenerateAStarJob(targetVolume, agent.ActiveVolume.Links[i].NeighborLink.transform.position, agent.TargetPos, this.wayPoints);
+                    aStarHandle = targetJob.Schedule();
+                    aStarHandle.Complete();
+                    targetJob.TempData.Dispose();
+                    targetJob.OpenCells.Dispose();
+
+                    originVolume = agent.ActiveVolume;
+                    originJob = JobFactory.GenerateAStarJob(originVolume, agent.InitialPos, originVolume.Links[i].transform.position, this.wayPoints);
+                    aStarHandle = originJob.Schedule();
+                    aStarHandle.Complete();
+                    originJob.TempData.Dispose();
+                    originJob.OpenCells.Dispose();
+
+                    break;
+                }
+            }
+
+            if (!foundTargetVolume)
             {
                 targetJob = JobFactory.GenerateAStarJob(agent.ActiveVolume, agent.InitialPos, agent.TargetPos, this.wayPoints);
                 aStarHandle = targetJob.Schedule();
                 aStarHandle.Complete();
                 targetJob.TempData.Dispose();
                 targetJob.OpenCells.Dispose();
-            }
-            else
-            {
-                foundTargetVolume = false;
-
-                for (int i = 0; i < agent.ActiveVolume.Links.Count; i++)
-                {
-                    if (BoundingBoxChecker.IsPositionInsideVolume(agent.TargetPos, agent.ActiveVolume.Links[i].LinkedVolume))
-                    {
-                        foundTargetVolume = true;
-
-                        targetVolume = agent.ActiveVolume.Links[i].LinkedVolume;
-                        targetJob = JobFactory.GenerateAStarJob(targetVolume, agent.ActiveVolume.Links[i].NeighborLink.transform.position, agent.TargetPos, this.wayPoints);
-                        aStarHandle = targetJob.Schedule();
-                        aStarHandle.Complete();
-                        targetJob.TempData.Dispose();
-                        targetJob.OpenCells.Dispose();
-
-                        //----->
-
-                        originVolume = agent.ActiveVolume;
-                        originJob = JobFactory.GenerateAStarJob(originVolume, agent.InitialPos, originVolume.Links[i].transform.position, this.wayPoints);
-                        aStarHandle = originJob.Schedule();
-                        aStarHandle.Complete();
-                        originJob.TempData.Dispose();
-                        originJob.OpenCells.Dispose();
-
-                        break;
-                    }
-                }
-
-                if (!foundTargetVolume)
-                {
-                    targetJob = JobFactory.GenerateAStarJob(agent.ActiveVolume, agent.InitialPos, agent.TargetPos, this.wayPoints);
-                    aStarHandle = targetJob.Schedule();
-                    aStarHandle.Complete();
-                    targetJob.TempData.Dispose();
-                    targetJob.OpenCells.Dispose();
-                }
             }
 
             agent.SetPath(new NavigationPath(wayPoints));
