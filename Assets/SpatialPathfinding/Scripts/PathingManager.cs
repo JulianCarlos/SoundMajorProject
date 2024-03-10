@@ -8,6 +8,7 @@ using System;
 using Unity.Mathematics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Unity.Entities.UniversalDelegates;
 
 namespace Pathfinding
 {
@@ -121,41 +122,40 @@ namespace Pathfinding
         public void AStar(FlyingAgent agent)
         {
             NavigationVolume originVolume;
-            NavigationVolume targetVolume;
-
-            foundTargetVolume = false;
+            NavigationVolume targetVolume = agent.ActiveVolume;
+            var temp = agent.ActiveVolume.Links[0];
 
             for (int i = 0; i < agent.ActiveVolume.Links.Count; i++)
             {
-                if (BoundingBoxChecker.IsPositionInsideVolume(agent.TargetPos, agent.ActiveVolume.Links[i].LinkedVolume))
+                if (math.distance(agent.TargetPos, agent.ActiveVolume.Links[i].transform.position) <= math.distance(agent.TargetPos, targetVolume.transform.position))
                 {
-                    foundTargetVolume = true;
-
                     targetVolume = agent.ActiveVolume.Links[i].LinkedVolume;
-                    targetJob = JobFactory.GenerateAStarJob(targetVolume, agent.ActiveVolume.Links[i].NeighborLink.transform.position, agent.TargetPos, this.wayPoints);
-                    aStarHandle = targetJob.Schedule();
-                    aStarHandle.Complete();
-                    targetJob.TempData.Dispose();
-                    targetJob.OpenCells.Dispose();
-
-                    originVolume = agent.ActiveVolume;
-                    originJob = JobFactory.GenerateAStarJob(originVolume, agent.InitialPos, originVolume.Links[i].transform.position, this.wayPoints);
-                    aStarHandle = originJob.Schedule();
-                    aStarHandle.Complete();
-                    originJob.TempData.Dispose();
-                    originJob.OpenCells.Dispose();
-
-                    break;
+                    temp = agent.ActiveVolume.Links[i];
                 }
             }
 
-            if (!foundTargetVolume)
+            if (BoundingBoxChecker.IsPositionInsideVolume(agent.TargetPos, agent.ActiveVolume))
             {
                 targetJob = JobFactory.GenerateAStarJob(agent.ActiveVolume, agent.InitialPos, agent.TargetPos, this.wayPoints);
                 aStarHandle = targetJob.Schedule();
                 aStarHandle.Complete();
                 targetJob.TempData.Dispose();
                 targetJob.OpenCells.Dispose();
+            }
+            else
+            {
+                targetJob = JobFactory.GenerateAStarJob(targetVolume, temp.NeighborLink.transform.position, agent.TargetPos, this.wayPoints);
+                aStarHandle = targetJob.Schedule();
+                aStarHandle.Complete();
+                targetJob.TempData.Dispose();
+                targetJob.OpenCells.Dispose();
+
+                originVolume = agent.ActiveVolume;
+                originJob = JobFactory.GenerateAStarJob(originVolume, agent.InitialPos, temp.transform.position, this.wayPoints);
+                aStarHandle = originJob.Schedule();
+                aStarHandle.Complete();
+                originJob.TempData.Dispose();
+                originJob.OpenCells.Dispose();
             }
 
             agent.SetPath(new NavigationPath(wayPoints));
