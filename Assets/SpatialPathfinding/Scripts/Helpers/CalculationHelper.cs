@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -17,5 +18,10 @@ public static class CalculationHelper
     public static float3 Int3ToVector3(int3 int3Direction)
     {
         return new float3(int3Direction.x, int3Direction.y, int3Direction.z);
+    }
+
+    public static Vector3 Float3ToVector3(float3 floatValue)
+    {
+        return new Vector3(floatValue.x, floatValue.y, floatValue.z);
     }
 }

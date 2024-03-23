@@ -43,6 +43,8 @@ namespace Pathfinding
 
         public List<NavigationSubLink> Links = new List<NavigationSubLink>();
 
+        public BoxCollider DetectionBox { get; private set; }
+
         private void Awake()
         {
             TotalCells = (int)(cellAmount.x * amountOfCellsPerMainCell * cellAmount.y * amountOfCellsPerMainCell * cellAmount.z * amountOfCellsPerMainCell);
@@ -60,8 +62,9 @@ namespace Pathfinding
             InitializeGrid();
             GetAllCellNeighbors();
 
-            Collider[] overlappedAgents = Physics.OverlapBox(transform.position, new Vector3((cellSize * amountOfCellsPerMainCell * cellAmount.x) / 2, (cellSize * amountOfCellsPerMainCell * cellAmount.y) / 2, (cellSize * amountOfCellsPerMainCell * cellAmount.z) / 2), Quaternion.identity, LayerMask.GetMask("FlyingAgent"));
+            DetectionBox = GetComponent<BoxCollider>();
 
+            Collider[] overlappedAgents = Physics.OverlapBox(transform.position, new Vector3((cellSize * amountOfCellsPerMainCell * cellAmount.x) / 2, (cellSize * amountOfCellsPerMainCell * cellAmount.y) / 2, (cellSize * amountOfCellsPerMainCell * cellAmount.z) / 2), Quaternion.identity, LayerMask.GetMask("FlyingAgent"));
             for (int i = 0; i < overlappedAgents.Length; i++)
             {
                 overlappedAgents[i].GetComponent<FlyingAgent>().AddActiveVolume(this);

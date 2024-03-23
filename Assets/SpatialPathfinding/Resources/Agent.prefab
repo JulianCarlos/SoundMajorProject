@@ -98,8 +98,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d38c11765708f40469f4a5cebb03e5c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TargetPos: {x: -4.6, y: -8.6, z: 10.3}
-  speed: 5
+  TargetPos: {x: 137.9871, y: -8.8, z: -13.552687}
+  speedCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  maxSpeed: 15
+  maxSpeedTime: 3
+  interpolateSpeedStart: 1
+  showPath: 1
 --- !u!54 &8324981994264039060
 Rigidbody:
   m_ObjectHideFlags: 0

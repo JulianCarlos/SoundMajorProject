@@ -1,7 +1,6 @@
+using Mono.Cecil;
 using System.Collections;
-using System.Collections.Generic;
 using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Pathfinding
@@ -10,16 +9,31 @@ namespace Pathfinding
     public class FlyingAgent : MonoBehaviour
     {
         public NavigationVolume ActiveVolume { get; private set; }
-
-        public Vector3 TargetPos;
         public Vector3 InitialPos => transform.position;
+        public Vector3 TargetPos;
 
-        [SerializeField] private float speed = 5f;
-        [SerializeField] private NavigationPath activePath;
         [Space]
+        [SerializeField] private AnimationCurve startSpeedCurve;
+        [SerializeField] private AnimationCurve stopSpeedCurve;
+        [Space]
+        [SerializeField] private float maxSpeed = 5f;
+        [SerializeField] private float timeToReachMaxSpeed = 3f;
+        [SerializeField] private bool interpolateSpeedStart = false;
+        [Space]
+        [SerializeField] private float rotationStrength = 10f;
+        [SerializeField] private bool useSmoothRotation = false;
+        [Space]
+        [SerializeField] private float decelerationDistance = 1f;
+        [Space]
+        [SerializeField] private float stoppingDistance = 1f;
+        [SerializeField] private bool autoBreak = false;
+        [Space]
+        [SerializeField] private NavigationPath activePath;
         [SerializeField] private bool showPath = false;
 
-        private int currentWayPointIndex;
+        private int currentWayPointIndex = 0;
+        private float speedCurveMultiplier = 1f;
+        private float currentAccelerationValue = 0f;
 
         private void Start()
         {
@@ -56,21 +70,40 @@ namespace Pathfinding
 
         public void Move()
         {
-            if (currentWayPointIndex <= 0 && math.distance(transform.position, activePath.Waypoints[currentWayPointIndex]) <= 0.01f)
+            if (currentWayPointIndex <= 0 && math.distance(transform.position, activePath.Waypoints[0]) <= stoppingDistance)
             {
                 PathingManager.OnAgentFinishedPathing(this);
                 return;
             }
-            else if (math.distance(transform.position, activePath.Waypoints[currentWayPointIndex]) <= 0.01f)
+            else if (math.distance(transform.position, activePath.Waypoints[currentWayPointIndex]) <= stoppingDistance)
             {
                 currentWayPointIndex--;
             }
             else
             {
-                transform.position = Vector3.MoveTowards(transform.position, activePath.Waypoints[currentWayPointIndex], speed * Time.fixedDeltaTime);
-            }
-        }
+                if (interpolateSpeedStart)
+                {
+                    speedCurveMultiplier = startSpeedCurve.Evaluate(currentAccelerationValue);
+                    currentAccelerationValue += Time.deltaTime / timeToReachMaxSpeed;
+                }
+                
+                if (useSmoothRotation)
+                {
+                    Vector3 targetDirection = (CalculationHelper.Float3ToVector3(activePath.Waypoints[currentWayPointIndex]) - transform.position).normalized;
+                    Quaternion lookRotation = Quaternion.LookRotation(targetDirection);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationStrength);
 
+                    transform.position += transform.forward * (speedCurveMultiplier * maxSpeed) * Time.deltaTime;
+                }
+                else
+                {
+                    transform.position = Vector3.MoveTowards(transform.position, activePath.Waypoints[currentWayPointIndex], maxSpeed * Time.deltaTime);
+                }
+                
+                Debug.DrawLine(transform.position, transform.position + transform.forward * 5f, Color.red);
+            }   
+        }
+        
         private void OnDrawGizmos()
         {
             Gizmos.color = Color.green;

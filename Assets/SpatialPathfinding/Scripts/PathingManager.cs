@@ -16,9 +16,8 @@ namespace Pathfinding
     public class PathingManager : MonoBehaviour
     {
         public static PathingManager Instance { get; private set; }
-
-        public static Action<FlyingAgent> OnAgentStartedPathing;
-        public static Action<FlyingAgent> OnAgentFinishedPathing;
+        public static Action<FlyingAgent> OnAgentStartedPathing { get; private set; }   
+        public static Action<FlyingAgent> OnAgentFinishedPathing { get; private set; }
 
         [SerializeField] private List<FlyingAgent> movableAgents = new List<FlyingAgent>();
         [SerializeField] private List<FlyingAgent> calculableAgents = new List<FlyingAgent>();
@@ -30,11 +29,13 @@ namespace Pathfinding
         Stopwatch calculateExecutionStopwatch = new Stopwatch();
 
         private NativeList<float3> wayPoints = new NativeList<float3>(Allocator.Persistent);
-        private bool foundTargetVolume = false;
 
         private AStarJob targetJob;
         private AStarJob originJob;
         private JobHandle aStarHandle;
+
+        private NavigationVolume originVolume;
+        private NavigationVolume targetVolume;
 
         private void Awake()
         {
@@ -42,59 +43,52 @@ namespace Pathfinding
 
             OnAgentStartedPathing += AddAgentToCalculation;
             OnAgentFinishedPathing += RemoveAgentFromMovable;
-
-            StartCoroutine(nameof(CalculateAllAgentPaths));
-            StartCoroutine(nameof(MoveAllAgents));
         }
 
-        private IEnumerator MoveAllAgents()
+        private void Update()
         {
-            while (true)
-            {
-                yield return null;
-
-                if (movableAgents.Count <= 0)
-                    continue;
-
-                moveExecutionStopwatch.Start();
-
-                for (int i = 0; i < movableAgents.Count; i++)
-                {
-                    movableAgents[i].Move();
-                }
-
-                moveExecutionStopwatch.Stop();
-                movableExecutionTime = moveExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
-                moveExecutionStopwatch.Reset();
-            }
+            CalculateAllAgentPaths();
+            MoveAllAgents();
         }
 
-        private IEnumerator CalculateAllAgentPaths()
+        private void MoveAllAgents()
         {
-            while (true)
+            if (movableAgents.Count <= 0)
+                return;
+
+            moveExecutionStopwatch.Start();
+
+            for (int i = 0; i < movableAgents.Count; i++)
             {
-                yield return null;
-
-                if (calculableAgents.Count <= 0)
-                    continue;
-
-                calculateExecutionStopwatch.Start();
-
-                for (int i = 0; i < calculableAgents.Count; i++)
-                {
-                    AStar(calculableAgents[i]);
-
-                    if (!movableAgents.Contains(calculableAgents[i]))
-                    {
-                        movableAgents.Add(calculableAgents[i]);
-                        calculableAgents.Remove(calculableAgents[i]);
-                    }
-                }
-
-                calculateExecutionStopwatch.Stop();
-                calculateExecutionTime = calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
-                calculateExecutionStopwatch.Reset();
+                movableAgents[i].Move();
             }
+
+            moveExecutionStopwatch.Stop();
+            movableExecutionTime = moveExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
+            moveExecutionStopwatch.Reset();
+        }
+
+        private void CalculateAllAgentPaths()
+        {
+            if (calculableAgents.Count <= 0)
+                return;
+
+            calculateExecutionStopwatch.Start();
+
+            for (int i = 0; i < calculableAgents.Count; i++)
+            {
+                AStar(calculableAgents[i]);
+
+                if (!movableAgents.Contains(calculableAgents[i]))
+                {
+                    movableAgents.Add(calculableAgents[i]);
+                    calculableAgents.Remove(calculableAgents[i]);
+                }
+            }
+
+            calculateExecutionStopwatch.Stop();
+            calculateExecutionTime = calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
+            calculateExecutionStopwatch.Reset();
         }
 
         public void AddAgentToCalculation(FlyingAgent agent)
@@ -121,22 +115,30 @@ namespace Pathfinding
 
         public void AStar(FlyingAgent agent)
         {
-            NavigationVolume originVolume;
-            NavigationVolume targetVolume = agent.ActiveVolume;
+            originVolume = agent.ActiveVolume;
+            targetVolume = agent.ActiveVolume;
+            
             int tempLinkIndex = -1;
+            float tempDistance = float.MaxValue;
+            float distance = math.distance(originVolume.DetectionBox.ClosestPoint(agent.TargetPos), agent.TargetPos);
+            List<NavigationSubLink> links = agent.ActiveVolume.Links;
 
-            for (int i = 0; i < agent.ActiveVolume.Links.Count; i++)
+            for (int i = 0; i < links.Count; i++)
             {
-                if (math.distance(agent.TargetPos, agent.ActiveVolume.Links[i].transform.position) <= math.distance(agent.TargetPos, targetVolume.transform.position))
+                tempDistance = math.distance(links[i].LinkedVolume.DetectionBox.ClosestPoint(agent.TargetPos), agent.TargetPos);
+
+                if (tempDistance < distance)
                 {
-                    targetVolume = agent.ActiveVolume.Links[i].LinkedVolume;
+                    distance = tempDistance;
+
+                    targetVolume = links[i].LinkedVolume;
                     tempLinkIndex = i;
                 }
             }
 
-            if (BoundingBoxChecker.IsPositionInsideVolume(agent.TargetPos, agent.ActiveVolume))
+            if (originVolume == targetVolume)
             {
-                targetJob = JobFactory.GenerateAStarJob(agent.ActiveVolume, agent.InitialPos, agent.TargetPos, this.wayPoints);
+                targetJob = JobFactory.GenerateAStarJob(originVolume, agent.InitialPos, agent.TargetPos, this.wayPoints);
                 aStarHandle = targetJob.Schedule();
                 aStarHandle.Complete();
                 targetJob.TempData.Dispose();
@@ -144,14 +146,14 @@ namespace Pathfinding
             }
             else
             {
-                targetJob = JobFactory.GenerateAStarJob(targetVolume, agent.ActiveVolume.Links[tempLinkIndex].NeighborLink.transform.position, agent.TargetPos, this.wayPoints);
+                targetJob = JobFactory.GenerateAStarJob(targetVolume, links[tempLinkIndex].NeighborLink.transform.position, agent.TargetPos, this.wayPoints);
                 aStarHandle = targetJob.Schedule();
                 aStarHandle.Complete();
                 targetJob.TempData.Dispose();
                 targetJob.OpenCells.Dispose();
 
                 originVolume = agent.ActiveVolume;
-                originJob = JobFactory.GenerateAStarJob(originVolume, agent.InitialPos, agent.ActiveVolume.Links[tempLinkIndex].transform.position, this.wayPoints);
+                originJob = JobFactory.GenerateAStarJob(originVolume, agent.InitialPos, links[tempLinkIndex].transform.position, this.wayPoints);
                 aStarHandle = originJob.Schedule();
                 aStarHandle.Complete();
                 originJob.TempData.Dispose();
