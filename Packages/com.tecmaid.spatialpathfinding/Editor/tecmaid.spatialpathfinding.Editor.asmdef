@@ -1,0 +1,16 @@
+{
+    "name": "tecmaid.spatialpathfinding.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:18b9e6351ce614a4daa0a643eb046b6d"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
