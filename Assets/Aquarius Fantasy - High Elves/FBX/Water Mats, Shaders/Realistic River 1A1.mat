@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-1773459221459265612
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 639247ca83abc874e893eb93af2b5e44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 0
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Realistic River 1A1
+  m_Shader: {fileID: -6465566751694194690, guid: e7ca17732f192dc469d5f8b58a26d6f1, type: 3}
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - Texture2D_45B5617D:
+        m_Texture: {fileID: 2800000, guid: 7cb3ae2a457544c4a878671caabc9071, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Texture2D_5BF4DB6D:
+        m_Texture: {fileID: 2800000, guid: 4b6ed03ad8869324985da78aad5f1178, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Texture2D_C45B3B0E:
+        m_Texture: {fileID: 2800000, guid: 3384ca5a4ae414a4ab840f15fc4638e9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - Vector1_10AF3814: -1.72
+    - Vector1_1C2677F3: 1.56
+    - Vector1_2FECEB7: 0.541
+    - Vector1_4F592AC4: 0.539
+    - Vector1_631AEC2A: 3.95
+    - Vector1_6B298CF2: 0.82
+    - Vector1_7AE0C38C: 10
+    - Vector1_848D0E3E: 0.728
+    - Vector1_A0603DCF: 0.509
+    - Vector1_B51EB83B: 0.907
+    - Vector1_B5E6D3C4: 0.52
+    - Vector1_C4C9B130: 0.878
+    - Vector1_DDD5029B: 2
+    - Vector1_EA03D6D7: 0.455
+    - Vector1_F03D12F2: 0.326
+    - _Alpha: 1
+    - _BUILTIN_QueueControl: 0
+    - _BUILTIN_QueueOffset: 0
+    m_Colors:
+    - Color_1F5500F8: {r: 0.17332679, g: 0.8962264, b: 0.8962264, a: 0}
+    - Color_48FD57D2: {r: 0.6037736, g: 0.508366, b: 0.41295835, a: 0.7176471}
+    - Color_87E6589B: {r: 0.6839622, g: 0.82411826, b: 1, a: 1}
+    - Color_93F6F7CF: {r: 0.6886792, g: 0.6886792, b: 0.6886792, a: 1}
+    - Color_A1052E5B: {r: 0, g: 0, b: 0, a: 0.772549}
+    - Color_C8AEF328: {r: 0.740566, g: 1, b: 0.971174, a: 0.8509804}
+    - Color_DB326F91: {r: 1, g: 0.14044955, b: 0, a: 1}
+    - Vector2_5D359AAF: {r: 4.03, g: 5, b: 0, a: 0}
+    - Vector2_8A56A3FC: {r: 2.86, g: 5.5, b: 0, a: 0}
+    - Vector2_CE23A25E: {r: 3.65, g: 4.88, b: 0, a: 0}
+  m_BuildTextureStacks: []

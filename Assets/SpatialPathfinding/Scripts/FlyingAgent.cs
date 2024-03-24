@@ -6,30 +6,34 @@ using UnityEngine;
 namespace Pathfinding
 {
     [DefaultExecutionOrder(200)]
+    [RequireComponent(typeof(Collider))]
     public class FlyingAgent : MonoBehaviour
     {
         public NavigationVolume ActiveVolume { get; private set; }
         public Vector3 InitialPos => transform.position;
         public Vector3 TargetPos;
 
-        [Space]
+        [Space, Header("Starting Speed Settings")]
         [SerializeField] private AnimationCurve startSpeedCurve;
-        [SerializeField] private AnimationCurve stopSpeedCurve;
-        [Space]
         [SerializeField] private float maxSpeed = 5f;
         [SerializeField] private float timeToReachMaxSpeed = 3f;
         [SerializeField] private bool interpolateSpeedStart = false;
-        [Space]
-        [SerializeField] private float rotationStrength = 10f;
-        [SerializeField] private bool useSmoothRotation = false;
-        [Space]
+
+        [Space, Header("Stopping Speed Settings")]
+        [SerializeField] private AnimationCurve stopSpeedCurve;
         [SerializeField] private float decelerationDistance = 1f;
-        [Space]
         [SerializeField] private float stoppingDistance = 1f;
+        [SerializeField] private float distanceUntilWaypointReached = 1f;
         [SerializeField] private bool autoBreak = false;
-        [Space]
-        [SerializeField] private NavigationPath activePath;
+
+        [Space, Header("Rotation Settings")]
+        [SerializeField, Min(1)] private float rotationStrength = 10f;
+        [SerializeField] private bool useSmoothRotation = false;
+
+        [Space, Header("Path Settings")]
         [SerializeField] private bool showPath = false;
+
+        private NavigationPath activePath;
 
         private int currentWayPointIndex = 0;
         private float speedCurveMultiplier = 1f;
@@ -40,7 +44,7 @@ namespace Pathfinding
             MoveTo(TargetPos);
         }
 
-        public void AddActiveVolume(NavigationVolume activeVolume)
+        public void SetActiveVolume(NavigationVolume activeVolume)
         {
             this.ActiveVolume = activeVolume;
         }
@@ -57,6 +61,12 @@ namespace Pathfinding
             RequestPath(targetPos);
         }
 
+        public void Move()
+        {
+            CheckWaypointPosition();
+            ApplyRotationAndPosition();
+        }
+
         private void RequestPath(float3 targetPos)
         {
             if (ActiveVolume == null)
@@ -68,42 +78,43 @@ namespace Pathfinding
             PathingManager.OnAgentStartedPathing(this);
         }
 
-        public void Move()
+        private void CheckWaypointPosition()
         {
-            if (currentWayPointIndex <= 0 && math.distance(transform.position, activePath.Waypoints[0]) <= stoppingDistance)
+            if (currentWayPointIndex <= 0)
             {
-                PathingManager.OnAgentFinishedPathing(this);
-                return;
+                if (math.distance(transform.position, activePath.Waypoints[0]) <= stoppingDistance)
+                {
+                    PathingManager.OnAgentFinishedPathing(this);
+                    return;
+                }
             }
-            else if (math.distance(transform.position, activePath.Waypoints[currentWayPointIndex]) <= stoppingDistance)
+            else if (math.distance(transform.position, activePath.Waypoints[currentWayPointIndex]) <= distanceUntilWaypointReached)
             {
                 currentWayPointIndex--;
             }
+        }
+
+        private void ApplyRotationAndPosition()
+        {
+            if (interpolateSpeedStart)
+            {
+                speedCurveMultiplier = startSpeedCurve.Evaluate(currentAccelerationValue);
+                currentAccelerationValue += Time.deltaTime / timeToReachMaxSpeed;
+            }
+
+            Vector3 targetDirection = (CalculationHelper.Float3ToVector3(activePath.Waypoints[currentWayPointIndex]) - transform.position).normalized;
+            Quaternion lookRotation = Quaternion.LookRotation(targetDirection);
+
+            if (useSmoothRotation)
+            {
+                transform.SetPositionAndRotation(Vector3.MoveTowards(transform.position, transform.position + transform.forward, (speedCurveMultiplier * maxSpeed) * Time.deltaTime), Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationStrength));
+            }
             else
             {
-                if (interpolateSpeedStart)
-                {
-                    speedCurveMultiplier = startSpeedCurve.Evaluate(currentAccelerationValue);
-                    currentAccelerationValue += Time.deltaTime / timeToReachMaxSpeed;
-                }
-                
-                if (useSmoothRotation)
-                {
-                    Vector3 targetDirection = (CalculationHelper.Float3ToVector3(activePath.Waypoints[currentWayPointIndex]) - transform.position).normalized;
-                    Quaternion lookRotation = Quaternion.LookRotation(targetDirection);
-                    transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationStrength);
-
-                    transform.position += transform.forward * (speedCurveMultiplier * maxSpeed) * Time.deltaTime;
-                }
-                else
-                {
-                    transform.position = Vector3.MoveTowards(transform.position, activePath.Waypoints[currentWayPointIndex], maxSpeed * Time.deltaTime);
-                }
-                
-                Debug.DrawLine(transform.position, transform.position + transform.forward * 5f, Color.red);
-            }   
+                transform.SetPositionAndRotation(Vector3.MoveTowards(transform.position, activePath.Waypoints[currentWayPointIndex], maxSpeed * Time.deltaTime), lookRotation);
+            }
         }
-        
+
         private void OnDrawGizmos()
         {
             Gizmos.color = Color.green;

@@ -1,0 +1,128 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8147347235352160525
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 5
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Water A
+  m_Shader: {fileID: -6465566751694194690, guid: e48f517cb46f20243a268277c8c95fb7, type: 3}
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _BUILTIN_SURFACE_TYPE_TRANSPARENT
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap:
+    RenderType: Transparent
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _FoamTexture:
+        m_Texture: {fileID: 2800000, guid: 3384ca5a4ae414a4ab840f15fc4638e9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FoamTexture_1:
+        m_Texture: {fileID: 2800000, guid: 10171ba17e30d32429b93500c8cdb762, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalsMain:
+        m_Texture: {fileID: 2800000, guid: 1f4af400f11e51240b21022066015af6, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalsSecondary:
+        m_Texture: {fileID: 2800000, guid: 7cb3ae2a457544c4a878671caabc9071, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_7E192881_Texture_1:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 0
+    - _Ambient_Occlusion: 0.15
+    - _BUILTIN_AlphaClip: 0
+    - _BUILTIN_Blend: 0
+    - _BUILTIN_CullMode: 0
+    - _BUILTIN_DstBlend: 10
+    - _BUILTIN_QueueControl: 0
+    - _BUILTIN_QueueOffset: 0
+    - _BUILTIN_SrcBlend: 5
+    - _BUILTIN_Surface: 1
+    - _BUILTIN_ZTest: 4
+    - _BUILTIN_ZWrite: 0
+    - _BUILTIN_ZWriteControl: 0
+    - _Depth: 0.97
+    - _Displacement: 0.288
+    - _FoamDistance: 0.5
+    - _FoamStrength: 0.96
+    - _FoamTiling: 20.7
+    - _MainTiling: 7.45
+    - _Metallic: 0.83
+    - _NormalsSpeedA: 11.97
+    - _NormalsSpeedB: -26.3
+    - _NormalsStrength: 0.94
+    - _QueueControl: 0
+    - _QueueOffset: 0
+    - _SecondaryTiling: 13.4
+    - _Smoothness: 0.93
+    - _Strength: 0.68
+    - _WavesTiming: 66.4
+    - _WavesTiming_1: 26
+    m_Colors:
+    - Color_3269AB1A: {r: 0.32809716, g: 0.9161637, b: 0.95283014, a: 0.454902}
+    - Color_8BFE4EE0: {r: 0.26486287, g: 0.47540385, b: 0.6037736, a: 0.7372549}
+    - _Color_A: {r: 0.13906196, g: 0.2321265, b: 0.23584908, a: 0.454902}
+    - _Color_B: {r: 0.034042373, g: 0.06571198, b: 0.084905684, a: 0.7372549}
+    - _DeepColor: {r: 0.060475275, g: 0.07187613, b: 0.084905684, a: 0.6784314}
+    - _Depth_Color: {r: 0.045923818, g: 0.18238449, b: 0.2264151, a: 0.7529412}
+    - _FoamColor: {r: 0.75881094, g: 0.7796818, b: 0.7924528, a: 0.8156863}
+    - _Foam_Color: {r: 0.4528302, g: 0.4261303, b: 0.39943042, a: 1}
+    - _NormalsMainTile: {r: 25, g: 25, b: 0, a: 0}
+    - _NormalsSecondaryTile: {r: 0, g: 0, b: 0, a: 0}
+    - _ShallowColor: {r: 0.21239765, g: 0.32452807, b: 0.3490566, a: 0}
+    - _Surface_Color: {r: 0.36258456, g: 0.5705853, b: 0.7924528, a: 0.5176471}
+  m_BuildTextureStacks: []
+--- !u!114 &2648647393251554819
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 639247ca83abc874e893eb93af2b5e44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 0

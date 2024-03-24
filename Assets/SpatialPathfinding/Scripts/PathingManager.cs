@@ -51,21 +51,26 @@ namespace Pathfinding
             MoveAllAgents();
         }
 
-        private void MoveAllAgents()
+        public void CreateInstance()
         {
-            if (movableAgents.Count <= 0)
-                return;
-
-            moveExecutionStopwatch.Start();
-
-            for (int i = 0; i < movableAgents.Count; i++)
+            if (Instance == null)
             {
-                movableAgents[i].Move();
+                Instance = this;
             }
+            else
+            {
+                Destroy(this.gameObject);
+            }
+        }
 
-            moveExecutionStopwatch.Stop();
-            movableExecutionTime = moveExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
-            moveExecutionStopwatch.Reset();
+        public void AddAgentToCalculation(FlyingAgent agent)
+        {
+            calculableAgents.Add(agent);
+        }
+
+        public void RemoveAgentFromMovable(FlyingAgent agent)
+        {
+            movableAgents.Remove(agent);
         }
 
         private void CalculateAllAgentPaths()
@@ -91,26 +96,21 @@ namespace Pathfinding
             calculateExecutionStopwatch.Reset();
         }
 
-        public void AddAgentToCalculation(FlyingAgent agent)
+        private void MoveAllAgents()
         {
-            calculableAgents.Add(agent);
-        }
+            if (movableAgents.Count <= 0)
+                return;
 
-        public void RemoveAgentFromMovable(FlyingAgent agent)
-        {
-            movableAgents.Remove(agent);
-        }
+            moveExecutionStopwatch.Start();
 
-        public void CreateInstance()
-        {
-            if (Instance == null)
+            for (int i = 0; i < movableAgents.Count; i++)
             {
-                Instance = this;
+                movableAgents[i].Move();
             }
-            else
-            {
-                Destroy(this.gameObject);
-            }
+
+            moveExecutionStopwatch.Stop();
+            movableExecutionTime = moveExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
+            moveExecutionStopwatch.Reset();
         }
 
         public void AStar(FlyingAgent agent)

@@ -67,7 +67,7 @@ namespace Pathfinding
             Collider[] overlappedAgents = Physics.OverlapBox(transform.position, new Vector3((cellSize * amountOfCellsPerMainCell * cellAmount.x) / 2, (cellSize * amountOfCellsPerMainCell * cellAmount.y) / 2, (cellSize * amountOfCellsPerMainCell * cellAmount.z) / 2), Quaternion.identity, LayerMask.GetMask("FlyingAgent"));
             for (int i = 0; i < overlappedAgents.Length; i++)
             {
-                overlappedAgents[i].GetComponent<FlyingAgent>().AddActiveVolume(this);
+                overlappedAgents[i].GetComponent<FlyingAgent>().SetActiveVolume(this);
             }
         }
 
@@ -226,7 +226,7 @@ namespace Pathfinding
         
             if (targetAgent != null)
             {
-                targetAgent.AddActiveVolume(this);
+                targetAgent.SetActiveVolume(this);
             }
         }
 
