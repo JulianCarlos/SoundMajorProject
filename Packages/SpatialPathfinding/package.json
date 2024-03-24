@@ -14,5 +14,10 @@
     "email": "info@tecmaid.com",
     "url": "https://www.tecmaid.com"
   },
-  "unityRelease": "13f1"
+  "unityRelease": "13f1",
+  "dependencies": {
+    "com.unity.burst": "1.8.9",
+    "com.unity.collections": "2.1.4",
+    "com.unity.mathematics": "1.2.6"
+  }
 }
