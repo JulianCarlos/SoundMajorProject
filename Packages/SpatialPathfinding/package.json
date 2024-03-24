@@ -1,0 +1,19 @@
+{
+    "name": "com.tecmaid.spatialpathfinding",
+    "version": "1.0.0",
+    "displayName": "Spatial Pathfinding",
+    "description": "A advanced solution for spatial pathfinding",
+    "unity": "2019.1",
+    "dependencies": {
+   },
+   "keywords": [
+      "keyword1",
+      "keyword2",
+      "keyword3"
+    ],
+    "author": {
+      "name": "Tecmaid",
+      "email": "info@tecmaid.com",
+      "url": "https://www.tecmaid.com"
+    }
+  }
