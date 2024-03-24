@@ -1,5 +1,5 @@
 {
-    "name": "tecmaid.spatialpathfinding.Editor",
+    "name": "tecmaid.spatial-pathfinding.Editor",
     "rootNamespace": "",
     "references": [
         "GUID:18b9e6351ce614a4daa0a643eb046b6d"

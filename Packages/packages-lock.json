@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.tecmaid.spatialpathfinding": {
+    "com.tecmaid.spatial-pathfinding": {
       "version": "file:com.tecmaid.spatialpathfinding",
       "depth": 0,
       "source": "embedded",

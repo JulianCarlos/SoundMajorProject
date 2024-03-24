@@ -1,3 +1,14 @@
 {
-	"name": "tecmaid.spatialpathfinding.Editor.Tests"
+    "name": "tecmaid.spatial-pathfinding.Editor.Tests",
+    "rootNamespace": "",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }
