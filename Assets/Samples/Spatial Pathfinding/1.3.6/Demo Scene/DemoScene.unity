@@ -313,6 +313,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad790eb4828899c468ceb4fcd1cd19de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Links: []
   cellSize: 3
   amountOfCellsPerMainCell: 5
   cellAmount:
@@ -326,7 +327,6 @@ MonoBehaviour:
   cellColor: {r: 0.35, g: 0.35, b: 0.35, a: 0.35}
   detectionColor: {r: 1, g: 0, b: 0, a: 1}
   miliseconds: 0
-  Links: []
 --- !u!4 &154558619
 Transform:
   m_ObjectHideFlags: 0
@@ -1370,6 +1370,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1200068330}
+  - component: {fileID: 1200068331}
   m_Layer: 0
   m_Name: Pathing
   m_TagString: Untagged
@@ -1397,6 +1398,27 @@ Transform:
   - {fileID: 115573602}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1200068331
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1200068329}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1248958124
 GameObject:
   m_ObjectHideFlags: 0
@@ -1581,6 +1603,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad790eb4828899c468ceb4fcd1cd19de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Links: []
   cellSize: 3
   amountOfCellsPerMainCell: 5
   cellAmount:
@@ -1594,7 +1617,6 @@ MonoBehaviour:
   cellColor: {r: 0.35, g: 0.35, b: 0.35, a: 0.35}
   detectionColor: {r: 1, g: 0, b: 0, a: 1}
   miliseconds: 0
-  Links: []
 --- !u!4 &1268817042
 Transform:
   m_ObjectHideFlags: 0

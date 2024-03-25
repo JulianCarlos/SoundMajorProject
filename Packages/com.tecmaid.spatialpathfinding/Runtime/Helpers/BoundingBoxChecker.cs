@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Pathfinding
+namespace Pathfinding.Helpers
 {
     public static class BoundingBoxChecker
     {

@@ -3,6 +3,7 @@ using System.Linq;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+using Pathfinding.Helpers;
 
 namespace Pathfinding
 {
@@ -13,6 +14,9 @@ namespace Pathfinding
         public int TotalCells { get; private set; }
         public int TotalCores { get; private set; }
         public int TotalCellsPerCore { get; private set; }
+
+        public BoxCollider DetectionBox { get; private set; }
+        public List<NavigationSubLink> Links = new List<NavigationSubLink>();
 
         [SerializeField] private uint cellSize = 2;
         [SerializeField] private uint amountOfCellsPerMainCell = 5;
@@ -26,21 +30,18 @@ namespace Pathfinding
         [SerializeField] private Color coreColor = new Color(0f, 0f, 1f, 1f);
         [SerializeField] private Color cellColor = new Color(0.35f, 0.35f, 0.35f, 0.35f);
         [SerializeField] private Color detectionColor = new Color(1f, 0f, 0f, 1f);
+        [Space]
+        [SerializeField] private double miliseconds = 0;
 
         public NativeArray<Cell> Cells;
         public NativeArray<GridCore> Cores;
         public NativeArray<NeighborData> CellNeighbors;
 
         private NativeArray<int3> directions = new NativeArray<int3>(6, Allocator.Persistent);
-        private int directionCount = 0;
 
         private RaycastHit directionHit;
 
-        [SerializeField] private double miliseconds = 0;
-
-        public List<NavigationSubLink> Links = new List<NavigationSubLink>();
-
-        public BoxCollider DetectionBox { get; private set; }
+        private int directionCount = 0;
 
         private void Awake()
         {
@@ -97,7 +98,7 @@ namespace Pathfinding
 
             for (int i = 0; i < directionCount; i++)
             {
-                if (!Physics.BoxCast(position, Vector3.one * detectionRadius, CalculationHelper.Int3ToVector3(directions[i]), out directionHit, transform.rotation,cellSize))
+                if (!Physics.BoxCast(position, Vector3.one * detectionRadius, CalculationHelper.Int3ToFloat3(directions[i]), out directionHit, transform.rotation,cellSize))
                 {
                     int targetCellIndex = FindNearestCell(position + (directions[i] * (int)cellSize));
 

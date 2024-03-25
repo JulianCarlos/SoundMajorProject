@@ -1,13 +1,9 @@
-using Codice.Utils;
-using Pathfinding;
-using System.Collections;
-using System.Collections.Generic;
-using System.Net;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
+using Pathfinding.Helpers;
 
 [BurstCompile(CompileSynchronously = false)]
 public struct AStarJob : IJob

@@ -6,32 +6,36 @@ using Unity.Mathematics;
 using UnityEngine;
 using static Codice.Client.Common.WebApi.WebApiEndpoints;
 
-public static class JobFactory
+namespace Pathfinding.Helpers
 {
-    private static NavigationVolume targetVolume;
-
-    public static AStarJob GenerateAStarJob(NavigationVolume volume, float3 initialPos, float3 targetPos, NativeList<float3> wayPoints)
+    public static class JobFactory
     {
-        targetVolume = volume;
+        private static NavigationVolume targetVolume;
 
-        AStarJob job = new AStarJob()
+        public static AStarJob GenerateAStarJob(NavigationVolume volume, float3 initialPos, float3 targetPos, NativeList<float3> wayPoints)
         {
-            TotalCells = targetVolume.TotalCells,
-            TotalCellsPerCore = targetVolume.TotalCellsPerCore,
-            TotalCores = targetVolume.TotalCores,
+            targetVolume = volume;
 
-            Cores = targetVolume.Cores,
-            Cells = targetVolume.Cells,
-            CellNeighbors = targetVolume.CellNeighbors,
+            AStarJob job = new AStarJob()
+            {
+                TotalCells = targetVolume.TotalCells,
+                TotalCellsPerCore = targetVolume.TotalCellsPerCore,
+                TotalCores = targetVolume.TotalCores,
 
-            InitialPos = initialPos,
-            TargetPos = targetPos,
+                Cores = targetVolume.Cores,
+                Cells = targetVolume.Cells,
+                CellNeighbors = targetVolume.CellNeighbors,
 
-            TempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.TempJob),
-            OpenCells = new NativeArray<int>(targetVolume.TotalCells, Allocator.TempJob),
-            WalkPoints = wayPoints,
-        };
+                InitialPos = initialPos,
+                TargetPos = targetPos,
 
-        return job;
+                TempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.TempJob),
+                OpenCells = new NativeArray<int>(targetVolume.TotalCells, Allocator.TempJob),
+                WalkPoints = wayPoints,
+            };
+
+            return job;
+        }
     }
 }
+

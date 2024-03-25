@@ -5,6 +5,7 @@ using Unity.Jobs;
 using System.Collections.Generic;
 using System;
 using Unity.Mathematics;
+using Pathfinding.Helpers;
 
 namespace Pathfinding
 {
