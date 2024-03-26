@@ -4,6 +4,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using Pathfinding.Helpers;
+using System.Diagnostics;
 
 namespace Pathfinding
 {
@@ -57,7 +58,13 @@ namespace Pathfinding
         private void Start()
         {
             InitializeDirections();
+
+            Stopwatch calculateExecutionStopwatch = new Stopwatch();
+            calculateExecutionStopwatch.Start();
             InitializeGrid();
+            calculateExecutionStopwatch.Stop();
+            UnityEngine.Debug.Log(calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency));
+
             GetAllCellNeighbors();
 
             DetectionBox = GetComponent<BoxCollider>();
@@ -163,7 +170,7 @@ namespace Pathfinding
         {
             int index = 0;
             int coreIndex = 0;
-            List<int> tempSubCells;
+            NativeList<int> tempSubCells = new(Allocator.Persistent);
 
             for (int x = 0; x < cellAmount.x; x++)
             {
@@ -176,7 +183,7 @@ namespace Pathfinding
                         transform.position.y + ((y - (cellAmount.y - 1f) / 2f) * cellSize) * amountOfCellsPerMainCell,
                         transform.position.z + ((z - (cellAmount.z - 1f) / 2f) * cellSize) * amountOfCellsPerMainCell);
 
-                        tempSubCells = new();
+                        tempSubCells.Clear();
 
                         for (int a = 0; a < amountOfCellsPerMainCell; a++)
                         {
@@ -200,7 +207,7 @@ namespace Pathfinding
                             }
                         }
 
-                        GridCore core = new GridCore(mainCellCenter, tempSubCells.ToArray());
+                        GridCore core = new GridCore(mainCellCenter, tempSubCells.AsArray());
                         Cores[coreIndex] = (core);
                         coreIndex++;
                     }

@@ -7,7 +7,7 @@ public struct GridCore
     public float3 CorePos;
     public UnsafeList<int> SubCells;
     
-    public GridCore(float3 corePos, int[] subCells)
+    public GridCore(float3 corePos, NativeArray<int> subCells)
     {
         CorePos = corePos;
         SubCells = new UnsafeList<int>(subCells.Length, Allocator.Persistent);
