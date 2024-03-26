@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
-using UnityEngine;
-using static Codice.Client.Common.WebApi.WebApiEndpoints;
 
 namespace Pathfinding.Helpers
 {

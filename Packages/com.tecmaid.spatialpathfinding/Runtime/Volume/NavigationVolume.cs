@@ -88,12 +88,13 @@ namespace Pathfinding
         {
             for (int i = 0; i < TotalCells; i++)
             {
-                GetNeighbours(Cells[i].CellPos, i);
+                GetNeighbours(i);
             }
         }
 
-        private void GetNeighbours(float3 position, int index)
+        private void GetNeighbours(int index)
         {
+            float3 position = Cells[index].CellPos;
             NativeArray<int> neighbors = new NativeArray<int>(directionCount, Allocator.Temp);
 
             for (int i = 0; i < directionCount; i++)

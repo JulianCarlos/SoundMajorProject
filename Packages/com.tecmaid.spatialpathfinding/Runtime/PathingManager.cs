@@ -48,7 +48,7 @@ namespace Pathfinding
             MoveAllAgents();
         }
 
-        public void CreateInstance()
+        private void CreateInstance()
         {
             if (Instance == null)
             {
@@ -60,12 +60,12 @@ namespace Pathfinding
             }
         }
 
-        public void AddAgentToCalculation(FlyingAgent agent)
+        private void AddAgentToCalculation(FlyingAgent agent)
         {
             calculableAgents.Add(agent);
         }
 
-        public void RemoveAgentFromMovable(FlyingAgent agent)
+        private void RemoveAgentFromMovable(FlyingAgent agent)
         {
             movableAgents.Remove(agent);
         }
@@ -79,7 +79,7 @@ namespace Pathfinding
 
             for (int i = 0; i < calculableAgents.Count; i++)
             {
-                AStar(calculableAgents[i]);
+                CalculateAStarPath(calculableAgents[i]);
 
                 if (!movableAgents.Contains(calculableAgents[i]))
                 {
@@ -110,16 +110,25 @@ namespace Pathfinding
             moveExecutionStopwatch.Reset();
         }
 
-        public void AStar(FlyingAgent agent)
+        private void CalculateAStarPath(FlyingAgent agent)
         {
             originVolume = agent.ActiveVolume;
             targetVolume = agent.ActiveVolume;
-            
+
             int tempLinkIndex = -1;
             float tempDistance = float.MaxValue;
             float distance = math.distance(originVolume.DetectionBox.ClosestPoint(agent.TargetPos), agent.TargetPos);
             List<NavigationSubLink> links = agent.ActiveVolume.Links;
 
+            CalculateClosestVolumes(agent, ref tempLinkIndex, ref tempDistance, ref distance, links);
+            GenerateWaypoints(agent, tempLinkIndex, links);
+
+            agent.SetPath(new NavigationPath(wayPoints));
+            wayPoints.Clear();
+        }
+
+        private void CalculateClosestVolumes(FlyingAgent agent, ref int tempLinkIndex, ref float tempDistance, ref float distance, List<NavigationSubLink> links)
+        {
             for (int i = 0; i < links.Count; i++)
             {
                 tempDistance = math.distance(links[i].LinkedVolume.DetectionBox.ClosestPoint(agent.TargetPos), agent.TargetPos);
@@ -132,7 +141,10 @@ namespace Pathfinding
                     tempLinkIndex = i;
                 }
             }
+        }
 
+        private void GenerateWaypoints(FlyingAgent agent, int tempLinkIndex, List<NavigationSubLink> links)
+        {
             if (originVolume == targetVolume)
             {
                 targetJob = JobFactory.GenerateAStarJob(originVolume, agent.InitialPos, agent.TargetPos, this.wayPoints);
@@ -156,9 +168,6 @@ namespace Pathfinding
                 originJob.TempData.Dispose();
                 originJob.OpenCells.Dispose();
             }
-
-            agent.SetPath(new NavigationPath(wayPoints));
-            wayPoints.Clear();
         }
     }
 }
