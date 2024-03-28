@@ -121,6 +121,12 @@ namespace Pathfinding
             }
         }
 
+        public void CancelPath()
+        {
+            PathingManager.OnAgentFinishedPathing(this);
+            activePath = new NavigationPath();
+        }
+
         private void OnDrawGizmos()
         {
             Gizmos.color = Color.green;

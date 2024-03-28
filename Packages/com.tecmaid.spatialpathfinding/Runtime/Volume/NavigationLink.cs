@@ -9,28 +9,41 @@ namespace Pathfinding
     [DefaultExecutionOrder(120)]
     public class NavigationLink : MonoBehaviour
     {
-        [SerializeField] private NavigationSubLink link1;
-        [SerializeField] private NavigationSubLink link2;
+        [SerializeField] private NavigationSubLink startLink;
+        [SerializeField] private NavigationSubLink endLink;
+        [Space]
+        [SerializeField] private bool biDirectional = true;
+
+        private void Awake()
+        {
+            startLink.RootLink = this;
+            endLink.RootLink = this;
+        }
 
         private void Start()
         {
             GenerateLinks();
         }
 
+        public bool CheckTraverseAccess(NavigationSubLink link)
+        {
+            return link == startLink || link == endLink && biDirectional;
+        }
+
         private void GenerateLinks()
         {
             Collider[] collisions;
             int mask = LayerMask.GetMask("NavigationVolume");
-
+            
             try
             {
-                collisions = Physics.OverlapSphere(link1.transform.position, 1f, mask);
-                link2.LinkedVolume = collisions[0].GetComponent<NavigationVolume>();
-                link2.NeighborLink = link1;
+                collisions = Physics.OverlapSphere(startLink.transform.position, 1f, mask);
+                endLink.LinkedVolume = collisions[0].GetComponent<NavigationVolume>();
+                endLink.NeighborLink = startLink;
 
-                collisions = Physics.OverlapSphere(link2.transform.position, 1f, mask);
-                link1.LinkedVolume = collisions[0].GetComponent<NavigationVolume>();
-                link1.NeighborLink = link2;
+                collisions = Physics.OverlapSphere(endLink.transform.position, 1f, mask);
+                startLink.LinkedVolume = collisions[0].GetComponent<NavigationVolume>();
+                startLink.NeighborLink = endLink;
 
                 LinkVolumes();
             }
@@ -39,25 +52,25 @@ namespace Pathfinding
                 Debug.LogWarning($"A link is not inside a Navigation Volume, links only work if both links are inside a valid Volume");
             }
 
-            if (link1.LinkedVolume == link2.LinkedVolume)
+            if (startLink.LinkedVolume == endLink.LinkedVolume)
             {
-                Debug.LogWarning($"{link1} and {link2} cant be on the same Volume");
+                Debug.LogWarning($"{startLink} and {endLink} cant be on the same Volume");
             }
         }
 
         private void LinkVolumes()
         {
-            link1.LinkedVolume.Links.Add(link2);
-            link2.LinkedVolume.Links.Add(link1);
+            startLink.LinkedVolume.Links.Add(endLink);
+            endLink.LinkedVolume.Links.Add(startLink);
         }
 
         private void OnDrawGizmos()
         {
-            if (link1 == null || link2 == null)
+            if (startLink == null || endLink == null)
                 return;
 
             Gizmos.color = Color.white;
-            Gizmos.DrawLine(link1.transform.position, link2.transform.position);
+            Gizmos.DrawLine(startLink.transform.position, endLink.transform.position);
         }
     }
 }

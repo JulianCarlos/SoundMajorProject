@@ -19,6 +19,8 @@ namespace Pathfinding
         [SerializeField] private List<FlyingAgent> movableAgents = new List<FlyingAgent>();
         [SerializeField] private List<FlyingAgent> calculableAgents = new List<FlyingAgent>();
         [Space]
+        [SerializeField] private Modifiers modifiers = Modifiers.NONE;
+        [Space]
         [SerializeField] private double movableExecutionTime = 0;
         [SerializeField] private double calculateExecutionTime = 0;
 
@@ -123,8 +125,33 @@ namespace Pathfinding
             CalculateClosestVolumes(agent, ref tempLinkIndex, ref tempDistance, ref distance, links);
             GenerateWaypoints(agent, tempLinkIndex, links);
 
+            if (this.modifiers == Modifiers.PATHSMOOTHING)
+            {
+                wayPoints = SmoothPath(wayPoints, originVolume.GetDetectionRadius());
+            }
+
             agent.SetPath(new NavigationPath(wayPoints));
             wayPoints.Clear();
+        }
+
+        private NativeList<float3> SmoothPath(NativeList<float3> waypoints, float detectionRadius)
+        {
+            int index = 0;
+            NativeList<float3> newWaypoints = new NativeList<float3>(Allocator.Persistent);
+            newWaypoints.Add(waypoints[index]);
+
+            for (int i = 1; i < waypoints.Length - 1; i++)
+            {
+                if (Physics.BoxCast(waypoints[index], Vector3.one * detectionRadius, waypoints[i] - waypoints[index], Quaternion.identity, math.distance(waypoints[i], waypoints[index]))) 
+                {
+                    newWaypoints.Add(waypoints[i - 1]);
+                    index = i - 1;
+                }
+            }
+
+            newWaypoints.Add(waypoints[waypoints.Length - 1]);
+
+            return newWaypoints;
         }
 
         private void CalculateClosestVolumes(FlyingAgent agent, ref int tempLinkIndex, ref float tempDistance, ref float distance, List<NavigationSubLink> links)
@@ -133,7 +160,7 @@ namespace Pathfinding
             {
                 tempDistance = math.distance(links[i].LinkedVolume.DetectionBox.ClosestPoint(agent.TargetPos), agent.TargetPos);
 
-                if (tempDistance < distance)
+                if (tempDistance < distance && links[i].RootLink.CheckTraverseAccess(links[i]))
                 {
                     distance = tempDistance;
 

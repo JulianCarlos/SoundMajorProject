@@ -5,6 +5,8 @@ using Unity.Mathematics;
 using UnityEngine;
 using Pathfinding.Helpers;
 using System.Diagnostics;
+using Unity.Jobs;
+using Unity.Plastic.Newtonsoft.Json;
 
 namespace Pathfinding
 {
@@ -39,6 +41,8 @@ namespace Pathfinding
         public NativeArray<NeighborData> CellNeighbors;
 
         private NativeArray<int3> directions = new NativeArray<int3>(6, Allocator.Persistent);
+        private NativeArray<RaycastHit> results= new NativeArray<RaycastHit>(6, Allocator.Persistent);
+        private NativeArray<BoxcastCommand> commands = new NativeArray<BoxcastCommand>(6, Allocator.Persistent);
 
         private RaycastHit directionHit;
 
@@ -57,13 +61,12 @@ namespace Pathfinding
 
         private void Start()
         {
-            InitializeDirections();
-
             Stopwatch calculateExecutionStopwatch = new Stopwatch();
             calculateExecutionStopwatch.Start();
+
+            InitializeDirections();
+
             InitializeGrid();
-            calculateExecutionStopwatch.Stop();
-            UnityEngine.Debug.Log(calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency));
 
             GetAllCellNeighbors();
 
@@ -74,6 +77,14 @@ namespace Pathfinding
             {
                 overlappedAgents[i].GetComponent<FlyingAgent>().SetActiveVolume(this);
             }
+
+            calculateExecutionStopwatch.Stop();
+            UnityEngine.Debug.Log(calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency));
+        }
+
+        public float GetDetectionRadius()
+        {
+            return detectionRadius;
         }
 
         private void InitializeDirections()
@@ -104,12 +115,34 @@ namespace Pathfinding
             float3 position = Cells[index].CellPos;
             NativeArray<int> neighbors = new NativeArray<int>(directionCount, Allocator.Temp);
 
+            //for (int i = 0; i < directionCount; i++)
+            //{
+            //    commands[i] = new BoxcastCommand(position, Vector3.one * detectionRadius, Quaternion.identity, CalculationHelper.Int3ToFloat3(directions[i]), cellSize);
+            //}
+            //
+            //JobHandle handle = BoxcastCommand.ScheduleBatch(commands, results, 1);
+            //handle.Complete();
+            //
+            //for (int i = 0; i < directionCount; i++)
+            //{
+            //    if (results[i].collider == null)
+            //    {
+            //        int targetCellIndex = FindNearestCell(position + (directions[i] * (int)cellSize));
+            //    
+            //        neighbors[i] = targetCellIndex;
+            //    }
+            //    else
+            //    {
+            //        neighbors[i] = -1;
+            //    }
+            //}
+
             for (int i = 0; i < directionCount; i++)
             {
                 if (!Physics.BoxCast(position, Vector3.one * detectionRadius, CalculationHelper.Int3ToFloat3(directions[i]), out directionHit, transform.rotation,cellSize))
                 {
                     int targetCellIndex = FindNearestCell(position + (directions[i] * (int)cellSize));
-
+            
                     neighbors[i] = targetCellIndex;
                 }
                 else
@@ -117,7 +150,7 @@ namespace Pathfinding
                     neighbors[i] = -1;
                 }
             }
-            
+
             CellNeighbors[index] = new NeighborData(neighbors);
 
             neighbors.Dispose();
@@ -169,6 +202,20 @@ namespace Pathfinding
         public void InitializeGrid()
         {
             int index = 0;
+
+            for (int i = 0; i < cellAmount.x; i++)
+            {
+                for (int y = 0; y < cellAmount.y; y++)
+                {
+                    for (int z = 0; z < cellAmount.z; z++)
+                    {
+
+                    }
+                }
+            }
+
+            #region OriginalGridGeneration
+            /*
             int coreIndex = 0;
             NativeList<int> tempSubCells = new(Allocator.Persistent);
 
@@ -213,6 +260,8 @@ namespace Pathfinding
                     }
                 }
             }
+            */
+            #endregion
         }
 
         private void OnValidate()
