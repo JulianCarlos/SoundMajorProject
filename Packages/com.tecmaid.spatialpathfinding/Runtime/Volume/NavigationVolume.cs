@@ -6,7 +6,6 @@ using UnityEngine;
 using Pathfinding.Helpers;
 using System.Diagnostics;
 using Unity.Jobs;
-using Unity.Plastic.Newtonsoft.Json;
 
 namespace Pathfinding
 {
@@ -202,20 +201,6 @@ namespace Pathfinding
         public void InitializeGrid()
         {
             int index = 0;
-
-            for (int i = 0; i < cellAmount.x; i++)
-            {
-                for (int y = 0; y < cellAmount.y; y++)
-                {
-                    for (int z = 0; z < cellAmount.z; z++)
-                    {
-
-                    }
-                }
-            }
-
-            #region OriginalGridGeneration
-            /*
             int coreIndex = 0;
             NativeList<int> tempSubCells = new(Allocator.Persistent);
 
@@ -260,8 +245,6 @@ namespace Pathfinding
                     }
                 }
             }
-            */
-            #endregion
         }
 
         private void OnValidate()
