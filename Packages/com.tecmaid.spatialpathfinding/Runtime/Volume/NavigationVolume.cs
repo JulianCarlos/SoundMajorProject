@@ -45,6 +45,8 @@ namespace Pathfinding
 
         private RaycastHit directionHit;
 
+        private RaycastHit[] hitResults = new RaycastHit[55];
+
         private int directionCount = 0;
 
         private void Awake()
@@ -114,34 +116,12 @@ namespace Pathfinding
             float3 position = Cells[index].CellPos;
             NativeArray<int> neighbors = new NativeArray<int>(directionCount, Allocator.Temp);
 
-            //for (int i = 0; i < directionCount; i++)
-            //{
-            //    commands[i] = new BoxcastCommand(position, Vector3.one * detectionRadius, Quaternion.identity, CalculationHelper.Int3ToFloat3(directions[i]), cellSize);
-            //}
-            //
-            //JobHandle handle = BoxcastCommand.ScheduleBatch(commands, results, 1);
-            //handle.Complete();
-            //
-            //for (int i = 0; i < directionCount; i++)
-            //{
-            //    if (results[i].collider == null)
-            //    {
-            //        int targetCellIndex = FindNearestCell(position + (directions[i] * (int)cellSize));
-            //    
-            //        neighbors[i] = targetCellIndex;
-            //    }
-            //    else
-            //    {
-            //        neighbors[i] = -1;
-            //    }
-            //}
-
             for (int i = 0; i < directionCount; i++)
             {
                 if (!Physics.BoxCast(position, Vector3.one * detectionRadius, CalculationHelper.Int3ToFloat3(directions[i]), out directionHit, transform.rotation,cellSize))
                 {
                     int targetCellIndex = FindNearestCell(position + (directions[i] * (int)cellSize));
-            
+                
                     neighbors[i] = targetCellIndex;
                 }
                 else

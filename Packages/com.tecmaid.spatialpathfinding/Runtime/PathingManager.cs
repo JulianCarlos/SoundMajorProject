@@ -149,7 +149,7 @@ namespace Pathfinding
                 }
             }
 
-            newWaypoints.Add(waypoints[waypoints.Length - 1]);
+            newWaypoints.Add(waypoints[^1]);
 
             return newWaypoints;
         }
