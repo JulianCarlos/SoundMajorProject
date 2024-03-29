@@ -26,6 +26,11 @@ namespace Pathfinding.Helpers
         {
             return new Vector3(floatValue.x, floatValue.y, floatValue.z);
         }
+
+        public static int FlattenIndex(int3 index, int totalHeight, int totalDepth)
+        {
+            return index.x + totalHeight * (index.y + totalDepth * index.z);
+        }
     }
 }
 
