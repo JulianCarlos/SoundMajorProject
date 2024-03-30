@@ -67,7 +67,7 @@ namespace Pathfinding
 
             InitializeDirections();
 
-            InitializeGrid();
+            InitializeCoreGrid();
 
             GetAllCellNeighbors();
 
@@ -140,45 +140,45 @@ namespace Pathfinding
             int closestCore = 0;
             float tempDistance;
             float distance = float.MaxValue;
-
+            
             for (int i = 0; i < TotalCores; i++)
             {
                 tempDistance = CalculationHelper.CalculateSquaredDistance(Cores[i].CorePos, position);
-
+            
                 if (tempDistance < distance)
                 {
                     distance = tempDistance;
                     closestCore = i;
                 }
             }
-
+            
             distance = float.MaxValue;
             int closestCell = 0;
-
+            
             NativeArray<int> subCells = new NativeArray<int>(Cores[closestCore].SubCells.Length, Allocator.Temp);
-
+            
             for (int i = 0; i < Cores[closestCore].SubCells.Length; i++)
             {
                 subCells[i] = Cores[closestCore].SubCells[i];
             }
-
+            
             for (int i = 0; i < TotalCellsPerCore; i++)
             {
                 tempDistance = CalculationHelper.CalculateSquaredDistance(Cells[subCells[i]].CellPos, position);
-
+            
                 if (tempDistance < distance)
                 {
                     distance = tempDistance;
                     closestCell = subCells[i];
                 }
             }
-
+            
             subCells.Dispose();
-
+            
             return closestCell;
         }
 
-        public void InitializeGrid()
+        public void InitializeCoreGrid()
         {
             int index = 0;
             int coreIndex = 0;
