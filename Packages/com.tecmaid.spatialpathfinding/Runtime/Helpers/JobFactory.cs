@@ -20,6 +20,10 @@ namespace Pathfinding.Helpers
                 TotalCellsPerCore = targetVolume.TotalCellsPerCore,
                 TotalCores = targetVolume.TotalCores,
 
+                VolumeWidth = targetVolume.VolumeWidth,
+                VolumeHeight = targetVolume.VolumeHeight,
+                VolumeDepth = targetVolume.VolumeDepth,
+
                 Cores = targetVolume.Cores,
                 Cells = targetVolume.Cells,
                 CellNeighbors = targetVolume.CellNeighbors,

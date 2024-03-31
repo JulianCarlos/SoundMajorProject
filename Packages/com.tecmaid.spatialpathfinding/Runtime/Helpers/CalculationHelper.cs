@@ -1,4 +1,4 @@
-using System.Collections;
+using System.Collections; 
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.Mathematics;
@@ -27,10 +27,17 @@ namespace Pathfinding.Helpers
             return new Vector3(floatValue.x, floatValue.y, floatValue.z);
         }
 
-        public static int FlattenIndex(int3 index, int totalHeight, int totalDepth)
+        public static int FlattenIndex(int3 index, int totalWidth, int totalHeight, int totalDepth)
         {
-            //return index.x + totalHeight * (index.y + totalDepth * index.z);
-            return index.y + (index.x << 10) + (index.z << 20);
+            return index.x + totalWidth * (index.y + totalHeight * index.z);
+        }
+
+        public static bool CheckIfIndexValid(int3 index, int totalWidth, int totalHeight, int totalDepth)
+        {
+            return
+                index.x >= 0 && index.x < totalWidth &&
+                index.y >= 0 && index.y < totalHeight &&
+                index.z >= 0 && index.z < totalDepth;
         }
     }
 }

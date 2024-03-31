@@ -12,6 +12,10 @@ public struct AStarJob : IJob
     public int TotalCores;
     public int TotalCellsPerCore;
 
+    public int VolumeWidth;
+    public int VolumeHeight;
+    public int VolumeDepth;
+
     public float3 TargetPos;
     public float3 InitialPos;
 
@@ -30,6 +34,10 @@ public struct AStarJob : IJob
     private int OpenCellsCount;
     private int ClosedCellsCount;
 
+    private int indexX;
+    private int indexY;
+    private int indexZ;
+
     public void Execute()
     {
         FindPoints(InitialPos, TargetPos);
@@ -46,45 +54,47 @@ public struct AStarJob : IJob
 
     private int FindNearestCell(float3 position)
     {
-        float tempDistance;
-        int closestCore = 0;
-        float distance = float.MaxValue;
+        float distanceX = float.MaxValue;
+        float distanceY = float.MaxValue;
+        float distanceZ = float.MaxValue;
 
-        for (int i = 0; i < TotalCores; i++)
+        float tempDistance = 0;
+
+        for (int x = 0; x < VolumeWidth; x++)
         {
-            tempDistance = CalculationHelper.CalculateSquaredDistance(Cores[i].CorePos, position);
+            int index = CalculationHelper.FlattenIndex(new int3(x, 0, 0), VolumeWidth, VolumeHeight, VolumeDepth);
+            tempDistance = CalculationHelper.CalculateSquaredDistance(Cells[index].CellPos, position);
 
-            if (tempDistance < distance)
+            if (tempDistance < distanceX)
             {
-                distance = tempDistance;
-                closestCore = i;
+                distanceX = tempDistance;
+                indexX = x;
+            }
+        }
+        for (int y = 0; y < VolumeHeight; y++)
+        {
+            int index = CalculationHelper.FlattenIndex(new int3(0, y, 0), VolumeWidth, VolumeHeight, VolumeDepth);
+            tempDistance = CalculationHelper.CalculateSquaredDistance(Cells[index].CellPos, position);
+
+            if (tempDistance < distanceY)
+            {
+                distanceY = tempDistance;
+                indexY = y;
+            }
+        }
+        for (int z = 0; z < VolumeDepth; z++)
+        {
+            int index = CalculationHelper.FlattenIndex(new int3(0, 0, z), VolumeWidth, VolumeHeight, VolumeDepth);
+            tempDistance = CalculationHelper.CalculateSquaredDistance(Cells[index].CellPos, position);
+
+            if (tempDistance < distanceZ)
+            {
+                distanceZ = tempDistance;
+                indexZ = z;
             }
         }
 
-        distance = float.MaxValue;
-        int closestCell = 0;
-
-        NativeArray<int> subCells = new NativeArray<int>(Cores[closestCore].SubCells.Length, Allocator.Temp);
-
-        for (int i = 0; i < Cores[closestCore].SubCells.Length; i++)
-        {
-            subCells[i] = Cores[closestCore].SubCells[i];
-        }
-
-        for (int i = 0; i < TotalCellsPerCore; i++)
-        {
-            tempDistance = CalculationHelper.CalculateSquaredDistance(Cells[subCells[i]].CellPos, position);
-
-            if (tempDistance < distance)
-            {
-                distance = tempDistance;
-                closestCell = subCells[i];
-            }
-        }
-
-        subCells.Dispose();
-
-        return closestCell;
+        return CalculationHelper.FlattenIndex(new int3(indexX, indexY, indexZ), VolumeWidth, VolumeHeight, VolumeDepth);
     }
 
     private void InitializeBuffers()

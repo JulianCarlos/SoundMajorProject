@@ -6,6 +6,8 @@ using UnityEngine;
 using Pathfinding.Helpers;
 using System.Diagnostics;
 using Unity.Jobs;
+using Debug = UnityEngine.Debug;
+using UnityEditor;
 
 namespace Pathfinding
 {
@@ -16,6 +18,10 @@ namespace Pathfinding
         public int TotalCells { get; private set; }
         public int TotalCores { get; private set; }
         public int TotalCellsPerCore { get; private set; }
+
+        public int VolumeWidth { get; private set; }
+        public int VolumeHeight { get; private set; }
+        public int VolumeDepth { get; private set; }
 
         public BoxCollider DetectionBox { get; private set; }
         public List<NavigationSubLink> Links = new List<NavigationSubLink>();
@@ -45,6 +51,14 @@ namespace Pathfinding
 
         private int directionCount = 0;
 
+        private int indexX = 0;
+        private int indexY = 0;
+        private int indexZ = 0;
+
+        private int rowXLength = 0;
+        private int rowYLength = 0;
+        private int rowZLength = 0;
+
         private void Awake()
         {
             TotalCells = (int)(cellAmount.x * amountOfCellsPerMainCell * cellAmount.y * amountOfCellsPerMainCell * cellAmount.z * amountOfCellsPerMainCell);
@@ -54,6 +68,10 @@ namespace Pathfinding
             Cells = new NativeArray<Cell>(TotalCells, Allocator.Persistent);
             Cores = new NativeArray<GridCore>(TotalCores, Allocator.Persistent);
             CellNeighbors = new NativeArray<NeighborData>(TotalCells, Allocator.Persistent);
+
+            VolumeWidth = (int)(cellAmount.x * amountOfCellsPerMainCell);
+            VolumeHeight = (int)(cellAmount.y * amountOfCellsPerMainCell);
+            VolumeDepth = (int)(cellAmount.z * amountOfCellsPerMainCell);
         }
 
         private void Start()
@@ -105,6 +123,12 @@ namespace Pathfinding
             {
                 GetNeighbours(i);
             }
+
+            //int index = FindNearestCell(new float3(0f, 0f, 0f));
+            //Debug.Log(index);
+            //Debug.DrawLine(Cells[index].CellPos, (Vector3)Cells[index].CellPos + Vector3.up * 5f, Color.cyan, 155f);
+
+            //Debug.Log(CalculationHelper.FlattenIndex(new int3(3, 5, 11), VolumeWidth, VolumeHeight, VolumeDepth));
         }
 
         private void GetNeighbours(int index)
@@ -133,91 +157,68 @@ namespace Pathfinding
 
         private int FindNearestCell(float3 position)
         {
-            int closestCore = 0;
-            float tempDistance;
-            float distance = float.MaxValue;
-            
-            for (int i = 0; i < TotalCores; i++)
+            float distanceX = float.MaxValue;
+            float distanceY = float.MaxValue;
+            float distanceZ = float.MaxValue;
+
+            float tempDistance = 0;
+
+            for (int x = 0; x < VolumeWidth; x++)
             {
-                tempDistance = CalculationHelper.CalculateSquaredDistance(Cores[i].CorePos, position);
-            
-                if (tempDistance < distance)
+                int index = CalculationHelper.FlattenIndex(new int3(x, 0, 0), VolumeWidth, VolumeHeight, VolumeDepth);
+                tempDistance = CalculationHelper.CalculateSquaredDistance(Cells[index].CellPos, position);
+                
+                if (tempDistance < distanceX)
                 {
-                    distance = tempDistance;
-                    closestCore = i;
+                    distanceX = tempDistance;
+                    indexX = x;
                 }
             }
-            
-            distance = float.MaxValue;
-            int closestCell = 0;
-            
-            NativeArray<int> subCells = new NativeArray<int>(Cores[closestCore].SubCells.Length, Allocator.Temp);
-            
-            for (int i = 0; i < Cores[closestCore].SubCells.Length; i++)
+            for (int y = 0; y < VolumeHeight; y++)
             {
-                subCells[i] = Cores[closestCore].SubCells[i];
-            }
-            
-            for (int i = 0; i < TotalCellsPerCore; i++)
-            {
-                tempDistance = CalculationHelper.CalculateSquaredDistance(Cells[subCells[i]].CellPos, position);
-            
-                if (tempDistance < distance)
+                int index = CalculationHelper.FlattenIndex(new int3(0, y, 0), VolumeWidth, VolumeHeight, VolumeDepth);
+                tempDistance = CalculationHelper.CalculateSquaredDistance(Cells[index].CellPos, position);
+                
+                if (tempDistance < distanceY)
                 {
-                    distance = tempDistance;
-                    closestCell = subCells[i];
+                    distanceY = tempDistance;
+                    indexY = y;
                 }
             }
-            
-            subCells.Dispose();
-            
-            return closestCell;
+            for (int z = 0; z < VolumeDepth; z++)
+            {
+                int index = CalculationHelper.FlattenIndex(new int3(0, 0, z), VolumeWidth, VolumeHeight, VolumeDepth);
+                tempDistance = CalculationHelper.CalculateSquaredDistance(Cells[index].CellPos, position);
+                
+                if (tempDistance < distanceZ)
+                {
+                    distanceZ = tempDistance;
+                    indexZ = z;
+                }
+            }
+
+            return CalculationHelper.FlattenIndex(new int3(indexX, indexY, indexZ), VolumeWidth, VolumeHeight, VolumeDepth);
         }
 
         public void InitializeCoreGrid()
         {
             int index = 0;
-            int coreIndex = 0;
-            NativeList<int> tempSubCells = new(Allocator.Persistent);
 
-            for (int x = 0; x < cellAmount.x; x++)
+            for (int z = 0; z < cellAmount.z * amountOfCellsPerMainCell; z++)
             {
-                for (int y = 0; y < cellAmount.y; y++)
+                for (int y = 0; y < cellAmount.y * amountOfCellsPerMainCell; y++)
                 {
-                    for (int z = 0; z < cellAmount.z; z++)
+                    for (int x = 0; x < cellAmount.x * amountOfCellsPerMainCell; x++)
                     {
-                        float3 mainCellCenter = new float3(
-                        transform.position.x + ((x - (cellAmount.x - 1f) / 2f) * cellSize) * amountOfCellsPerMainCell,
-                        transform.position.y + ((y - (cellAmount.y - 1f) / 2f) * cellSize) * amountOfCellsPerMainCell,
-                        transform.position.z + ((z - (cellAmount.z - 1f) / 2f) * cellSize) * amountOfCellsPerMainCell);
+                        Vector3 mainCellCenter = new Vector3(
+                        transform.position.x + ((x - (cellAmount.x * amountOfCellsPerMainCell - 1f) / 2f) * cellSize),
+                        transform.position.y + ((y - (cellAmount.y * amountOfCellsPerMainCell - 1f) / 2f) * cellSize),
+                        transform.position.z + ((z - (cellAmount.z * amountOfCellsPerMainCell - 1f) / 2f) * cellSize));
 
-                        tempSubCells.Clear();
+                        Cell cell = new Cell(mainCellCenter, index, new int3(x, y, z));
+                        Cells[index] = cell;
 
-                        for (int a = 0; a < amountOfCellsPerMainCell; a++)
-                        {
-                            for (int b = 0; b < amountOfCellsPerMainCell; b++)
-                            {
-                                for (int c = 0; c < amountOfCellsPerMainCell; c++)
-                                {
-                                    float3 subcellCenter = new float3(
-                                        mainCellCenter.x + (a - (amountOfCellsPerMainCell - 1f) / 2f) * cellSize,
-                                        mainCellCenter.y + (b - (amountOfCellsPerMainCell - 1f) / 2f) * cellSize,
-                                        mainCellCenter.z + (c - (amountOfCellsPerMainCell - 1f) / 2f) * cellSize
-                                    );
-
-                                    Cell cell = new Cell(subcellCenter, index);
-
-                                    Cells[index] = (cell);
-                                    tempSubCells.Add(cell.Index);
-
-                                    index++;
-                                }
-                            }
-                        }
-
-                        GridCore core = new GridCore(mainCellCenter, tempSubCells.AsArray());
-                        Cores[coreIndex] = (core);
-                        coreIndex++;
+                        index++;
                     }
                 }
             }
@@ -249,53 +250,41 @@ namespace Pathfinding
             if (visualMode == VisualMode.None)
                 return;
 
-            if (visualMode == VisualMode.VolumeOnly || visualMode == VisualMode.All)
+            if (visualMode == VisualMode.All || visualMode == VisualMode.VolumeOnly)
             {
                 Gizmos.color = volumeColor;
-                Gizmos.DrawCube(transform.position, new Vector3(cellAmount.x, cellAmount.y, cellAmount.z) * amountOfCellsPerMainCell * cellSize);
+                Gizmos.DrawCube(transform.position, (new Vector3(cellAmount.x, cellAmount.y, cellAmount.z) * amountOfCellsPerMainCell) * cellSize);
             }
 
-            for (int x = 0; x < cellAmount.x; x++)
+            if (visualMode == VisualMode.All || visualMode == VisualMode.Detection || visualMode == VisualMode.CellsOnly)
             {
-                for (int y = 0; y < cellAmount.y; y++)
+                Gizmos.color = Color.red;
+
+                int index = 0;
+
+                for (int z = 0; z < cellAmount.z * amountOfCellsPerMainCell; z++)
                 {
-                    for (int z = 0; z < cellAmount.z; z++)
+                    for (int y = 0; y < cellAmount.y * amountOfCellsPerMainCell; y++)
                     {
-                        Vector3 mainCellCenter = new Vector3(
-                        transform.position.x + ((x - (cellAmount.x - 1f) / 2f) * cellSize) * amountOfCellsPerMainCell,
-                        transform.position.y + ((y - (cellAmount.y - 1f) / 2f) * cellSize) * amountOfCellsPerMainCell,
-                        transform.position.z + ((z - (cellAmount.z - 1f) / 2f) * cellSize) * amountOfCellsPerMainCell);
-
-                        if (visualMode == VisualMode.CoresOnly || visualMode == VisualMode.All)
+                        for (int x = 0; x < cellAmount.x * amountOfCellsPerMainCell; x++)
                         {
-                            Gizmos.color = coreColor;
-                            Gizmos.DrawWireCube(mainCellCenter, Vector3.one);
-                        }
+                            Vector3 mainCellCenter = new Vector3(
+                            transform.position.x + ((x - (cellAmount.x * amountOfCellsPerMainCell - 1f) / 2f) * cellSize),
+                            transform.position.y + ((y - (cellAmount.y * amountOfCellsPerMainCell - 1f) / 2f) * cellSize),
+                            transform.position.z + ((z - (cellAmount.z * amountOfCellsPerMainCell - 1f) / 2f) * cellSize));
 
-                        for (int a = 0; a < amountOfCellsPerMainCell; a++)
-                        {
-                            for (int b = 0; b < amountOfCellsPerMainCell; b++)
+                            if (visualMode == VisualMode.Detection || visualMode == VisualMode.All)
                             {
-                                for (int c = 0; c < amountOfCellsPerMainCell; c++)
-                                {
-                                    Vector3 subcellCenter = new Vector3(
-                                        mainCellCenter.x + (a - (amountOfCellsPerMainCell - 1f) / 2f) * cellSize,
-                                        mainCellCenter.y + (b - (amountOfCellsPerMainCell - 1f) / 2f) * cellSize,
-                                        mainCellCenter.z + (c - (amountOfCellsPerMainCell - 1f) / 2f) * cellSize
-                                    );
-
-                                    if (visualMode == VisualMode.Detection || visualMode == VisualMode.All)
-                                    {
-                                        Gizmos.color = detectionColor;
-                                        Gizmos.DrawWireCube(subcellCenter, Vector3.one * detectionRadius * 2);
-                                    }
-                                    if (visualMode == VisualMode.CellsOnly || visualMode == VisualMode.All)
-                                    {
-                                        Gizmos.color = cellColor;
-                                        Gizmos.DrawWireCube(subcellCenter, Vector3.one * cellSize);
-                                    }
-                                }
+                                Gizmos.DrawWireCube(mainCellCenter, Vector3.one * detectionRadius);
                             }
+
+                            if (visualMode == VisualMode.CellsOnly || visualMode == VisualMode.All)
+                            {
+                                Gizmos.DrawWireCube(mainCellCenter, Vector3.one * cellSize);
+                            }
+                            //Handles.Label(mainCellCenter, $"{new int3(x, y, z)} \n {index}");
+
+                            index++;
                         }
                     }
                 }
@@ -308,9 +297,7 @@ namespace Pathfinding
         None,
         All,
         Detection,
-        Neighbors,
         VolumeOnly,
-        CoresOnly,
         CellsOnly,
     }
 }
