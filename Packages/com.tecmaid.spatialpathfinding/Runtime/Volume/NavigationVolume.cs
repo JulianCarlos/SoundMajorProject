@@ -40,12 +40,8 @@ namespace Pathfinding
         public NativeArray<NeighborData> CellNeighbors;
 
         private NativeArray<int3> directions = new NativeArray<int3>(6, Allocator.Persistent);
-        private NativeArray<RaycastHit> results= new NativeArray<RaycastHit>(6, Allocator.Persistent);
-        private NativeArray<BoxcastCommand> commands = new NativeArray<BoxcastCommand>(6, Allocator.Persistent);
 
         private RaycastHit directionHit;
-
-        private RaycastHit[] hitResults = new RaycastHit[55];
 
         private int directionCount = 0;
 
@@ -91,14 +87,14 @@ namespace Pathfinding
         private void InitializeDirections()
         {
             //Horizontal
-            directions[0] = new int3(0, 0, 1);
-            directions[1] = new int3(0, 0, -1);
-            directions[2] = new int3(1, 0, 0);
-            directions[3] = new int3(-1, 0, 0);
+            directions[0] = new int3( 0,  0,  1);
+            directions[1] = new int3( 0,  0, -1);
+            directions[2] = new int3( 1,  0,  0);
+            directions[3] = new int3(-1,  0,  0);
 
             //Vertical
-            directions[4] = new int3(0, 1, 0);
-            directions[5] = new int3(0, -1, 0);
+            directions[4] = new int3( 0,  1,  0);
+            directions[5] = new int3( 0, -1,  0);
 
             directionCount = directions.Count();
         }

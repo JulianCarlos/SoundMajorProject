@@ -29,7 +29,8 @@ namespace Pathfinding.Helpers
 
         public static int FlattenIndex(int3 index, int totalHeight, int totalDepth)
         {
-            return index.x + totalHeight * (index.y + totalDepth * index.z);
+            //return index.x + totalHeight * (index.y + totalDepth * index.z);
+            return index.y + (index.x << 10) + (index.z << 20);
         }
     }
 }
