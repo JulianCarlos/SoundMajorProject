@@ -27,15 +27,11 @@ namespace Pathfinding
 
         [SerializeField] private uint3 gridSize = new uint3(25, 8, 25);
         [SerializeField] private uint cellSize = 3;
-        [Space]
         [SerializeField] private float detectionRadius = 2f;
-        [Space]
-        [SerializeField] private VisualMode visualMode = VisualMode.VolumeOnly;
-        [Space]
         [SerializeField] private Color volumeColor = new Color(0f, 1f, 0.85f, 0.72f);
         [SerializeField] private Color cellColor = new Color(0.35f, 0.35f, 0.35f, 0.35f);
         [SerializeField] private Color detectionColor = new Color(1f, 0f, 0f, 1f);
-        [Space]
+        [SerializeField] private VisualMode visualMode = VisualMode.VolumeOnly;
         [SerializeField] private double miliseconds = 0;
 
         public NativeArray<Cell> Cells;
