@@ -9,8 +9,6 @@ using Pathfinding.Helpers;
 public struct AStarJob : IJob
 {
     public int TotalCells;
-    public int TotalCores;
-    public int TotalCellsPerCore;
 
     public int VolumeWidth;
     public int VolumeHeight;
@@ -23,7 +21,6 @@ public struct AStarJob : IJob
 
     public NativeArray<Cell> Cells;
     public NativeArray<int> OpenCells;
-    public NativeArray<GridCore> Cores;
     public NativeArray<TempData> TempData;
     public NativeArray<NeighborData> CellNeighbors;
 
@@ -54,17 +51,17 @@ public struct AStarJob : IJob
 
     private int FindNearestCell(float3 position)
     {
+        int index;
+        float tempDistance;
         float distanceX = float.MaxValue;
         float distanceY = float.MaxValue;
         float distanceZ = float.MaxValue;
 
-        float tempDistance = 0;
-
         for (int x = 0; x < VolumeWidth; x++)
         {
-            int index = CalculationHelper.FlattenIndex(new int3(x, 0, 0), VolumeWidth, VolumeHeight, VolumeDepth);
+            index = CalculationHelper.FlattenIndex(new int3(x, 0, 0), VolumeWidth, VolumeHeight);
             tempDistance = CalculationHelper.CalculateSquaredDistance(Cells[index].CellPos, position);
-
+            
             if (tempDistance < distanceX)
             {
                 distanceX = tempDistance;
@@ -73,7 +70,7 @@ public struct AStarJob : IJob
         }
         for (int y = 0; y < VolumeHeight; y++)
         {
-            int index = CalculationHelper.FlattenIndex(new int3(0, y, 0), VolumeWidth, VolumeHeight, VolumeDepth);
+            index = CalculationHelper.FlattenIndex(new int3(0, y, 0), VolumeWidth, VolumeHeight);
             tempDistance = CalculationHelper.CalculateSquaredDistance(Cells[index].CellPos, position);
 
             if (tempDistance < distanceY)
@@ -84,7 +81,7 @@ public struct AStarJob : IJob
         }
         for (int z = 0; z < VolumeDepth; z++)
         {
-            int index = CalculationHelper.FlattenIndex(new int3(0, 0, z), VolumeWidth, VolumeHeight, VolumeDepth);
+            index = CalculationHelper.FlattenIndex(new int3(0, 0, z), VolumeWidth, VolumeHeight);
             tempDistance = CalculationHelper.CalculateSquaredDistance(Cells[index].CellPos, position);
 
             if (tempDistance < distanceZ)
@@ -94,7 +91,7 @@ public struct AStarJob : IJob
             }
         }
 
-        return CalculationHelper.FlattenIndex(new int3(indexX, indexY, indexZ), VolumeWidth, VolumeHeight, VolumeDepth);
+        return CalculationHelper.FlattenIndex(new int3(indexX, indexY, indexZ), VolumeWidth, VolumeHeight);
     }
 
     private void InitializeBuffers()

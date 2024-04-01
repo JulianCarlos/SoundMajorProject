@@ -119,7 +119,7 @@ namespace Pathfinding
 
             int tempLinkIndex = -1;
             float tempDistance = float.MaxValue;
-            float distance = math.distance(originVolume.DetectionBox.ClosestPoint(agent.TargetPos), agent.TargetPos);
+            float distance = CalculationHelper.CalculateSquaredDistance(originVolume.DetectionBox.ClosestPoint(agent.TargetPos), agent.TargetPos);
             List<NavigationSubLink> links = agent.ActiveVolume.Links;
 
             CalculateClosestVolumes(agent, ref tempLinkIndex, ref tempDistance, ref distance, links);
@@ -158,9 +158,9 @@ namespace Pathfinding
         {
             for (int i = 0; i < links.Count; i++)
             {
-                tempDistance = math.distance(links[i].LinkedVolume.DetectionBox.ClosestPoint(agent.TargetPos), agent.TargetPos);
+                tempDistance = CalculationHelper.CalculateSquaredDistance(links[i].LinkedVolume.DetectionBox.ClosestPoint(agent.TargetPos), agent.TargetPos);
 
-                if (tempDistance < distance && links[i].RootLink.CheckTraverseAccess(links[i]))
+                if (links[i].RootLink.CheckTraverseAccess(links[i]) && tempDistance < distance)
                 {
                     distance = tempDistance;
 
