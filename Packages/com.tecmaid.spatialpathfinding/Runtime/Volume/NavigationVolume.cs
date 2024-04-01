@@ -8,6 +8,7 @@ using System.Diagnostics;
 using Unity.Jobs;
 using Debug = UnityEngine.Debug;
 using UnityEditor;
+using System;
 
 namespace Pathfinding
 {
@@ -24,9 +25,8 @@ namespace Pathfinding
         public BoxCollider DetectionBox { get; private set; }
         public List<NavigationSubLink> Links = new List<NavigationSubLink>();
 
-        [SerializeField] private uint cellSize = 2;
-        [SerializeField] private uint amountOfCellsPerMainCell = 5;
-        [SerializeField] private uint3 cellAmount = new uint3(3, 3, 3);
+        [SerializeField] private uint3 gridSize = new uint3(25, 8, 25);
+        [SerializeField] private uint cellSize = 3;
         [Space]
         [SerializeField] private float detectionRadius = 2f;
         [Space]
@@ -39,20 +39,20 @@ namespace Pathfinding
         [SerializeField] private double miliseconds = 0;
 
         public NativeArray<Cell> Cells;
-        public NativeArray<GridCore> Cores;
         public NativeArray<NeighborData> CellNeighbors;
 
         private NativeArray<int3> directions = new NativeArray<int3>(6, Allocator.Persistent);
+        private NativeArray<int> tempNeighbors = new NativeArray<int>(6, Allocator.Persistent);
 
         private RaycastHit directionHit;
 
-        private int directionCount = 6;
+        private int directionCount;
 
         private void Awake()
         {
-            VolumeWidth = (int)(cellAmount.x * amountOfCellsPerMainCell);
-            VolumeHeight = (int)(cellAmount.y * amountOfCellsPerMainCell);
-            VolumeDepth = (int)(cellAmount.z * amountOfCellsPerMainCell);
+            VolumeWidth = (int) gridSize.x;
+            VolumeHeight = (int) gridSize.y;
+            VolumeDepth = (int) gridSize.z;
 
             TotalCells = VolumeWidth * VolumeHeight * VolumeDepth;
 
@@ -67,7 +67,7 @@ namespace Pathfinding
 
             InitializeDirections();
 
-            InitializeCoreGrid();
+            InitializeGrid();
 
             GetAllCellNeighbors();
 
@@ -107,48 +107,43 @@ namespace Pathfinding
         {
             for (int i = 0; i < TotalCells; i++)
             {
-                GetNeighbours(i);
+                GetNeighbours(i, Cells[i].CellPos);
             }
         }
 
-        private void GetNeighbours(int index)
+        private void GetNeighbours(int index, float3 position)
         {
-            float3 position = Cells[index].CellPos;
-            NativeArray<int> neighbors = new NativeArray<int>(directionCount, Allocator.Temp);
-
             for (int i = 0; i < directionCount; i++)
             {
                 if (CalculationHelper.CheckIfIndexValid(Cells[index].Index3D + directions[i], VolumeWidth, VolumeHeight, VolumeDepth) &&
                     !Physics.BoxCast(position, Vector3.one * detectionRadius, CalculationHelper.Int3ToFloat3(directions[i]), out directionHit, transform.rotation, cellSize))
                 {
                     int targetCellIndex = CalculationHelper.FlattenIndex(Cells[index].Index3D + directions[i], VolumeWidth, VolumeHeight);
-                    neighbors[i] = targetCellIndex;
+                    tempNeighbors[i] = targetCellIndex;
                 } 
                 else
                 {
-                    neighbors[i] = -1;
+                    tempNeighbors[i] = -1;
                 }
             }
 
-            CellNeighbors[index] = new NeighborData(neighbors);
-
-            neighbors.Dispose();
+            CellNeighbors[index] = new NeighborData(tempNeighbors);
         }
 
-        public void InitializeCoreGrid()
+        public void InitializeGrid()
         {
             int index = 0;
 
-            for (int z = 0; z < cellAmount.z * amountOfCellsPerMainCell; z++)
+            for (int z = 0; z < VolumeDepth; z++)
             {
-                for (int y = 0; y < cellAmount.y * amountOfCellsPerMainCell; y++)
+                for (int y = 0; y < VolumeHeight; y++)
                 {
-                    for (int x = 0; x < cellAmount.x * amountOfCellsPerMainCell; x++)
+                    for (int x = 0; x < VolumeWidth; x++)
                     {
                         Vector3 mainCellCenter = new Vector3(
-                        transform.position.x + ((x - (cellAmount.x * amountOfCellsPerMainCell - 1f) / 2f) * cellSize),
-                        transform.position.y + ((y - (cellAmount.y * amountOfCellsPerMainCell - 1f) / 2f) * cellSize),
-                        transform.position.z + ((z - (cellAmount.z * amountOfCellsPerMainCell - 1f) / 2f) * cellSize));
+                        transform.position.x + ((x - (VolumeWidth - 1f) / 2f) * cellSize),
+                        transform.position.y + ((y - (VolumeHeight - 1f) / 2f) * cellSize),
+                        transform.position.z + ((z - (VolumeDepth - 1f) / 2f) * cellSize));
                         
                         Cell cell = new Cell(mainCellCenter, index, new int3(x, y, z));
                         Cells[index] = cell;
@@ -161,13 +156,12 @@ namespace Pathfinding
 
         private void OnValidate()
         {
-            GetComponent<BoxCollider>().size = new Vector3(cellAmount.x, cellAmount.y, cellAmount.z) * amountOfCellsPerMainCell * cellSize;
+            GetComponent<BoxCollider>().size = new Vector3(gridSize.x, gridSize.y, gridSize.z) * cellSize;
         }
 
         private void OnDisable()
         {
             directions.Dispose();
-            Cores.Dispose();
         }
 
         private void OnTriggerEnter(Collider other)
@@ -188,7 +182,7 @@ namespace Pathfinding
             if (visualMode == VisualMode.All || visualMode == VisualMode.VolumeOnly)
             {
                 Gizmos.color = volumeColor;
-                Gizmos.DrawCube(transform.position, (new Vector3(cellAmount.x, cellAmount.y, cellAmount.z) * amountOfCellsPerMainCell) * cellSize);
+                Gizmos.DrawCube(transform.position, new Vector3(gridSize.x, gridSize.y, gridSize.z) * cellSize);
             }
 
             if (visualMode == VisualMode.All || visualMode == VisualMode.Detection || visualMode == VisualMode.CellsOnly)
@@ -197,16 +191,16 @@ namespace Pathfinding
 
                 int index = 0;
 
-                for (int z = 0; z < cellAmount.z * amountOfCellsPerMainCell; z++)
+                for (int z = 0; z < gridSize.z; z++)
                 {
-                    for (int y = 0; y < cellAmount.y * amountOfCellsPerMainCell; y++)
+                    for (int y = 0; y < gridSize.y; y++)
                     {
-                        for (int x = 0; x < cellAmount.x * amountOfCellsPerMainCell; x++)
+                        for (int x = 0; x < gridSize.x; x++)
                         {
                             Vector3 mainCellCenter = new Vector3(
-                            transform.position.x + ((x - (cellAmount.x * amountOfCellsPerMainCell - 1f) / 2f) * cellSize),
-                            transform.position.y + ((y - (cellAmount.y * amountOfCellsPerMainCell - 1f) / 2f) * cellSize),
-                            transform.position.z + ((z - (cellAmount.z * amountOfCellsPerMainCell - 1f) / 2f) * cellSize));
+                            transform.position.x + ((x - (gridSize.x - 1f) / 2f) * cellSize),
+                            transform.position.y + ((y - (gridSize.y - 1f) / 2f) * cellSize),
+                            transform.position.z + ((z - (gridSize.z - 1f) / 2f) * cellSize));
 
                             if (visualMode == VisualMode.Detection || visualMode == VisualMode.All)
                             {
