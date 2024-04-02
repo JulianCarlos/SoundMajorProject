@@ -5,7 +5,7 @@
             <ui:Label tabindex="-1" text="Navigation Link" parse-escape-sequences="true" display-tooltip-when-elided="true" class="MainTitle" />
         </ui:VisualElement>
         <ui:VisualElement name="LinkSettingsContainer" class="FieldContainer" style="flex-grow: 1;">
-            <ui:Foldout text="Link Settings" class="FieldInnerContainer FoldOutContainerTitle">
+            <ui:Foldout text="Link Settings" view-data-key="NavigationLinkIsOpen1" class="FieldInnerContainer FoldOutContainerTitle">
                 <uie:ObjectField label="Object Field" binding-path="startLink" class="VariableContainer" style="right: auto; flex-basis: auto; flex-grow: 0; flex-direction: row; justify-content: flex-start;" />
                 <uie:ObjectField label="Object Field" binding-path="endLink" class="VariableContainer" />
                 <uie:PropertyField binding-path="biDirectional" class="VariableContainer" />

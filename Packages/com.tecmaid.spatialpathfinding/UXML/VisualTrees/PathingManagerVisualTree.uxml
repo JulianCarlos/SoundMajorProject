@@ -5,18 +5,18 @@
             <ui:Label tabindex="-1" text="Pathing Manager" parse-escape-sequences="true" display-tooltip-when-elided="true" class="MainTitle" />
         </ui:VisualElement>
         <ui:VisualElement name="AgentsContainer" class="FieldContainer" style="flex-grow: 1;">
-            <ui:Foldout text="Active Agents Settings" class="FieldInnerContainer FoldOutContainerTitle">
+            <ui:Foldout text="Active Agents Settings" view-data-key="PathingManagerIsOpen1" class="FieldInnerContainer FoldOutContainerTitle">
                 <uie:PropertyField binding-path="movableAgents" class="VariableContainer" />
                 <uie:PropertyField binding-path="calculableAgents" class="VariableContainer" />
             </ui:Foldout>
         </ui:VisualElement>
         <ui:VisualElement name="ModifiersContainer" class="FieldContainer" style="flex-grow: 1;">
-            <ui:Foldout text="Modifiers Settings" class="FoldOutContainerTitle FieldInnerContainer">
+            <ui:Foldout text="Modifiers Settings" view-data-key="PathingManagerIsOpen2" class="FoldOutContainerTitle FieldInnerContainer">
                 <uie:PropertyField binding-path="modifiers" class="VariableContainer" />
             </ui:Foldout>
         </ui:VisualElement>
         <ui:VisualElement name="DebuggingContainer" class="FieldContainer" style="flex-grow: 1;">
-            <ui:Foldout text="Debugging Settings" class="FoldOutContainerTitle FieldInnerContainer">
+            <ui:Foldout text="Debugging Settings" view-data-key="PathingManagerIsOpen3" class="FoldOutContainerTitle FieldInnerContainer">
                 <uie:PropertyField binding-path="movableExecutionTime" class="VariableContainer" />
                 <uie:PropertyField binding-path="calculateExecutionTime" class="VariableContainer" />
             </ui:Foldout>

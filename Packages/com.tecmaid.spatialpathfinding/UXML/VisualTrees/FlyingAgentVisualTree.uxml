@@ -5,7 +5,7 @@
             <ui:Label tabindex="-1" text="Flying Agent" parse-escape-sequences="true" display-tooltip-when-elided="true" class="MainTitle" />
         </ui:VisualElement>
         <ui:VisualElement name="AgentStartSpeedSettingsContainer" class="FieldContainer">
-            <ui:Foldout text="Agent Start Speed Settings" view-data-key="isOpen1" class="Label FieldInnerContainer FoldOutContainerTitle">
+            <ui:Foldout text="Agent Start Speed Settings" view-data-key="AgentIsOpen1" class="Label FieldInnerContainer FoldOutContainerTitle">
                 <uie:PropertyField binding-path="startSpeedCurve" class="VariableContainer" />
                 <uie:PropertyField binding-path="maxSpeed" class="VariableContainer" />
                 <uie:PropertyField binding-path="timeToReachMaxSpeed" class="VariableContainer" />
@@ -13,7 +13,7 @@
             </ui:Foldout>
         </ui:VisualElement>
         <ui:VisualElement name="AgentStopSpeedSettingsContainer" class="FieldContainer" style="flex-grow: 1;">
-            <ui:Foldout text="Agent Stop Speed Settings" view-data-key="isOpen2" class="FoldOutContainerTitle FieldInnerContainer">
+            <ui:Foldout text="Agent Stop Speed Settings" view-data-key="AgentIsOpen2" class="FoldOutContainerTitle FieldInnerContainer">
                 <uie:PropertyField binding-path="stopSpeedCurve" class="VariableContainer" />
                 <uie:PropertyField binding-path="decelerationDistance" class="VariableContainer" />
                 <uie:PropertyField binding-path="stoppingDistance" class="VariableContainer" />
@@ -22,13 +22,13 @@
             </ui:Foldout>
         </ui:VisualElement>
         <ui:VisualElement name="AgentRotationSettingsContainer" class="FieldContainer" style="flex-grow: 1;">
-            <ui:Foldout text="Agent Rotation Settings" view-data-key="isOpen3" class="FoldOutContainerTitle FieldInnerContainer">
+            <ui:Foldout text="Agent Rotation Settings" view-data-key="AgentIsOpen3" class="FoldOutContainerTitle FieldInnerContainer">
                 <uie:PropertyField binding-path="useSmoothRotation" class="VariableContainer" />
                 <uie:PropertyField binding-path="rotationStrength" class="VariableContainer" />
             </ui:Foldout>
         </ui:VisualElement>
         <ui:VisualElement name="PathSettingsContainer" class="FieldContainer" style="flex-grow: 1;">
-            <ui:Foldout text="Path Settings" view-data-key="isOpen4" class="FoldOutContainerTitle FieldInnerContainer">
+            <ui:Foldout text="Path Settings" view-data-key="AgentIsOpen4" class="FoldOutContainerTitle FieldInnerContainer">
                 <uie:PropertyField binding-path="showPath" name="PropertyField" class="VariableContainer" />
             </ui:Foldout>
         </ui:VisualElement>

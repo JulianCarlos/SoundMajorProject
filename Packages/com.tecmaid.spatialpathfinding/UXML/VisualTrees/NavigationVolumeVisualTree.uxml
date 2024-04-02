@@ -5,18 +5,18 @@
             <ui:Label tabindex="-1" text="Navigation Volume" parse-escape-sequences="true" display-tooltip-when-elided="true" enable-rich-text="true" class="ContainerTitle MainTitle" style="-unity-font-style: bold;" />
         </ui:VisualElement>
         <ui:VisualElement name="GridSettingsContainer" class="FieldContainer" style="visibility: visible;">
-            <ui:Foldout text="Grid Settings" view-data-key="isOpen1" class="FoldOutContainerTitle FieldInnerContainer">
+            <ui:Foldout text="Grid Settings" view-data-key="NavigationVolumeIsOpen1" class="FoldOutContainerTitle FieldInnerContainer">
                 <uie:PropertyField binding-path="gridSize" name="GridSizeField" class="VariableContainer" style="-unity-text-align: middle-center;" />
                 <uie:PropertyField binding-path="cellSize" name="CellSizeField" class="VariableContainer" />
             </ui:Foldout>
         </ui:VisualElement>
         <ui:VisualElement name="DetectionSettingsContainer" class="FieldContainer" style="flex-grow: 1;">
-            <ui:Foldout text="Detection Settings" view-data-key="isOpen2" class="FoldOutContainerTitle FieldInnerContainer">
+            <ui:Foldout text="Detection Settings" view-data-key="NavigationVolumeIsOpen2" class="FoldOutContainerTitle FieldInnerContainer">
                 <uie:PropertyField binding-path="detectionRadius" class="VariableContainer" />
             </ui:Foldout>
         </ui:VisualElement>
         <ui:VisualElement name="VisualSettingsContainer" class="FieldContainer" style="flex-grow: 1;">
-            <ui:Foldout text="Volume Display Settings" view-data-key="isOpen3" class="FoldOutContainerTitle FieldInnerContainer">
+            <ui:Foldout text="Volume Display Settings" view-data-key="NavigationVolumeIsOpen3" class="FoldOutContainerTitle FieldInnerContainer">
                 <uie:PropertyField binding-path="volumeColor" class="VariableContainer" />
                 <uie:PropertyField binding-path="cellColor" class="VariableContainer" />
                 <uie:PropertyField binding-path="detectionColor" class="VariableContainer" />
@@ -24,8 +24,8 @@
             </ui:Foldout>
         </ui:VisualElement>
         <ui:VisualElement name="DebuggingSettingsContainer" class="FieldContainer" style="flex-grow: 1;">
-            <ui:Foldout text="Debugging Settings" view-data-key="isOpen4" class="FoldOutContainerTitle FieldInnerContainer">
-                <uie:PropertyField binding-path="miliseconds" class="VariableContainer" />
+            <ui:Foldout text="Debugging Settings" view-data-key="NavigationVolumeIsOpen4" class="FoldOutContainerTitle FieldInnerContainer">
+                <uie:PropertyField binding-path="generationTime" class="VariableContainer" />
             </ui:Foldout>
         </ui:VisualElement>
     </ui:VisualElement>

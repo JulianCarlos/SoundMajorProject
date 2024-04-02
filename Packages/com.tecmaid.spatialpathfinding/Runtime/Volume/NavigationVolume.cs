@@ -35,7 +35,7 @@ namespace Pathfinding
         [SerializeField] private Color detectionColor = new Color(1f, 0f, 0f, 1f);
         [SerializeField] private VisualMode visualMode = VisualMode.VolumeOnly;
 
-        [SerializeField] private double miliseconds = 0;
+        [SerializeField] private double generationTime = 0;
 
         public NativeArray<Cell> Cells;
         public NativeArray<NeighborData> CellNeighbors;
