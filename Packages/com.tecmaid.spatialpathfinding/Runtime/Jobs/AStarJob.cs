@@ -5,7 +5,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using Pathfinding.Helpers;
 
-[BurstCompile(CompileSynchronously = false)]
+[BurstCompile(CompileSynchronously = false, DisableSafetyChecks = true)]
 public struct AStarJob : IJob
 {
     public int TotalCells;

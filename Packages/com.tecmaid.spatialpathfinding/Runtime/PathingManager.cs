@@ -24,8 +24,8 @@ namespace Pathfinding
         [SerializeField] private double movableExecutionTime = 0;
         [SerializeField] private double calculateExecutionTime = 0;
 
-        Stopwatch moveExecutionStopwatch = new Stopwatch();
-        Stopwatch calculateExecutionStopwatch = new Stopwatch();
+        private Stopwatch moveExecutionStopwatch = new Stopwatch();
+        private Stopwatch calculateExecutionStopwatch = new Stopwatch();
 
         private NativeList<float3> wayPoints = new NativeList<float3>(Allocator.Persistent);
 
