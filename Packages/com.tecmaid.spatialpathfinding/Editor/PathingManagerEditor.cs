@@ -1,21 +1,21 @@
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.UIElements;
 
 namespace Pathfinding
 {
     [CustomEditor(typeof(PathingManager))]
     public class PathingManagerEditor : Editor
     {
-        public override void OnInspectorGUI()
+        public VisualTreeAsset VisualTree;
+
+        public override VisualElement CreateInspectorGUI()
         {
-            base.OnInspectorGUI();
+            VisualElement root = new VisualElement();
 
-            PathingManager manager = (PathingManager)target;
+            VisualTree.CloneTree(root);
 
-            if (GUILayout.Button("Generate Grids"))
-            {
-
-            }
+            return root;
         }
     }
 }

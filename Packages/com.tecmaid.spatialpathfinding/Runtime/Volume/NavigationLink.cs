@@ -11,7 +11,7 @@ namespace Pathfinding
     {
         [SerializeField] private NavigationSubLink startLink;
         [SerializeField] private NavigationSubLink endLink;
-        [Space]
+
         [SerializeField] private bool biDirectional = true;
 
         private void Awake()

@@ -18,9 +18,9 @@ namespace Pathfinding
 
         [SerializeField] private List<FlyingAgent> movableAgents = new List<FlyingAgent>();
         [SerializeField] private List<FlyingAgent> calculableAgents = new List<FlyingAgent>();
-        [Space]
+        
         [SerializeField] private Modifiers modifiers = Modifiers.NONE;
-        [Space]
+
         [SerializeField] private double movableExecutionTime = 0;
         [SerializeField] private double calculateExecutionTime = 0;
 

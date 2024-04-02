@@ -3,19 +3,21 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-[CustomEditor(typeof(NavigationVolume))]
-public class NavigationVolumeEditor : Editor
+namespace Pathfinding
 {
-    public VisualTreeAsset VisualTree;
-
-    public override VisualElement CreateInspectorGUI()
+    [CustomEditor(typeof(NavigationVolume))]
+    public class NavigationVolumeEditor : Editor
     {
-        //return base.CreateInspectorGUI();
+        public VisualTreeAsset VisualTree;
 
-        VisualElement root = new VisualElement();
+        public override VisualElement CreateInspectorGUI()
+        {
+            VisualElement root = new VisualElement();
 
-        VisualTree.CloneTree(root);
+            VisualTree.CloneTree(root);
 
-        return root;
+            return root;
+        }
     }
 }
+

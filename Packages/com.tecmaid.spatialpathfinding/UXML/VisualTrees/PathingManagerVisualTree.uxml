@@ -1,0 +1,22 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Packages/com.tecmaid.spatial-pathfinding/UXML/MainStyles.uss?fileID=7433441132597879392&amp;guid=a609aebdd6f07094eac99d9f20d05262&amp;type=3#MainStyles" />
+    <ui:VisualElement name="MainContainer" class="MainContainer" style="flex-grow: 1;">
+        <ui:VisualElement name="AgentsContainer" class="FieldContainer" style="flex-grow: 1;">
+            <ui:Foldout text="Foldout" class="FieldInnerContainer">
+                <uie:PropertyField binding-path="movableAgents" class="VariableContainer" />
+                <uie:PropertyField binding-path="calculableAgents" class="VariableContainer" />
+            </ui:Foldout>
+        </ui:VisualElement>
+        <ui:VisualElement name="ModifiersContainer" class="FieldContainer" style="flex-grow: 1;">
+            <ui:Foldout text="Modifiers Settings" class="FoldOutContainerTitle FieldInnerContainer">
+                <uie:PropertyField binding-path="modifiers" class="VariableContainer" />
+            </ui:Foldout>
+        </ui:VisualElement>
+        <ui:VisualElement name="DebuggingContainer" class="FieldContainer" style="flex-grow: 1;">
+            <ui:Foldout text="Debugging Settings" class="FoldOutContainerTitle FieldInnerContainer">
+                <uie:PropertyField binding-path="movableExecutionTime" class="VariableContainer" />
+                <uie:PropertyField binding-path="calculateExecutionTime" class="VariableContainer" />
+            </ui:Foldout>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

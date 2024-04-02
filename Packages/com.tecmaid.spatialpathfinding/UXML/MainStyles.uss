@@ -1,0 +1,90 @@
+.FieldContainer {
+    background-color: rgb(41, 41, 41);
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-left-color: rgb(14, 14, 14);
+    border-right-color: rgb(14, 14, 14);
+    border-top-color: rgb(14, 14, 14);
+    border-bottom-color: rgb(14, 14, 14);
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
+.ContainerTitle {
+    font-size: 16px;
+    color: rgb(219, 219, 219);
+    -unity-font-style: bold;
+}
+
+.FieldInnerContainer {
+    margin-top: 8px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    margin-left: 8px;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.MainContainer {
+    padding-top: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    background-color: rgb(168, 168, 168);
+    border-left-color: rgb(255, 255, 255);
+    border-right-color: rgb(255, 255, 255);
+    border-top-color: rgb(255, 255, 255);
+    border-bottom-color: rgb(255, 255, 255);
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    background-image: none;
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.VariableContainer {
+    background-color: rgb(58, 58, 58);
+    margin-top: 5px;
+    margin-right: 15px;
+    margin-bottom: 5px;
+    margin-left: 0;
+    padding-top: 5px;
+    padding-right: 25px;
+    padding-bottom: 5px;
+    padding-left: 15px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    -unity-text-align: middle-left;
+    white-space: normal;
+    color: rgb(255, 255, 255);
+    opacity: 1;
+    text-size: 12px;
+    text-overflow: clip;
+}
+
+.FoldOutContainerTitle .unity-foldout__text {
+    font-size: 20px;
+    margin-left: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    -unity-font-style: bold;
+}
+
+.FoldOutContainerTitle .unity-foldout__checkmark {
+    opacity: 0;
+    display: flex;
+}

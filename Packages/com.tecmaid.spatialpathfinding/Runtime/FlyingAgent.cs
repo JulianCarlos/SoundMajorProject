@@ -13,24 +13,20 @@ namespace Pathfinding
         public Vector3 InitialPos => transform.position;
         public Vector3 TargetPos;
 
-        [Space, Header("Starting Speed Settings")]
         [SerializeField] private AnimationCurve startSpeedCurve = new AnimationCurve(new Keyframe(0,0), new Keyframe(1,1));
         [SerializeField] private float maxSpeed = 5f;
         [SerializeField] private float timeToReachMaxSpeed = 3f;
         [SerializeField] private bool interpolateSpeedStart = false;
 
-        [Space, Header("Stopping Speed Settings")]
         [SerializeField] private AnimationCurve stopSpeedCurve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 1));
         [SerializeField] private float decelerationDistance = 1f;
         [SerializeField] private float stoppingDistance = 1f;
         [SerializeField] private float distanceUntilWaypointReached = 1f;
         [SerializeField] private bool autoBreak = false;
 
-        [Space, Header("Rotation Settings")]
         [SerializeField, Min(1)] private float rotationStrength = 10f;
         [SerializeField] private bool useSmoothRotation = false;
 
-        [Space, Header("Path Settings")]
         [SerializeField] private bool showPath = false;
 
         private NavigationPath activePath;
