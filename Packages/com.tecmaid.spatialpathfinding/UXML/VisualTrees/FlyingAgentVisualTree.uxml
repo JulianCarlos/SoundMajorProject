@@ -1,6 +1,9 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
     <Style src="project://database/Packages/com.tecmaid.spatial-pathfinding/UXML/MainStyles.uss?fileID=7433441132597879392&amp;guid=a609aebdd6f07094eac99d9f20d05262&amp;type=3#MainStyles" />
     <ui:VisualElement name="MainContainer" class="MainContainer">
+        <ui:VisualElement class="MainTitleContainer" style="flex-grow: 1;">
+            <ui:Label tabindex="-1" text="Flying Agent" parse-escape-sequences="true" display-tooltip-when-elided="true" class="MainTitle" />
+        </ui:VisualElement>
         <ui:VisualElement name="AgentStartSpeedSettingsContainer" class="FieldContainer">
             <ui:Foldout text="Agent Start Speed Settings" view-data-key="isOpen1" class="Label FieldInnerContainer FoldOutContainerTitle">
                 <uie:PropertyField binding-path="startSpeedCurve" class="VariableContainer" />

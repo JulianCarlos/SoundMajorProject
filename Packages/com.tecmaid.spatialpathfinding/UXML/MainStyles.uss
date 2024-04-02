@@ -76,7 +76,7 @@
     text-overflow: clip;
 }
 
-.FoldOutContainerTitle .unity-foldout__text {
+.FoldOutContainerTitle > .unity-foldout__toggle .unity-foldout__text {
     font-size: 20px;
     margin-left: 10px;
     margin-top: 5px;
@@ -87,4 +87,33 @@
 .FoldOutContainerTitle .unity-foldout__checkmark {
     opacity: 0;
     display: flex;
+}
+
+.MainTitleContainer {
+    align-self: center;
+    background-color: rgb(41, 41, 41);
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-left-color: rgb(14, 14, 14);
+    border-right-color: rgb(14, 14, 14);
+    border-top-color: rgb(14, 14, 14);
+    border-bottom-color: rgb(14, 14, 14);
+    margin-top: 0;
+    margin-bottom: 6px;
+}
+
+.MainTitle {
+    font-size: 26px;
+    margin-top: 5px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    margin-left: 5px;
+    flex-wrap: wrap;
+    -unity-font-style: bold;
 }

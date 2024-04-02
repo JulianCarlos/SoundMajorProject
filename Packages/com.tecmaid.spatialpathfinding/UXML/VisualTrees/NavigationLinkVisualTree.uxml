@@ -1,13 +1,15 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
     <Style src="project://database/Packages/com.tecmaid.spatial-pathfinding/UXML/MainStyles.uss?fileID=7433441132597879392&amp;guid=a609aebdd6f07094eac99d9f20d05262&amp;type=3#MainStyles" />
     <ui:VisualElement name="MainContainer" class="MainContainer" style="flex-grow: 1;">
+        <ui:VisualElement class="MainTitleContainer" style="flex-grow: 1;">
+            <ui:Label tabindex="-1" text="Navigation Link" parse-escape-sequences="true" display-tooltip-when-elided="true" class="MainTitle" />
+        </ui:VisualElement>
         <ui:VisualElement name="LinkSettingsContainer" class="FieldContainer" style="flex-grow: 1;">
-            <ui:VisualElement class="FieldInnerContainer" style="flex-grow: 1;">
-                <ui:Label tabindex="-1" text="Navigation Link Settings" parse-escape-sequences="true" display-tooltip-when-elided="true" class="ContainerTitle" style="opacity: 1;" />
+            <ui:Foldout text="Link Settings" class="FieldInnerContainer FoldOutContainerTitle">
                 <uie:ObjectField label="Object Field" binding-path="startLink" class="VariableContainer" style="right: auto; flex-basis: auto; flex-grow: 0; flex-direction: row; justify-content: flex-start;" />
                 <uie:ObjectField label="Object Field" binding-path="endLink" class="VariableContainer" />
                 <uie:PropertyField binding-path="biDirectional" class="VariableContainer" />
-            </ui:VisualElement>
+            </ui:Foldout>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

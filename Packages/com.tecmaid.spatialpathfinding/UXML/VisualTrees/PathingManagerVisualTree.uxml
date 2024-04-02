@@ -1,8 +1,11 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
     <Style src="project://database/Packages/com.tecmaid.spatial-pathfinding/UXML/MainStyles.uss?fileID=7433441132597879392&amp;guid=a609aebdd6f07094eac99d9f20d05262&amp;type=3#MainStyles" />
     <ui:VisualElement name="MainContainer" class="MainContainer" style="flex-grow: 1;">
+        <ui:VisualElement class="MainTitleContainer" style="flex-grow: 1;">
+            <ui:Label tabindex="-1" text="Pathing Manager" parse-escape-sequences="true" display-tooltip-when-elided="true" class="MainTitle" />
+        </ui:VisualElement>
         <ui:VisualElement name="AgentsContainer" class="FieldContainer" style="flex-grow: 1;">
-            <ui:Foldout text="Foldout" class="FieldInnerContainer">
+            <ui:Foldout text="Active Agents Settings" class="FieldInnerContainer FoldOutContainerTitle">
                 <uie:PropertyField binding-path="movableAgents" class="VariableContainer" />
                 <uie:PropertyField binding-path="calculableAgents" class="VariableContainer" />
             </ui:Foldout>
