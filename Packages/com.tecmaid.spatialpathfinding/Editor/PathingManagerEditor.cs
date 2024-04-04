@@ -2,9 +2,6 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.UIElements;
 using Pathfinding.Helpers;
-using UnityEngine.PlayerLoop;
-using System;
-using UnityEditor.UIElements;
 
 namespace Pathfinding
 {

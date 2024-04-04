@@ -1,6 +1,4 @@
-using Pathfinding;
 using UnityEditor;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Pathfinding

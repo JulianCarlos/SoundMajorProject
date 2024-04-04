@@ -1,4 +1,3 @@
-
 public unsafe struct TempData
 {
     public readonly int ParentIndex;

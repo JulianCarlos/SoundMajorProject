@@ -299,7 +299,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 60, y: 75, z: 60}
+  m_Size: {x: 75, y: 75, z: 75}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &154558618
 MonoBehaviour:
@@ -313,20 +313,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad790eb4828899c468ceb4fcd1cd19de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Links: []
+  gridSize:
+    x: 25
+    y: 25
+    z: 25
   cellSize: 3
-  amountOfCellsPerMainCell: 5
-  cellAmount:
-    x: 4
-    y: 5
-    z: 4
   detectionRadius: 1
-  visualMode: 4
   volumeColor: {r: 0, g: 1, b: 0.85, a: 0.72}
-  coreColor: {r: 0, g: 0, b: 1, a: 1}
   cellColor: {r: 0.35, g: 0.35, b: 0.35, a: 0.35}
   detectionColor: {r: 1, g: 0, b: 0, a: 1}
-  miliseconds: 0
-  Links: []
+  visualMode: 3
+  generationTime: 0
 --- !u!4 &154558619
 Transform:
   m_ObjectHideFlags: 0
@@ -791,8 +789,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb998247015c1ea41886b9db470cb702, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  AgentLayerName: 
+  agentLayerInput: FlyingAgent
+  VolumeLayerName: 
+  volumeLayerInput: NavigationVolume
   movableAgents: []
   calculableAgents: []
+  modifiers: 0
+  detectableLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
   movableExecutionTime: 0
   calculateExecutionTime: 0
 --- !u!4 &656600415
@@ -1567,7 +1573,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 60, y: 75, z: 60}
+  m_Size: {x: 75, y: 75, z: 75}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &1268817041
 MonoBehaviour:
@@ -1581,20 +1587,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad790eb4828899c468ceb4fcd1cd19de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Links: []
+  gridSize:
+    x: 25
+    y: 25
+    z: 25
   cellSize: 3
-  amountOfCellsPerMainCell: 5
-  cellAmount:
-    x: 4
-    y: 5
-    z: 4
   detectionRadius: 1
-  visualMode: 4
   volumeColor: {r: 0, g: 1, b: 0.85, a: 0.72}
-  coreColor: {r: 0, g: 0, b: 1, a: 1}
   cellColor: {r: 0.35, g: 0.35, b: 0.35, a: 0.35}
   detectionColor: {r: 1, g: 0, b: 0, a: 1}
-  miliseconds: 0
-  Links: []
+  visualMode: 3
+  generationTime: 0
 --- !u!4 &1268817042
 Transform:
   m_ObjectHideFlags: 0

@@ -1,6 +1,4 @@
-
 using Unity.Collections;
-using UnityEngine;
 
 public unsafe struct NeighborData
 {

@@ -5,10 +5,6 @@ using Unity.Mathematics;
 using UnityEngine;
 using Pathfinding.Helpers;
 using System.Diagnostics;
-using Unity.Jobs;
-using Debug = UnityEngine.Debug;
-using UnityEditor;
-using System;
 
 namespace Pathfinding
 {
@@ -46,6 +42,7 @@ namespace Pathfinding
         private RaycastHit directionHit;
 
         private int directionCount;
+        private LayerMask detectionMask;
 
         private void Awake()
         {
@@ -57,6 +54,11 @@ namespace Pathfinding
 
             Cells = new NativeArray<Cell>(TotalCells, Allocator.Persistent);
             CellNeighbors = new NativeArray<NeighborData>(TotalCells, Allocator.Persistent);
+
+            detectionMask = PathingManager.Instance.DetectableLayer;
+            DetectionBox = GetComponent<BoxCollider>();
+
+            CollectAgents();
         }
 
         private void Start()
@@ -65,20 +67,14 @@ namespace Pathfinding
             calculateExecutionStopwatch.Start();
 
             InitializeDirections();
-
             InitializeGrid();
-
             GetAllCellNeighbors();
-
-            DetectionBox = GetComponent<BoxCollider>();
-
-            CollectAgents();
 
             calculateExecutionStopwatch.Stop();
             UnityEngine.Debug.Log(calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency));
         }
 
-        private void CollectAgents()
+        public void CollectAgents()
         {
             int layerIndex = LayerMask.GetMask(PathingManager.Instance.AgentLayerName);
 

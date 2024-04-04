@@ -1,10 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using Unity.Collections;
 using Unity.Mathematics;
-using Unity.Plastic.Antlr3.Runtime;
-using UnityEngine;
 
 public struct NavigationPath
 {
