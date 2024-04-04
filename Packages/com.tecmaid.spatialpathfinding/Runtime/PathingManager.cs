@@ -16,8 +16,8 @@ namespace Pathfinding
         public static Action<FlyingAgent> OnAgentStartedPathing { get; private set; }   
         public static Action<FlyingAgent> OnAgentFinishedPathing { get; private set; }
 
-        public string AgentLayerName => agentLayerName;
-        public string VolumeLayerName => volumeLayerName;
+        public string AgentLayerName = "FlyingAgent";
+        public string VolumeLayerName = "NavigationVolume";
         public LayerMask DetectableLayer => detectableLayer;
 
         [SerializeField] private List<FlyingAgent> movableAgents = new List<FlyingAgent>();
@@ -68,6 +68,12 @@ namespace Pathfinding
             {
                 Destroy(this.gameObject);
             }
+        }
+
+        public void SetLayers()
+        {
+            AgentLayerName = agentLayerName;
+            VolumeLayerName = volumeLayerName;
         }
 
         private void AddAgentToCalculation(FlyingAgent agent)

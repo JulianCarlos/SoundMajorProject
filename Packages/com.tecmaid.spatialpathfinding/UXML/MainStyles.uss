@@ -117,3 +117,10 @@
     flex-wrap: wrap;
     -unity-font-style: bold;
 }
+
+.ReadOnly-Property {
+    color: rgb(210, 210, 210);
+    padding-right: 0;
+    padding-left: 0;
+    margin-top: 5px;
+}

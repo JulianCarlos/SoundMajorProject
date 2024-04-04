@@ -3,6 +3,8 @@ using UnityEditor;
 using UnityEngine.UIElements;
 using Pathfinding.Helpers;
 using UnityEngine.PlayerLoop;
+using System;
+using UnityEditor.UIElements;
 
 namespace Pathfinding
 {
@@ -14,6 +16,9 @@ namespace Pathfinding
 
         public Button createLayersButton;
         public Button applyLayersButton;
+
+        public VisualElement CurrentCachedAgentLayer;
+        public VisualElement CurrentCachedVolumeLayer;
 
         private void OnEnable()
         {
@@ -28,9 +33,13 @@ namespace Pathfinding
 
             createLayersButton = root.Q<Button>("CreateLayersButton");
             createLayersButton.RegisterCallback<ClickEvent>(GenerateLayers);
-
             applyLayersButton = root.Q<Button>("ApplyLayersButton");
             applyLayersButton.RegisterCallback<ClickEvent>(ApplyLayersToObjects);
+
+            CurrentCachedAgentLayer = root.Q<VisualElement>("AgentCachedLayer");
+            CurrentCachedVolumeLayer = root.Q<VisualElement>("VolumeCachedLayer");
+            CurrentCachedAgentLayer.SetEnabled(false);
+            CurrentCachedVolumeLayer.SetEnabled(false);
 
             return root;
         }
@@ -45,6 +54,8 @@ namespace Pathfinding
         {
             if (TagFactory.LayerExists(Manager.AgentLayerName) && TagFactory.LayerExists(Manager.VolumeLayerName))
             {
+                Manager.SetLayers();
+
                 FlyingAgent[] agents = FindObjectsOfType<FlyingAgent>();
                 for (int i = 0; i < agents.Length; i++)
                 {
