@@ -25,7 +25,7 @@
                     <uie:PropertyField binding-path="volumeLayerInput" name="VolumeLayer" label="New Volume Layer" />
                     <uie:PropertyField name="VolumeCachedLayer" binding-path="VolumeLayerName" label="Current Volume Layer" class="ReadOnly-Property" />
                 </ui:VisualElement>
-                <uie:PropertyField binding-path="detectableLayer" name="DetectableLayer" class="VariableContainer" />
+                <uie:PropertyField binding-path="detectableLayer" name="DetectableLayer" label="Detectable Layers" class="VariableContainer" />
                 <ui:VisualElement style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: center; margin-bottom: 10px; margin-top: 10px;">
                     <ui:Button text="Create Layers" parse-escape-sequences="true" display-tooltip-when-elided="true" name="CreateLayersButton" />
                     <ui:Button text="Apply Layers" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ApplyLayersButton" />

@@ -118,7 +118,7 @@ namespace Pathfinding
             for (int i = 0; i < directionCount; i++)
             {
                 if (CalculationHelper.CheckIfIndexValid(Cells[index].Index3D + directions[i], VolumeWidth, VolumeHeight, VolumeDepth) &&
-                    !Physics.BoxCast(position, Vector3.one * detectionRadius, CalculationHelper.Int3ToFloat3(directions[i]), out directionHit, transform.rotation, cellSize))
+                    !Physics.BoxCast(position, Vector3.one * detectionRadius, CalculationHelper.Int3ToFloat3(directions[i]), out directionHit, transform.rotation, cellSize, PathingManager.Instance.DetectableLayer))
                 {
                     int targetCellIndex = CalculationHelper.FlattenIndex(Cells[index].Index3D + directions[i], VolumeWidth, VolumeHeight);
                     tempNeighbors[i] = targetCellIndex;
