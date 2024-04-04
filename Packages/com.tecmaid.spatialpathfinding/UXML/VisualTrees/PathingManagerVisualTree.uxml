@@ -15,6 +15,17 @@
                 <uie:PropertyField binding-path="modifiers" class="VariableContainer" />
             </ui:Foldout>
         </ui:VisualElement>
+        <ui:VisualElement name="LayersContainer" class="FieldContainer" style="flex-grow: 1;">
+            <ui:Foldout text="Layer Settings" class="FieldInnerContainer FoldOutContainerTitle">
+                <uie:PropertyField binding-path="agentLayerName" class="VariableContainer" />
+                <uie:PropertyField binding-path="volumeLayerName" class="VariableContainer" />
+                <uie:PropertyField binding-path="detectableLayer" class="VariableContainer" />
+            </ui:Foldout>
+            <ui:VisualElement style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: center; margin-bottom: 10px;">
+                <ui:Button text="Create Layers" parse-escape-sequences="true" display-tooltip-when-elided="true" name="CreateLayersButton" />
+                <ui:Button text="Apply Layers" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ApplyLayersButton" />
+            </ui:VisualElement>
+        </ui:VisualElement>
         <ui:VisualElement name="DebuggingContainer" class="FieldContainer" style="flex-grow: 1;">
             <ui:Foldout text="Debugging Settings" view-data-key="PathingManagerIsOpen3" class="FoldOutContainerTitle FieldInnerContainer">
                 <uie:PropertyField binding-path="movableExecutionTime" class="VariableContainer" />
