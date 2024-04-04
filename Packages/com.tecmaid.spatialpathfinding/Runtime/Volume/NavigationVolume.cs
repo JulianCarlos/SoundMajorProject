@@ -72,14 +72,21 @@ namespace Pathfinding
 
             DetectionBox = GetComponent<BoxCollider>();
 
-            Collider[] overlappedAgents = Physics.OverlapBox(transform.position, new Vector3((cellSize * VolumeWidth) / 2, (cellSize * VolumeHeight) / 2, (cellSize * VolumeDepth) / 2), Quaternion.identity, LayerMask.GetMask("FlyingAgent"));
+            CollectAgents();
+
+            calculateExecutionStopwatch.Stop();
+            UnityEngine.Debug.Log(calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency));
+        }
+
+        private void CollectAgents()
+        {
+            int layerIndex = LayerMask.GetMask(PathingManager.Instance.AgentLayerName);
+
+            Collider[] overlappedAgents = Physics.OverlapBox(transform.position, new Vector3((cellSize * VolumeWidth) / 2, (cellSize * VolumeHeight) / 2, (cellSize * VolumeDepth) / 2), Quaternion.identity, layerIndex);
             for (int i = 0; i < overlappedAgents.Length; i++)
             {
                 overlappedAgents[i].GetComponent<FlyingAgent>().SetActiveVolume(this);
             }
-
-            calculateExecutionStopwatch.Stop();
-            UnityEngine.Debug.Log(calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency));
         }
 
         public float GetDetectionRadius()

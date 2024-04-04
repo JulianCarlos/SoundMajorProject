@@ -18,11 +18,11 @@
         <ui:VisualElement name="LayersContainer" class="FieldContainer" style="flex-grow: 1;">
             <ui:Foldout text="Layer Settings" class="FieldInnerContainer FoldOutContainerTitle">
                 <ui:VisualElement class="VariableContainer" style="flex-grow: 1;">
-                    <uie:PropertyField binding-path="agentLayerName" name="AgentLayer" />
+                    <uie:PropertyField binding-path="agentLayerInput" name="AgentLayer" label="New Agent Layer" />
                     <uie:PropertyField name="AgentCachedLayer" binding-path="AgentLayerName" label="Current Agent Layer" class="ReadOnly-Property" />
                 </ui:VisualElement>
                 <ui:VisualElement class="VariableContainer" style="flex-grow: 1;">
-                    <uie:PropertyField binding-path="volumeLayerName" name="VolumeLayer" />
+                    <uie:PropertyField binding-path="volumeLayerInput" name="VolumeLayer" label="New Volume Layer" />
                     <uie:PropertyField name="VolumeCachedLayer" binding-path="VolumeLayerName" label="Current Volume Layer" class="ReadOnly-Property" />
                 </ui:VisualElement>
                 <uie:PropertyField binding-path="detectableLayer" name="DetectableLayer" class="VariableContainer" />

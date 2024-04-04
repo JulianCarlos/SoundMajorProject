@@ -33,7 +33,7 @@ namespace Pathfinding
         private void GenerateLinks()
         {
             Collider[] collisions;
-            int mask = LayerMask.GetMask("NavigationVolume");
+            int mask = LayerMask.GetMask(PathingManager.Instance.VolumeLayerName);
             
             try
             {

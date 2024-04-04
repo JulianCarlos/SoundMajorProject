@@ -46,13 +46,13 @@ namespace Pathfinding
 
         public void GenerateLayers(ClickEvent evt)
         {
-            TagFactory.CreateLayer(Manager.AgentLayerName);
-            TagFactory.CreateLayer(Manager.VolumeLayerName);
+            TagFactory.CreateLayer(Manager.agentLayerInput);
+            TagFactory.CreateLayer(Manager.volumeLayerInput);
         }
 
         public void ApplyLayersToObjects(ClickEvent evt)
         {
-            if (TagFactory.LayerExists(Manager.AgentLayerName) && TagFactory.LayerExists(Manager.VolumeLayerName))
+            if (TagFactory.LayerExists(Manager.agentLayerInput) && TagFactory.LayerExists(Manager.volumeLayerInput))
             {
                 Manager.SetLayers();
 

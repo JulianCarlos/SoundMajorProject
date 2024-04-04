@@ -16,19 +16,17 @@ namespace Pathfinding
         public static Action<FlyingAgent> OnAgentStartedPathing { get; private set; }   
         public static Action<FlyingAgent> OnAgentFinishedPathing { get; private set; }
 
-        public string AgentLayerName = "FlyingAgent";
-        public string VolumeLayerName = "NavigationVolume";
+        public string AgentLayerName = "";
+        public string agentLayerInput = "FlyingAgent";
+
+        public string VolumeLayerName = "";
+        public string volumeLayerInput = "NavigationVolume";
         public LayerMask DetectableLayer => detectableLayer;
 
         [SerializeField] private List<FlyingAgent> movableAgents = new List<FlyingAgent>();
         [SerializeField] private List<FlyingAgent> calculableAgents = new List<FlyingAgent>();
-        
         [SerializeField] private Modifiers modifiers = Modifiers.NONE;
-
-        [SerializeField] private string agentLayerName = "FlyingAgent";
-        [SerializeField] private string volumeLayerName = "NavigationVolume";
         [SerializeField] private LayerMask detectableLayer = ~0;
-
         [SerializeField] private double movableExecutionTime = 0;
         [SerializeField] private double calculateExecutionTime = 0;
 
@@ -72,8 +70,8 @@ namespace Pathfinding
 
         public void SetLayers()
         {
-            AgentLayerName = agentLayerName;
-            VolumeLayerName = volumeLayerName;
+            AgentLayerName = agentLayerInput;
+            VolumeLayerName = volumeLayerInput;
         }
 
         private void AddAgentToCalculation(FlyingAgent agent)
