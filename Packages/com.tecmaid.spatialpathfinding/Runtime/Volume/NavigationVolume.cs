@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using Pathfinding.Helpers;
 using System.Diagnostics;
+using Unity.Jobs;
 
 namespace Pathfinding
 {
@@ -17,6 +18,9 @@ namespace Pathfinding
         public int VolumeWidth { get; private set; }
         public int VolumeHeight { get; private set; }
         public int VolumeDepth { get; private set; }
+
+        public NativeArray<Cell> Cells;
+        public NativeArray<NeighborData> CellNeighbors;
 
         public BoxCollider DetectionBox { get; private set; }
         public List<NavigationSubLink> Links = new List<NavigationSubLink>();
@@ -33,16 +37,12 @@ namespace Pathfinding
 
         [SerializeField] private double generationTime = 0;
 
-        public NativeArray<Cell> Cells;
-        public NativeArray<NeighborData> CellNeighbors;
-
         private NativeArray<int3> directions = new NativeArray<int3>(6, Allocator.Persistent);
         private NativeArray<int> tempNeighbors = new NativeArray<int>(6, Allocator.Persistent);
-
+        private LayerMask detectionMask;
         private RaycastHit directionHit;
 
         private int directionCount;
-        private LayerMask detectionMask;
 
         private void Awake()
         {
@@ -120,8 +120,7 @@ namespace Pathfinding
                 if (CalculationHelper.CheckIfIndexValid(Cells[index].Index3D + directions[i], VolumeWidth, VolumeHeight, VolumeDepth) &&
                     !Physics.BoxCast(position, Vector3.one * detectionRadius, CalculationHelper.Int3ToFloat3(directions[i]), out directionHit, transform.rotation, cellSize, detectionMask))
                 {
-                    int targetCellIndex = CalculationHelper.FlattenIndex(Cells[index].Index3D + directions[i], VolumeWidth, VolumeHeight);
-                    tempNeighbors[i] = targetCellIndex;
+                    tempNeighbors[i] = CalculationHelper.FlattenIndex(Cells[index].Index3D + directions[i], VolumeWidth, VolumeHeight);
                 } 
                 else
                 {
@@ -134,26 +133,20 @@ namespace Pathfinding
 
         public void InitializeGrid()
         {
-            int index = 0;
-
-            for (int z = 0; z < VolumeDepth; z++)
+            InitializeGridJob job = new InitializeGridJob()
             {
-                for (int y = 0; y < VolumeHeight; y++)
-                {
-                    for (int x = 0; x < VolumeWidth; x++)
-                    {
-                        Vector3 mainCellCenter = new Vector3(
-                        transform.position.x + ((x - (VolumeWidth - 1f) / 2f) * cellSize),
-                        transform.position.y + ((y - (VolumeHeight - 1f) / 2f) * cellSize),
-                        transform.position.z + ((z - (VolumeDepth - 1f) / 2f) * cellSize));
-                        
-                        Cell cell = new Cell(mainCellCenter, index, new int3(x, y, z));
-                        Cells[index] = cell;
+                Cells = this.Cells,
+                VolumeDepth = this.VolumeDepth,
+                VolumeHeight = this.VolumeHeight, 
+                VolumeWidth = this.VolumeWidth,
+                cellSize = this.cellSize,
+                position = transform.position,
+            };
 
-                        index++;
-                    }
-                }
-            }
+            JobHandle handle = job.Schedule();
+            handle.Complete();
+
+            Cells = job.Cells;
         }
 
         private void OnValidate()
@@ -163,7 +156,10 @@ namespace Pathfinding
 
         private void OnDisable()
         {
+            Cells.Dispose();
             directions.Dispose();
+            CellNeighbors.Dispose();
+            tempNeighbors.Dispose();
         }
 
         private void OnTriggerEnter(Collider other)
