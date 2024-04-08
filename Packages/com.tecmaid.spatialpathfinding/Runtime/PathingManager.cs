@@ -18,11 +18,12 @@ namespace Pathfinding
 
         public string AgentLayerName = "";
         public string agentLayerInput = "FlyingAgent";
-
         public string VolumeLayerName = "";
         public string volumeLayerInput = "NavigationVolume";
         public LayerMask DetectableLayer => detectableLayer;
+        public GridGenerationMethod GridGenerationMethod => gridGenerationMethod;
 
+        [SerializeField] private GridGenerationMethod gridGenerationMethod = GridGenerationMethod.Directional;
         [SerializeField] private List<FlyingAgent> movableAgents = new List<FlyingAgent>();
         [SerializeField] private List<FlyingAgent> calculableAgents = new List<FlyingAgent>();
         [SerializeField] private Modifiers modifiers = Modifiers.NONE;

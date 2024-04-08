@@ -793,6 +793,7 @@ MonoBehaviour:
   agentLayerInput: FlyingAgent
   VolumeLayerName: NavigationVolume
   volumeLayerInput: NavigationVolume
+  gridGenerationMethod: 0
   movableAgents: []
   calculableAgents: []
   modifiers: 0

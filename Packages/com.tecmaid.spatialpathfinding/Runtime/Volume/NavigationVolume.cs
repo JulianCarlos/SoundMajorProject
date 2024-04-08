@@ -6,7 +6,6 @@ using UnityEngine;
 using Pathfinding.Helpers;
 using System.Diagnostics;
 using Unity.Jobs;
-using System.Collections;
 
 namespace Pathfinding
 {
@@ -38,6 +37,7 @@ namespace Pathfinding
 
         [SerializeField] private double generationTime = 0;
 
+        private NativeArray<bool> obscuredCells;
         private NativeArray<int3> directions = new NativeArray<int3>(6, Allocator.Persistent);
         private NativeArray<int> tempNeighbors = new NativeArray<int>(6, Allocator.Persistent);
         private LayerMask detectionMask;
@@ -55,6 +55,7 @@ namespace Pathfinding
 
             Cells = new NativeArray<Cell>(TotalCells, Allocator.Persistent);
             CellNeighbors = new NativeArray<NeighborData>(TotalCells, Allocator.Persistent);
+            obscuredCells = new NativeArray<bool>(TotalCells, Allocator.Persistent);
 
             detectionMask = PathingManager.Instance.DetectableLayer;
             DetectionBox = GetComponent<BoxCollider>();
@@ -69,10 +70,32 @@ namespace Pathfinding
 
             InitializeDirections();
             InitializeGrid();
-            GetAllCellNeighbors();
+
+            if (PathingManager.Instance.GridGenerationMethod == GridGenerationMethod.Simple)
+            {
+                CheckObscuredCells();
+                GetAllCellNeighborsSimple();
+            }
+            else if (PathingManager.Instance.GridGenerationMethod == GridGenerationMethod.Directional)
+            {
+                GetAllCellNeighborsDirectional();
+            }
+
 
             calculateExecutionStopwatch.Stop();
             UnityEngine.Debug.Log(calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency));
+        }
+
+        private void CheckObscuredCells()
+        {
+            DetectionBox.enabled = false;
+
+            for (int i = 0; i < TotalCells; i++)
+            {
+                obscuredCells[i] = Physics.CheckBox(Cells[i].CellPos, 0.5f * cellSize * Vector3.one);
+            }
+
+            DetectionBox.enabled = true;
         }
 
         public void CollectAgents()
@@ -106,15 +129,41 @@ namespace Pathfinding
             directionCount = directions.Count();
         }
 
-        private void GetAllCellNeighbors()
+        private void GetAllCellNeighborsDirectional()
         {
             for (int i = 0; i < TotalCells; i++)
             {
-                GetNeighbours(i, Cells[i].CellPos);
+                GetNeighboursDirectional(i, Cells[i].CellPos);
             }
         }
 
-        private void GetNeighbours(int index, float3 position)
+        private void GetAllCellNeighborsSimple()
+        {
+            for (int i = 0; i < TotalCells; i++)
+            {
+                GetNeighborsSimple(i, Cells[i].CellPos);
+            }
+        }
+
+        private void GetNeighborsSimple(int index, float3 position)
+        {
+            for (int i = 0; i < directionCount; i++)
+            {
+                if (CalculationHelper.CheckIfIndexValid(Cells[index].Index3D + directions[i], VolumeWidth, VolumeHeight, VolumeDepth) &&
+                    obscuredCells[CalculationHelper.FlattenIndex(Cells[index].Index3D + directions[i], VolumeWidth, VolumeHeight)] == false)
+                {
+                    tempNeighbors[i] = CalculationHelper.FlattenIndex(Cells[index].Index3D + directions[i], VolumeWidth, VolumeHeight);
+                }
+                else
+                {
+                    tempNeighbors[i] = -1;
+                }
+            }
+
+            CellNeighbors[index] = new NeighborData(tempNeighbors);
+        }
+
+        private void GetNeighboursDirectional(int index, float3 position)
         {
             for (int i = 0; i < directionCount; i++)
             {

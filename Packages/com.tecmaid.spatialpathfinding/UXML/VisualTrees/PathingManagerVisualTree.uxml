@@ -4,6 +4,11 @@
         <ui:VisualElement class="MainTitleContainer" style="flex-grow: 1;">
             <ui:Label tabindex="-1" text="Pathing Manager" parse-escape-sequences="true" display-tooltip-when-elided="true" class="MainTitle" />
         </ui:VisualElement>
+        <ui:VisualElement name="PathfindingSettingsContainer" class="FieldContainer" style="flex-grow: 1;">
+            <ui:Foldout text="Pathfinding Settings" class="FoldOutContainerTitle FieldInnerContainer">
+                <uie:PropertyField binding-path="gridGenerationMethod" class="VariableContainer" />
+            </ui:Foldout>
+        </ui:VisualElement>
         <ui:VisualElement name="AgentsContainer" class="FieldContainer" style="flex-grow: 1;">
             <ui:Foldout text="Active Agents Settings" view-data-key="PathingManagerIsOpen1" class="FieldInnerContainer FoldOutContainerTitle">
                 <uie:PropertyField binding-path="movableAgents" class="VariableContainer" />

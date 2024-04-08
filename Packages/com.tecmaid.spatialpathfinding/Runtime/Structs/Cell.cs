@@ -1,7 +1,7 @@
 using Unity.Burst;
 using Unity.Mathematics;
 
-public struct Cell
+public readonly struct Cell
 {
     public readonly int Index;
     public readonly int3 Index3D;
