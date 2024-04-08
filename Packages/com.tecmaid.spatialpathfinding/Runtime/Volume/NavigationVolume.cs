@@ -6,6 +6,7 @@ using UnityEngine;
 using Pathfinding.Helpers;
 using System.Diagnostics;
 using Unity.Jobs;
+using System.Collections;
 
 namespace Pathfinding
 {
@@ -78,7 +79,7 @@ namespace Pathfinding
         {
             int layerIndex = LayerMask.GetMask(PathingManager.Instance.AgentLayerName);
 
-            Collider[] overlappedAgents = Physics.OverlapBox(transform.position, new Vector3((cellSize * VolumeWidth) / 2, (cellSize * VolumeHeight) / 2, (cellSize * VolumeDepth) / 2), Quaternion.identity, layerIndex);
+            Collider[] overlappedAgents = Physics.OverlapBox(transform.position, cellSize * new Vector3(VolumeWidth,VolumeHeight,VolumeDepth) / 2, Quaternion.identity, layerIndex);
             for (int i = 0; i < overlappedAgents.Length; i++)
             {
                 overlappedAgents[i].GetComponent<FlyingAgent>().SetActiveVolume(this);
@@ -118,7 +119,7 @@ namespace Pathfinding
             for (int i = 0; i < directionCount; i++)
             {
                 if (CalculationHelper.CheckIfIndexValid(Cells[index].Index3D + directions[i], VolumeWidth, VolumeHeight, VolumeDepth) &&
-                    !Physics.BoxCast(position, Vector3.one * detectionRadius, CalculationHelper.Int3ToFloat3(directions[i]), out directionHit, transform.rotation, cellSize, detectionMask))
+                    !Physics.BoxCast(position, detectionRadius * Vector3.one, CalculationHelper.Int3ToFloat3(directions[i]), out directionHit, transform.rotation, cellSize, detectionMask))
                 {
                     tempNeighbors[i] = CalculationHelper.FlattenIndex(Cells[index].Index3D + directions[i], VolumeWidth, VolumeHeight);
                 } 
@@ -151,7 +152,7 @@ namespace Pathfinding
 
         private void OnValidate()
         {
-            GetComponent<BoxCollider>().size = new Vector3(gridSize.x, gridSize.y, gridSize.z) * cellSize;
+            GetComponent<BoxCollider>().size = cellSize * new Vector3(gridSize.x, gridSize.y, gridSize.z);
         }
 
         private void OnDisable()

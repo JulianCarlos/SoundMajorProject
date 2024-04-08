@@ -154,7 +154,7 @@ namespace Pathfinding
 
             for (int i = 1; i < waypoints.Length - 1; i++)
             {
-                if (Physics.BoxCast(waypoints[index], Vector3.one * detectionRadius, waypoints[i] - waypoints[index], Quaternion.identity, math.distance(waypoints[i], waypoints[index]))) 
+                if (Physics.BoxCast(waypoints[index], detectionRadius * Vector3.one, waypoints[i] - waypoints[index], Quaternion.identity, math.distance(waypoints[i], waypoints[index]))) 
                 {
                     newWaypoints.Add(waypoints[i - 1]);
                     index = i - 1;
