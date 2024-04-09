@@ -12,36 +12,188 @@ namespace Pathfinding
     [DefaultExecutionOrder(100)]
     public class PathingManager : MonoBehaviour
     {
+        #region Static Accessors
+
+        /// <summary>
+        /// The Main Instance of this object
+        /// </summary>
+        /// <remarks>
+        /// Note: Only one <see cref="PathingManager"/> can exist at a time
+        /// </remarks>
         public static PathingManager Instance { get; private set; }
-        public static Action<FlyingAgent> OnAgentStartedPathing { get; private set; }   
+
+        /// <summary>
+        /// Action for Adding Agents
+        /// </summary>
+        /// <remarks>
+        /// This Action gets executed every time the agent starts moving
+        /// </remarks>
+        public static Action<FlyingAgent> OnAgentStartedPathing { get; private set; }
+
+        /// <summary>
+        /// Action for Removing Agents
+        /// </summary>
+        /// <remarks>
+        /// This Action gets executed every time a agent has reached his destination
+        /// </remarks>
         public static Action<FlyingAgent> OnAgentFinishedPathing { get; private set; }
 
-        public string AgentLayerName = "";
-        public string agentLayerInput = "FlyingAgent";
-        public string VolumeLayerName = "";
-        public string volumeLayerInput = "NavigationVolume";
+        #endregion
+
+        #region Serialized Field Accessors
+
+        /// <summary>
+        /// The layer name of the agent layer
+        /// </summary>
+        public string AgentLayerName => agentLayerName;
+
+        /// <summary>
+        /// The layer name of the agent layer
+        /// </summary>
+        public string VolumeLayerName => volumeLayerName;
+
+        /// <summary>
+        /// The active layers responsible for the neighbor calculation
+        /// </summary>
         public LayerMask DetectableLayer => detectableLayer;
+
+        /// <summary>
+        /// The generation method for generating the grid and calculating neighbors
+        /// </summary>
         public GridGenerationMethod GridGenerationMethod => gridGenerationMethod;
 
-        [SerializeField] private GridGenerationMethod gridGenerationMethod = GridGenerationMethod.Simple;
-        [SerializeField] private List<FlyingAgent> movableAgents = new List<FlyingAgent>();
-        [SerializeField] private List<FlyingAgent> calculableAgents = new List<FlyingAgent>();
-        [SerializeField] private Modifiers modifiers = Modifiers.NONE;
+        #endregion
+
+        #region Serialized Fields
+
+        /// <summary>
+        /// The layer name of the agent layer
+        /// </summary>
+        [SerializeField] private string agentLayerName;
+
+        /// <summary>
+        /// The layer name of the agent layer
+        /// </summary>
+        [SerializeField] private string volumeLayerName;
+
+        /// <summary>
+        /// The active layers responsible for the neighbor calculation
+        /// </summary>
         [SerializeField] private LayerMask detectableLayer = ~0;
+
+        /// <summary>
+        /// The generation method for generating the grid and calculating neighbors
+        /// </summary>
+        [SerializeField] private GridGenerationMethod gridGenerationMethod = GridGenerationMethod.Simple;
+
+        /// <summary>
+        /// The layer name input for generating agent layer
+        /// </summary>
+        [SerializeField] private string agentLayerInput = "FlyingAgent";
+
+        /// <summary>
+        /// The layer name input for generating volume layer
+        /// </summary>
+        [SerializeField] private string volumeLayerInput = "NavigationVolume";
+
+        /// <summary>
+        /// The current agents inside the movable list
+        /// </summary>
+        /// <remarks>
+        /// Everytime the 
+        /// <see cref="CalculateAStarPath(FlyingAgent)"/> is completed, the agent will be added
+        /// </remarks>
+        [SerializeField] private List<FlyingAgent> movableAgents = new List<FlyingAgent>();
+
+        /// <summary>
+        /// The current agents inside the calculable list
+        /// </summary>
+        /// <remarks>
+        /// Everytime the 
+        /// <see cref="OnAgentStartedPathing"/> is executed, the agent will be added
+        /// </remarks>
+        [SerializeField] private List<FlyingAgent> calculableAgents = new List<FlyingAgent>();
+
+        /// <summary>
+        /// Modifier for modifying the finished path
+        /// </summary>
+        [SerializeField] private Modifiers modifiers = Modifiers.NONE;
+
+        /// <summary>
+        /// The amount of time it takes to move the agents
+        /// </summary>
+        /// <remarks>
+        /// Note: this is only for debugging purposes
+        /// </remarks>
         [SerializeField] private double movableExecutionTime = 0;
+
+        /// <summary>
+        /// The amount of time it takes to calculating the agents
+        /// </summary>
+        /// <remarks>
+        /// Note: this is only for debugging purposes
+        /// </remarks>
         [SerializeField] private double calculateExecutionTime = 0;
 
+        #endregion
+
+        #region Private Fields
+
+        /// <summary>
+        /// Stopwatch for measuring time to move the agents
+        /// </summary>
+        /// <remarks>
+        /// Note: this is only for debugging purposes
+        /// </remarks>
         private Stopwatch moveExecutionStopwatch = new Stopwatch();
+
+        /// <summary>
+        /// Stopwatch for measuring time to calculate the agents
+        /// </summary>
+        /// <remarks>
+        /// Note: this is only for debugging purposes
+        /// </remarks>
         private Stopwatch calculateExecutionStopwatch = new Stopwatch();
 
+        /// <summary>
+        /// Local List to concat multiple waypoints together
+        /// </summary>
         private NativeList<float3> wayPoints = new NativeList<float3>(Allocator.Persistent);
 
+        /// <summary>
+        /// Cached Job for faster processing speed
+        /// </summary>
+        /// <remarks>
+        /// Note: This is not the final approach
+        /// </remarks>
         private AStarJob targetJob;
+
+        /// <summary>
+        /// Cached Job for faster processing speed
+        /// </summary>
+        /// <remarks>
+        /// Note: This is not the final approach
+        /// </remarks>
         private AStarJob originJob;
+
+        /// <summary>
+        /// Handle for scheduling <see cref="AStarJob"/>
+        /// </summary>
         private JobHandle aStarHandle;
 
+        /// <summary>
+        /// The volume of the agent requesting the path
+        /// </summary>
         private NavigationVolume originVolume;
+
+        /// <summary>
+        /// The targetvolume of the agent requesting the path
+        /// </summary>
         private NavigationVolume targetVolume;
+
+        #endregion
+
+        #region Default Execution Methods
 
         private void Awake()
         {
@@ -57,6 +209,35 @@ namespace Pathfinding
             MoveAllAgents();
         }
 
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Setting the Layer from the input field
+        /// </summary>
+        public void SetLayers()
+        {
+            agentLayerName = agentLayerInput;
+            volumeLayerName = volumeLayerInput;
+        }
+
+        /// <summary>
+        /// Getting the layernames currently inside the input fields
+        /// </summary>
+        /// <returns> <see cref="agentLayerInput"/> | <see cref="volumeLayerInput"/> </returns>
+        public string[] GetInputLayer()
+        {
+            return new string[2] { agentLayerInput, volumeLayerInput };
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// Method for creating <see cref="PathingManager"/> Instance
+        /// </summary>
         private void CreateInstance()
         {
             if (Instance == null)
@@ -69,22 +250,33 @@ namespace Pathfinding
             }
         }
 
-        public void SetLayers()
-        {
-            AgentLayerName = agentLayerInput;
-            VolumeLayerName = volumeLayerInput;
-        }
-
+        /// <summary>
+        /// Adds a agent to the calculation list
+        /// </summary>
+        /// <remarks>
+        /// Note: this method is subscribed to the <see cref="OnAgentStartedPathing"/> method
+        /// </remarks>
+        /// <param name="agent"><see cref="FlyingAgent"/> requesting path</param>
         private void AddAgentToCalculation(FlyingAgent agent)
         {
             calculableAgents.Add(agent);
         }
 
+        /// <summary>
+        /// Removes a agent from the movable list
+        /// </summary>
+        /// <remarks>
+        /// Note: this method is subscribed to the <see cref="OnAgentFinishedPathing"/> method
+        /// </remarks>
+        /// <param name="agent"><see cref="FlyingAgent"/> reached path</param>
         private void RemoveAgentFromMovable(FlyingAgent agent)
         {
             movableAgents.Remove(agent);
         }
 
+        /// <summary>
+        /// Responsible for calculating path of each <see cref="FlyingAgent"/> inside the <see cref="calculableAgents"/> list
+        /// </summary>
         private void CalculateAllAgentPaths()
         {
             if (calculableAgents.Count <= 0)
@@ -108,6 +300,9 @@ namespace Pathfinding
             calculateExecutionStopwatch.Reset();
         }
 
+        /// <summary>
+        /// Responsible for moving all <see cref="FlyingAgent"/> inside the <see cref="movableAgents"/> list
+        /// </summary>
         private void MoveAllAgents()
         {
             if (movableAgents.Count <= 0)
@@ -125,6 +320,10 @@ namespace Pathfinding
             moveExecutionStopwatch.Reset();
         }
 
+        /// <summary>
+        /// Calculate Path for <see cref="FlyingAgent"/>
+        /// </summary>
+        /// <param name="agent">Target <see cref="FlyingAgent"/> requesting path</param>
         private void CalculateAStarPath(FlyingAgent agent)
         {
             originVolume = agent.ActiveVolume;
@@ -147,6 +346,15 @@ namespace Pathfinding
             wayPoints.Clear();
         }
 
+        /// <summary>
+        /// Responsible for Smoothing out the finished waypoints list
+        /// </summary>
+        /// <remarks>
+        /// Note: This method increases performance slightly
+        /// </remarks>
+        /// <param name="waypoints">The target waypoints which should get smoothed</param>
+        /// <param name="detectionRadius">The detection radius to determine if neighbors are in line of sight</param>
+        /// <returns></returns>
         private NativeList<float3> SmoothPath(NativeList<float3> waypoints, float detectionRadius)
         {
             int index = 0;
@@ -167,6 +375,14 @@ namespace Pathfinding
             return newWaypoints;
         }
 
+        /// <summary>
+        /// Calculates the closest volume to the target position of the requesting <see cref="FlyingAgent"/>
+        /// </summary>
+        /// <param name="agent">Target <see cref="FlyingAgent"/> requesting path</param>
+        /// <param name="tempLinkIndex">The index of the current link</param>
+        /// <param name="tempDistance">The current distance calculated</param>
+        /// <param name="distance">The current shortest distance</param>
+        /// <param name="links">All links connect to the target <see cref="NavigationVolume"/></param>
         private void CalculateClosestVolumes(FlyingAgent agent, ref int tempLinkIndex, ref float tempDistance, ref float distance, List<NavigationSubLink> links)
         {
             for (int i = 0; i < links.Count; i++)
@@ -183,6 +399,12 @@ namespace Pathfinding
             }
         }
 
+        /// <summary>
+        /// Responsible for executing <see cref="AStarJob"/> and generating a waypoints list
+        /// </summary>
+        /// <param name="agent">Target <see cref="FlyingAgent"/> requesting path</param>
+        /// <param name="tempLinkIndex"> Current active link index</param>
+        /// <param name="links">All links connect to the target <see cref="NavigationVolume"/></param>
         private void GenerateWaypoints(FlyingAgent agent, int tempLinkIndex, List<NavigationSubLink> links)
         {
             if (originVolume == targetVolume)
@@ -209,6 +431,8 @@ namespace Pathfinding
                 originJob.OpenCells.Dispose();
             }
         }
+
+        #endregion
     }
 }
 

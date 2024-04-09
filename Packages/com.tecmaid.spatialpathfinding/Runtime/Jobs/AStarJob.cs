@@ -8,21 +8,20 @@ using Pathfinding.Helpers;
 [BurstCompile(CompileSynchronously = false, DisableSafetyChecks = true)]
 public struct AStarJob : IJob
 {
-    public int TotalCells;
+    [ReadOnly] public int TotalCells;
+    [ReadOnly] public int VolumeWidth;
+    [ReadOnly] public int VolumeHeight;
+    [ReadOnly] public int VolumeDepth;
 
-    public int VolumeWidth;
-    public int VolumeHeight;
-    public int VolumeDepth;
+    [ReadOnly] public float3 TargetPos;
+    [ReadOnly] public float3 InitialPos;
 
-    public float3 TargetPos;
-    public float3 InitialPos;
+    [ReadOnly] public NativeArray<Cell> Cells;
+    [ReadOnly] public NativeArray<int> OpenCells;
+    [ReadOnly] public NativeArray<NeighborData> CellNeighbors;
 
-    public NativeList<float3> WalkPoints;
-
-    public NativeArray<Cell> Cells;
-    public NativeArray<int> OpenCells;
-    public NativeArray<TempData> TempData;
-    public NativeArray<NeighborData> CellNeighbors;
+    [WriteOnly] public NativeList<float3> WalkPoints;
+    [WriteOnly] public NativeArray<TempData> TempData;
 
     private int endPoint;
     private int currentPoint;

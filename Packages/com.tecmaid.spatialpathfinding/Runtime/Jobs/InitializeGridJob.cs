@@ -7,14 +7,14 @@ using UnityEngine;
 [BurstCompile]
 public struct InitializeGridJob : IJob
 {
-    public NativeArray<Cell> Cells;
+    [WriteOnly] public NativeArray<Cell> Cells;
 
-    public int VolumeDepth;
-    public int VolumeHeight;
-    public int VolumeWidth;
+    [ReadOnly] public int VolumeDepth;
+    [ReadOnly] public int VolumeHeight;
+    [ReadOnly] public int VolumeWidth;
 
-    public float cellSize;
-    public Vector3 position;
+    [ReadOnly] public float cellSize;
+    [ReadOnly] public Vector3 position;
 
     public void Execute()
     {

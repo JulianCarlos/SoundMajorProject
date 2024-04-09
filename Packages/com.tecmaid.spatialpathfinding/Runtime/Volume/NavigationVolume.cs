@@ -6,6 +6,7 @@ using UnityEngine;
 using Pathfinding.Helpers;
 using System.Diagnostics;
 using Unity.Jobs;
+using Unity.Profiling;
 
 namespace Pathfinding
 {
@@ -81,7 +82,6 @@ namespace Pathfinding
                 GetAllCellNeighborsDirectional();
             }
 
-
             calculateExecutionStopwatch.Stop();
             UnityEngine.Debug.Log(calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency));
         }
@@ -139,34 +139,26 @@ namespace Pathfinding
 
         private void GetAllCellNeighborsSimple()
         {
-            for (int i = 0; i < TotalCells; i++)
+            GetNeighborsSimpleJob job = new GetNeighborsSimpleJob()
             {
-                GetNeighborsSimple(i);
-            }
-        }
+                Cells = this.Cells,
+                ObscuredCells = this.obscuredCells,
+                Directions = this.directions,
 
-        private void GetNeighborsSimple(int index)
-        {
-            int3 localIndex3D;
-            int flattenIndex;
+                CellNeighbors = this.CellNeighbors,
 
-            for (int j = 0; j < directionCount; j++)
-            {
-                localIndex3D = Cells[index].Index3D + directions[j];
-                flattenIndex = CalculationHelper.FlattenIndex(localIndex3D, VolumeWidth, VolumeHeight);
+                VolumeWidth = this.VolumeWidth,
+                VolumeHeight = this.VolumeHeight,
+                VolumeDepth = this.VolumeDepth,
 
-                if (CalculationHelper.CheckIfIndexValid(localIndex3D, VolumeWidth, VolumeHeight, VolumeDepth) &&
-                    obscuredCells[flattenIndex] == false)
-                {
-                    tempNeighbors[j] = flattenIndex;
-                }
-                else
-                {
-                    tempNeighbors[j] = -1;
-                }
-            }
+                TotalCells = this.TotalCells,
 
-            CellNeighbors[index] = new NeighborData(tempNeighbors);
+                TempNeighbors = this.tempNeighbors,
+            };
+
+            JobHandle handle = job.Schedule();
+
+            handle.Complete();
         }
 
         private void GetNeighboursDirectional(int index, float3 position)
