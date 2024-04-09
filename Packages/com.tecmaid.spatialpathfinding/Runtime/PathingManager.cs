@@ -23,7 +23,7 @@ namespace Pathfinding
         public LayerMask DetectableLayer => detectableLayer;
         public GridGenerationMethod GridGenerationMethod => gridGenerationMethod;
 
-        [SerializeField] private GridGenerationMethod gridGenerationMethod = GridGenerationMethod.Directional;
+        [SerializeField] private GridGenerationMethod gridGenerationMethod = GridGenerationMethod.Simple;
         [SerializeField] private List<FlyingAgent> movableAgents = new List<FlyingAgent>();
         [SerializeField] private List<FlyingAgent> calculableAgents = new List<FlyingAgent>();
         [SerializeField] private Modifiers modifiers = Modifiers.NONE;

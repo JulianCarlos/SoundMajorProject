@@ -43,7 +43,7 @@ namespace Pathfinding
         private LayerMask detectionMask;
         private RaycastHit directionHit;
 
-        private int directionCount;
+        private short directionCount;
 
         private void Awake()
         {
@@ -92,7 +92,7 @@ namespace Pathfinding
 
             for (int i = 0; i < TotalCells; i++)
             {
-                obscuredCells[i] = Physics.CheckBox(Cells[i].CellPos, 0.5f * cellSize * Vector3.one);
+                obscuredCells[i] = Physics.CheckBox(Cells[i].CellPos, 0.5f * cellSize * Vector3.one, Quaternion.identity, detectionMask);
             }
 
             DetectionBox.enabled = true;
@@ -102,7 +102,7 @@ namespace Pathfinding
         {
             int layerIndex = LayerMask.GetMask(PathingManager.Instance.AgentLayerName);
 
-            Collider[] overlappedAgents = Physics.OverlapBox(transform.position, cellSize * new Vector3(VolumeWidth,VolumeHeight,VolumeDepth) / 2, Quaternion.identity, layerIndex);
+            Collider[] overlappedAgents = Physics.OverlapBox(transform.position, cellSize * 0.5f * new Vector3(VolumeWidth,VolumeHeight,VolumeDepth) , Quaternion.identity, layerIndex);
             for (int i = 0; i < overlappedAgents.Length; i++)
             {
                 overlappedAgents[i].GetComponent<FlyingAgent>().SetActiveVolume(this);
@@ -126,7 +126,7 @@ namespace Pathfinding
             directions[4] = new int3( 0,  1,  0);
             directions[5] = new int3( 0, -1,  0);
 
-            directionCount = directions.Count();
+            directionCount = (short)directions.Count();
         }
 
         private void GetAllCellNeighborsDirectional()
@@ -141,22 +141,28 @@ namespace Pathfinding
         {
             for (int i = 0; i < TotalCells; i++)
             {
-                GetNeighborsSimple(i, Cells[i].CellPos);
+                GetNeighborsSimple(i);
             }
         }
 
-        private void GetNeighborsSimple(int index, float3 position)
+        private void GetNeighborsSimple(int index)
         {
-            for (int i = 0; i < directionCount; i++)
+            int3 localIndex3D;
+            int flattenIndex;
+
+            for (int j = 0; j < directionCount; j++)
             {
-                if (CalculationHelper.CheckIfIndexValid(Cells[index].Index3D + directions[i], VolumeWidth, VolumeHeight, VolumeDepth) &&
-                    obscuredCells[CalculationHelper.FlattenIndex(Cells[index].Index3D + directions[i], VolumeWidth, VolumeHeight)] == false)
+                localIndex3D = Cells[index].Index3D + directions[j];
+                flattenIndex = CalculationHelper.FlattenIndex(localIndex3D, VolumeWidth, VolumeHeight);
+
+                if (CalculationHelper.CheckIfIndexValid(localIndex3D, VolumeWidth, VolumeHeight, VolumeDepth) &&
+                    obscuredCells[flattenIndex] == false)
                 {
-                    tempNeighbors[i] = CalculationHelper.FlattenIndex(Cells[index].Index3D + directions[i], VolumeWidth, VolumeHeight);
+                    tempNeighbors[j] = flattenIndex;
                 }
                 else
                 {
-                    tempNeighbors[i] = -1;
+                    tempNeighbors[j] = -1;
                 }
             }
 
