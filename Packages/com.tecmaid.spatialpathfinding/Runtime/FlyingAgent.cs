@@ -59,6 +59,9 @@ namespace Pathfinding
 
         public void Move()
         {
+            if (activePath.Waypoints.Length <= 0)
+                return;
+
             CheckWaypointPosition();
             ApplyRotationAndPosition();
         }

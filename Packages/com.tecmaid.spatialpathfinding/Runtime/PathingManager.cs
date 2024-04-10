@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System;
 using Unity.Mathematics;
 using Pathfinding.Helpers;
+using System.Collections;
 
 namespace Pathfinding
 {
@@ -120,6 +121,11 @@ namespace Pathfinding
         [SerializeField] private Modifiers modifiers = Modifiers.NONE;
 
         /// <summary>
+        /// The frequency of how often the <see cref="CalculateAllAgentPaths"/> gets called
+        /// </summary>
+        [SerializeField] private float calculationTimeStep = 0.2f;
+
+        /// <summary>
         /// The amount of time it takes to move the agents
         /// </summary>
         /// <remarks>
@@ -145,7 +151,7 @@ namespace Pathfinding
         /// <remarks>
         /// Note: this is only for debugging purposes
         /// </remarks>
-        private Stopwatch moveExecutionStopwatch = new Stopwatch();
+        private readonly Stopwatch moveExecutionStopwatch = new Stopwatch();
 
         /// <summary>
         /// Stopwatch for measuring time to calculate the agents
@@ -153,7 +159,7 @@ namespace Pathfinding
         /// <remarks>
         /// Note: this is only for debugging purposes
         /// </remarks>
-        private Stopwatch calculateExecutionStopwatch = new Stopwatch();
+        private readonly Stopwatch calculateExecutionStopwatch = new Stopwatch();
 
         /// <summary>
         /// Local List to concat multiple waypoints together
@@ -182,6 +188,11 @@ namespace Pathfinding
         private JobHandle aStarHandle;
 
         /// <summary>
+        /// Cached Waitforseconds to reduce GC
+        /// </summary>
+        private WaitForSeconds calculationTimeStepWait;
+
+        /// <summary>
         /// The volume of the agent requesting the path
         /// </summary>
         private NavigationVolume originVolume;
@@ -201,6 +212,13 @@ namespace Pathfinding
 
             OnAgentStartedPathing += AddAgentToCalculation;
             OnAgentFinishedPathing += RemoveAgentFromMovable;
+
+            calculationTimeStepWait = new WaitForSeconds(calculationTimeStep);
+        }
+
+        private void Start()
+        {
+            StartCoroutine(nameof(CalculateAllAgentPaths));
         }
 
         private void Update()
@@ -260,6 +278,7 @@ namespace Pathfinding
         private void AddAgentToCalculation(FlyingAgent agent)
         {
             calculableAgents.Add(agent);
+            movableAgents.Add(agent);
         }
 
         /// <summary>
@@ -271,33 +290,31 @@ namespace Pathfinding
         /// <param name="agent"><see cref="FlyingAgent"/> reached path</param>
         private void RemoveAgentFromMovable(FlyingAgent agent)
         {
+            calculableAgents.Remove(agent);
             movableAgents.Remove(agent);
         }
 
         /// <summary>
         /// Responsible for calculating path of each <see cref="FlyingAgent"/> inside the <see cref="calculableAgents"/> list
         /// </summary>
-        private void CalculateAllAgentPaths()
+        private IEnumerator CalculateAllAgentPaths()
         {
-            if (calculableAgents.Count <= 0)
-                return;
-
-            calculateExecutionStopwatch.Start();
-
-            for (int i = 0; i < calculableAgents.Count; i++)
+            while (true)
             {
-                CalculateAStarPath(calculableAgents[i]);
+                yield return calculationTimeStepWait;
 
-                if (!movableAgents.Contains(calculableAgents[i]))
+                calculateExecutionStopwatch.Start();
+
+                for (int i = 0; i < calculableAgents.Count; i++)
                 {
-                    movableAgents.Add(calculableAgents[i]);
-                    calculableAgents.Remove(calculableAgents[i]);
+                    CalculateAStarPath(calculableAgents[i]);
                 }
+
+                calculateExecutionStopwatch.Stop();
+                calculateExecutionTime = calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
+                calculateExecutionStopwatch.Reset();
             }
 
-            calculateExecutionStopwatch.Stop();
-            calculateExecutionTime = calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
-            calculateExecutionStopwatch.Reset();
         }
 
         /// <summary>
@@ -339,7 +356,7 @@ namespace Pathfinding
 
             if (this.modifiers == Modifiers.PATHSMOOTHING)
             {
-                wayPoints = SmoothPath(wayPoints, originVolume.GetDetectionRadius());
+                wayPoints = SmoothPath(wayPoints, originVolume);
             }
 
             agent.SetPath(new NavigationPath(wayPoints));
@@ -355,15 +372,22 @@ namespace Pathfinding
         /// <param name="waypoints">The target waypoints which should get smoothed</param>
         /// <param name="detectionRadius">The detection radius to determine if neighbors are in line of sight</param>
         /// <returns></returns>
-        private NativeList<float3> SmoothPath(NativeList<float3> waypoints, float detectionRadius)
+        private NativeList<float3> SmoothPath(NativeList<float3> waypoints, NavigationVolume volume)
         {
+            float smoothDetection = 0;
+
+            if (gridGenerationMethod == GridGenerationMethod.Simple)
+                smoothDetection = volume.CellSize;
+            else if (gridGenerationMethod == GridGenerationMethod.Directional)
+                smoothDetection = volume.GetDetectionRadius();
+
             int index = 0;
             NativeList<float3> newWaypoints = new NativeList<float3>(Allocator.Persistent);
             newWaypoints.Add(waypoints[index]);
 
             for (int i = 1; i < waypoints.Length - 1; i++)
             {
-                if (Physics.BoxCast(waypoints[index], detectionRadius * Vector3.one, waypoints[i] - waypoints[index], Quaternion.identity, math.distance(waypoints[i], waypoints[index]))) 
+                if (Physics.BoxCast(waypoints[index], smoothDetection * Vector3.one, waypoints[i] - waypoints[index], Quaternion.identity, math.distance(waypoints[i], waypoints[index]))) 
                 {
                     newWaypoints.Add(waypoints[i - 1]);
                     index = i - 1;

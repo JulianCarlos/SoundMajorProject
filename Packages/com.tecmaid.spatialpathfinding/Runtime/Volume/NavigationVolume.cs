@@ -20,6 +20,8 @@ namespace Pathfinding
         public int VolumeHeight { get; private set; }
         public int VolumeDepth { get; private set; }
 
+        public uint CellSize => cellSize;
+
         public NativeArray<Cell> Cells;
         public NativeArray<NeighborData> CellNeighbors;
 
