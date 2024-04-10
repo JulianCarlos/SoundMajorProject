@@ -126,6 +126,11 @@ namespace Pathfinding
         [SerializeField] private float calculationTimeStep = 0.2f;
 
         /// <summary>
+        /// The frequency of how often the grid neighbors get updated
+        /// </summary>
+        [SerializeField] private float updateGridTimeStep = 0.5f;
+
+        /// <summary>
         /// The amount of time it takes to move the agents
         /// </summary>
         /// <remarks>
