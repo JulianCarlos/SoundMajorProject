@@ -7,7 +7,7 @@ namespace Pathfinding.Helpers
     {
         private static NavigationVolume targetVolume;
 
-        public static AStarJob GenerateAStarJob(NavigationVolume volume, float3 initialPos, float3 targetPos, NativeList<float3> wayPoints)
+        public static AStarJob GenerateAStarJob(NavigationVolume volume, float3 initialPos, float3 targetPos)
         {
             targetVolume = volume;
 
@@ -27,7 +27,7 @@ namespace Pathfinding.Helpers
 
                 TempData = new NativeArray<TempData>(targetVolume.TotalCells, Allocator.TempJob),
                 OpenCells = new NativeArray<int>(targetVolume.TotalCells, Allocator.TempJob),
-                WalkPoints = wayPoints,
+                WalkPoints = new NativeList<float3>(Allocator.TempJob),
             };
 
             return job;

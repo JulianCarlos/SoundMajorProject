@@ -32,6 +32,8 @@ namespace Pathfinding
         private NavigationPath activePath;
 
         private int currentWayPointIndex = 0;
+        private int currentSegmentIndex = 0;
+
         private float speedCurveMultiplier = 1f;
         private float currentAccelerationValue = 0f;
 
@@ -85,39 +87,39 @@ namespace Pathfinding
 
         private void CheckWaypointPosition()
         {
-            if (currentWayPointIndex <= 0)
-            {
-                if (math.distance(transform.position, activePath.Waypoints[0]) <= stoppingDistance)
-                {
-                    PathingManager.OnAgentFinishedPathing(this);
-                    return;
-                }
-            }
-            else if (math.distance(transform.position, activePath.Waypoints[currentWayPointIndex]) <= distanceUntilWaypointReached)
-            {
-                currentWayPointIndex--;
-            }
+            //if (currentWayPointIndex <= 0)
+            //{
+            //    if (math.distance(transform.position, activePath.Waypoints[0]) <= stoppingDistance)
+            //    {
+            //        PathingManager.OnAgentFinishedPathing(this);
+            //        return;
+            //    }
+            //}
+            //else if (math.distance(transform.position, activePath.Waypoints[currentWayPointIndex]) <= distanceUntilWaypointReached)
+            //{
+            //    currentWayPointIndex--;
+            //}
         }
 
         private void ApplyRotationAndPosition()
         {
-            if (interpolateSpeedStart)
-            {
-                speedCurveMultiplier = startSpeedCurve.Evaluate(currentAccelerationValue);
-                currentAccelerationValue += Time.deltaTime / timeToReachMaxSpeed;
-            }
-
-            Vector3 targetDirection = (CalculationHelper.Float3ToVector3(activePath.Waypoints[currentWayPointIndex]) - transform.position).normalized;
-            Quaternion lookRotation = Quaternion.LookRotation(targetDirection);
-
-            if (useSmoothRotation)
-            {
-                transform.SetPositionAndRotation(Vector3.MoveTowards(transform.position, transform.position + transform.forward, (speedCurveMultiplier * maxSpeed) * Time.deltaTime), Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationStrength));
-            }
-            else
-            {
-                transform.SetPositionAndRotation(Vector3.MoveTowards(transform.position, activePath.Waypoints[currentWayPointIndex], maxSpeed * Time.deltaTime), lookRotation);
-            }
+            //if (interpolateSpeedStart)
+            //{
+            //    speedCurveMultiplier = startSpeedCurve.Evaluate(currentAccelerationValue);
+            //    currentAccelerationValue += Time.deltaTime / timeToReachMaxSpeed;
+            //}
+            //
+            //Vector3 targetDirection = (CalculationHelper.Float3ToVector3(activePath.Waypoints[currentWayPointIndex]) - transform.position).normalized;
+            //Quaternion lookRotation = Quaternion.LookRotation(targetDirection);
+            //
+            //if (useSmoothRotation)
+            //{
+            //    transform.SetPositionAndRotation(Vector3.MoveTowards(transform.position, transform.position + transform.forward, (speedCurveMultiplier * maxSpeed) * Time.deltaTime), Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationStrength));
+            //}
+            //else
+            //{
+            //    transform.SetPositionAndRotation(Vector3.MoveTowards(transform.position, activePath.Waypoints[currentWayPointIndex], maxSpeed * Time.deltaTime), lookRotation);
+            //}
         }
 
         public void CancelPath()
@@ -132,10 +134,10 @@ namespace Pathfinding
 
             if (showPath && activePath.Waypoints.Length > 0)
             {
-                for (int i = 0; i < activePath.Waypoints.Length - 1; i++)
-                {
-                    Gizmos.DrawLine(activePath.Waypoints[i], activePath.Waypoints[i + 1]);
-                }
+                //for (int i = 0; i < activePath.Waypoints.Length - 1; i++)
+                //{
+                //    Gizmos.DrawLine(activePath.Waypoints[i], activePath.Waypoints[i + 1]);
+                //}
             }
         }
     }
