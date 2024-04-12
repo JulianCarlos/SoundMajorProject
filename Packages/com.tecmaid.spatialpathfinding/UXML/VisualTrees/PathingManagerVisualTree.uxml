@@ -7,6 +7,7 @@
         <ui:VisualElement name="PathfindingSettingsContainer" class="FieldContainer" style="flex-grow: 1;">
             <ui:Foldout text="Pathfinding Settings" class="FoldOutContainerTitle FieldInnerContainer">
                 <uie:PropertyField binding-path="gridGenerationMethod" class="VariableContainer" />
+                <uie:PropertyField binding-path="gridUpdateMode" class="VariableContainer" />
                 <uie:PropertyField binding-path="calculationTimeStep" class="VariableContainer" />
                 <uie:PropertyField binding-path="updateGridTimeStep" class="VariableContainer" />
             </ui:Foldout>

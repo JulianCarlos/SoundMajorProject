@@ -88,16 +88,9 @@ namespace Pathfinding
             UnityEngine.Debug.Log(calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency));
         }
 
-        private void CheckObscuredCells()
+        public float GetDetectionRadius()
         {
-            DetectionBox.enabled = false;
-
-            for (int i = 0; i < TotalCells; i++)
-            {
-                obscuredCells[i] = Physics.CheckBox(Cells[i].CellPos, 0.5f * cellSize * Vector3.one, Quaternion.identity, detectionMask);
-            }
-
-            DetectionBox.enabled = true;
+            return detectionRadius;
         }
 
         public void CollectAgents()
@@ -111,32 +104,16 @@ namespace Pathfinding
             }
         }
 
-        public float GetDetectionRadius()
+        private void CheckObscuredCells()
         {
-            return detectionRadius;
-        }
+            DetectionBox.enabled = false;
 
-        private void InitializeDirections()
-        {
-            //Horizontal
-            directions[0] = new int3( 0,  0,  1);
-            directions[1] = new int3( 0,  0, -1);
-            directions[2] = new int3( 1,  0,  0);
-            directions[3] = new int3(-1,  0,  0);
-
-            //Vertical
-            directions[4] = new int3( 0,  1,  0);
-            directions[5] = new int3( 0, -1,  0);
-
-            directionCount = (short)directions.Count();
-        }
-
-        private void GetAllCellNeighborsDirectional()
-        {
             for (int i = 0; i < TotalCells; i++)
             {
-                GetNeighboursDirectional(i, Cells[i].CellPos);
+                obscuredCells[i] = Physics.CheckBox(Cells[i].CellPos, 0.5f * cellSize * Vector3.one, Quaternion.identity, detectionMask);
             }
+
+            DetectionBox.enabled = true;
         }
 
         private void GetAllCellNeighborsSimple()
@@ -163,6 +140,14 @@ namespace Pathfinding
             handle.Complete();
         }
 
+        private void GetAllCellNeighborsDirectional()
+        {
+            for (int i = 0; i < TotalCells; i++)
+            {
+                GetNeighboursDirectional(i, Cells[i].CellPos);
+            }
+        }
+
         private void GetNeighboursDirectional(int index, float3 position)
         {
             for (int i = 0; i < directionCount; i++)
@@ -181,7 +166,22 @@ namespace Pathfinding
             CellNeighbors[index] = new NeighborData(tempNeighbors);
         }
 
-        public void InitializeGrid()
+        private void InitializeDirections()
+        {
+            //Horizontal
+            directions[0] = new int3(0, 0, 1);
+            directions[1] = new int3(0, 0, -1);
+            directions[2] = new int3(1, 0, 0);
+            directions[3] = new int3(-1, 0, 0);
+
+            //Vertical
+            directions[4] = new int3(0, 1, 0);
+            directions[5] = new int3(0, -1, 0);
+
+            directionCount = (short)directions.Count();
+        }
+
+        private void InitializeGrid()
         {
             InitializeGridJob job = new InitializeGridJob()
             {
@@ -219,6 +219,16 @@ namespace Pathfinding
             if (targetAgent != null)
             {
                 targetAgent.SetActiveVolume(this);
+            }
+        }
+
+        private void OnTriggerExit(Collider other)
+        {
+            FlyingAgent targetAgent = other.gameObject.GetComponent<FlyingAgent>();
+
+            if (targetAgent != null)
+            {
+                targetAgent.SetActiveVolume(null);
             }
         }
 

@@ -88,6 +88,11 @@ namespace Pathfinding
         [SerializeField] private GridGenerationMethod gridGenerationMethod = GridGenerationMethod.Simple;
 
         /// <summary>
+        /// The update mode for updating the grid during runtime
+        /// </summary>
+        [SerializeField] private GridUpdateMode gridUpdateMode = GridUpdateMode.Static;
+
+        /// <summary>
         /// The layer name input for generating agent layer
         /// </summary>
         [SerializeField] private string agentLayerInput = "FlyingAgent";
@@ -304,18 +309,27 @@ namespace Pathfinding
         /// </summary>
         private IEnumerator CalculateAllAgentPaths()
         {
-            yield return calculationTimeStepWait;
-
-            calculateExecutionStopwatch.Start();
-
-            for (int i = 0; i < calculableAgents.Count; i++)
+            while (true)
             {
-                CalculateAStarPath(calculableAgents[i]);
-            }
+                yield return calculationTimeStepWait;
 
-            calculateExecutionStopwatch.Stop();
-            calculateExecutionTime = calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
-            calculateExecutionStopwatch.Reset();
+                calculateExecutionStopwatch.Start();
+
+                for (int i = 0; i < calculableAgents.Count; i++)
+                {
+                    if (!calculableAgents[i].IsTraversing)
+                    {
+                        CalculateAStarPath(calculableAgents[i]);
+
+                        if (gridUpdateMode == GridUpdateMode.Static)
+                            calculableAgents.RemoveAt(i);
+                    }
+                }
+
+                calculateExecutionStopwatch.Stop();
+                calculateExecutionTime = calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
+                calculateExecutionStopwatch.Reset();
+            }
         }
 
         /// <summary>
@@ -375,31 +389,40 @@ namespace Pathfinding
         /// <returns></returns>
         private NativeList<NavigationPathSegment> SmoothPath(NativeList<NavigationPathSegment> waypoints, NavigationVolume volume)
         {
-            //float smoothDetection = 0;
-            //
-            //if (gridGenerationMethod == GridGenerationMethod.Simple)
-            //    smoothDetection = volume.CellSize;
-            //else if (gridGenerationMethod == GridGenerationMethod.Directional)
-            //    smoothDetection = volume.GetDetectionRadius();
-            //
-            //int index = 0;
-            //NativeList<float3> newWaypoints = new NativeList<float3>(Allocator.Persistent);
-            //newWaypoints.Add(waypoints[index]);
-            //
-            //for (int i = 1; i < waypoints.Length - 1; i++)
-            //{
-            //    if (Physics.BoxCast(waypoints[index], smoothDetection * Vector3.one, waypoints[i] - waypoints[index], Quaternion.identity, math.distance(waypoints[i], waypoints[index]))) 
-            //    {
-            //        newWaypoints.Add(waypoints[i - 1]);
-            //        index = i - 1;
-            //    }
-            //}
-            //
-            //newWaypoints.Add(waypoints[^1]);
-            //
-            //return newWaypoints;
+            int index;
+            float smoothDetection;
+            NativeList<float3> newWaypoints = new NativeList<float3>(Allocator.Persistent);
+            NativeList<NavigationPathSegment> smoothedSegments = new NativeList<NavigationPathSegment>(Allocator.Persistent);
 
-            return new NativeList<NavigationPathSegment>();
+            for (int i = 0; i < waypoints.Length; i++)
+            {
+                index = 0;
+                smoothDetection = 0;
+
+                if (gridGenerationMethod == GridGenerationMethod.Simple)
+                    smoothDetection = volume.CellSize;
+                else if (gridGenerationMethod == GridGenerationMethod.Directional)
+                    smoothDetection = volume.GetDetectionRadius();
+
+                newWaypoints.Add(waypoints[i].Waypoints[index]);
+
+                for (int j = 1; j < waypoints[i].Waypoints.Length - 1; j++)
+                {
+                    if (Physics.BoxCast(waypoints[i].Waypoints[index], smoothDetection * Vector3.one, waypoints[i].Waypoints[j] - waypoints[i].Waypoints[index], Quaternion.identity, math.distance(waypoints[i].Waypoints[j], waypoints[i].Waypoints[index])))
+                    {
+                        newWaypoints.Add(waypoints[i].Waypoints[j - 1]);
+                        index = j - 1;
+                    }
+                }
+
+                newWaypoints.Add(waypoints[i].Waypoints[^1]);
+
+                smoothedSegments.Add(new NavigationPathSegment(newWaypoints));
+
+                newWaypoints.Clear();
+            }
+
+            return smoothedSegments;
         }
 
         /// <summary>
@@ -439,7 +462,10 @@ namespace Pathfinding
                 targetJob = JobFactory.GenerateAStarJob(originVolume, agent.InitialPos, agent.TargetPos);
                 aStarHandle = targetJob.Schedule();
                 aStarHandle.Complete();
-                wayPoints.Add(new NavigationPathSegment(targetJob.WalkPoints));
+
+                if (targetJob.WalkPoints.Length > 0)
+                    wayPoints.Add(new NavigationPathSegment(targetJob.WalkPoints));
+
                 targetJob.WalkPoints.Dispose();
                 targetJob.TempData.Dispose();
                 targetJob.OpenCells.Dispose();
@@ -449,7 +475,10 @@ namespace Pathfinding
                 targetJob = JobFactory.GenerateAStarJob(targetVolume, links[tempLinkIndex].NeighborLink.transform.position, agent.TargetPos);
                 aStarHandle = targetJob.Schedule();
                 aStarHandle.Complete();
-                wayPoints.Add(new NavigationPathSegment(targetJob.WalkPoints));
+
+                if(targetJob.WalkPoints.Length > 0)
+                    wayPoints.Add(new NavigationPathSegment(targetJob.WalkPoints));
+
                 targetJob.WalkPoints.Dispose();
                 targetJob.TempData.Dispose();
                 targetJob.OpenCells.Dispose();
@@ -459,7 +488,10 @@ namespace Pathfinding
                 originJob = JobFactory.GenerateAStarJob(originVolume, agent.InitialPos, links[tempLinkIndex].transform.position);
                 aStarHandle = originJob.Schedule();
                 aStarHandle.Complete();
-                wayPoints.Add(new NavigationPathSegment(originJob.WalkPoints));
+
+                if (originJob.WalkPoints.Length > 0)
+                    wayPoints.Add(new NavigationPathSegment(originJob.WalkPoints));
+
                 originJob.WalkPoints.Dispose();
                 originJob.TempData.Dispose();
                 originJob.OpenCells.Dispose();

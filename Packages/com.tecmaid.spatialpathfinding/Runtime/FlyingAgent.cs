@@ -1,6 +1,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 using Pathfinding.Helpers;
+using System;
 
 namespace Pathfinding
 {
@@ -8,6 +9,8 @@ namespace Pathfinding
     [RequireComponent(typeof(Collider))]
     public class FlyingAgent : MonoBehaviour
     {
+        public bool IsTraversing = false;
+
         public NavigationVolume ActiveVolume { get; private set; }
 
         public Vector3 InitialPos => transform.position;
@@ -49,9 +52,12 @@ namespace Pathfinding
 
         public void SetPath(NavigationPath calculatedPath)
         {
-            activePath = calculatedPath;
-
-            currentWayPointIndex = activePath.Waypoints.Length - 1;
+            if (!IsTraversing && calculatedPath.Waypoints.Length > 0)
+            {
+                activePath = calculatedPath;
+                currentSegmentIndex = activePath.Waypoints.Length - 1;
+                currentWayPointIndex = activePath.Waypoints[currentSegmentIndex].Waypoints.Length - 1;
+            }
         }
 
         public void MoveTo(float3 targetPos)
@@ -87,39 +93,56 @@ namespace Pathfinding
 
         private void CheckWaypointPosition()
         {
-            //if (currentWayPointIndex <= 0)
+            //if (math.distance(transform.position, activePath.Waypoints[currentSegmentIndex].Waypoints[^1]) <= stoppingDistance ))
             //{
-            //    if (math.distance(transform.position, activePath.Waypoints[0]) <= stoppingDistance)
-            //    {
-            //        PathingManager.OnAgentFinishedPathing(this);
-            //        return;
-            //    }
+            //
             //}
-            //else if (math.distance(transform.position, activePath.Waypoints[currentWayPointIndex]) <= distanceUntilWaypointReached)
-            //{
-            //    currentWayPointIndex--;
-            //}
+            if (math.distance(transform.position, activePath.Waypoints[currentSegmentIndex].Waypoints[currentWayPointIndex]) <= distanceUntilWaypointReached)
+            {
+                if (currentWayPointIndex == 0)
+                {
+                    if (currentSegmentIndex > 0)
+                    {
+                        IsTraversing = true;
+                        currentSegmentIndex--;
+                        currentWayPointIndex = activePath.Waypoints[currentSegmentIndex].Waypoints.Length - 1;
+                    }
+                    else
+                    {
+                        PathingManager.OnAgentFinishedPathing(this);
+                        return;
+                    }
+                }
+                else
+                {
+                    IsTraversing = false;
+                    currentWayPointIndex--;
+                }
+            }
         }
 
         private void ApplyRotationAndPosition()
         {
-            //if (interpolateSpeedStart)
-            //{
-            //    speedCurveMultiplier = startSpeedCurve.Evaluate(currentAccelerationValue);
-            //    currentAccelerationValue += Time.deltaTime / timeToReachMaxSpeed;
-            //}
-            //
-            //Vector3 targetDirection = (CalculationHelper.Float3ToVector3(activePath.Waypoints[currentWayPointIndex]) - transform.position).normalized;
-            //Quaternion lookRotation = Quaternion.LookRotation(targetDirection);
-            //
-            //if (useSmoothRotation)
-            //{
-            //    transform.SetPositionAndRotation(Vector3.MoveTowards(transform.position, transform.position + transform.forward, (speedCurveMultiplier * maxSpeed) * Time.deltaTime), Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationStrength));
-            //}
-            //else
-            //{
-            //    transform.SetPositionAndRotation(Vector3.MoveTowards(transform.position, activePath.Waypoints[currentWayPointIndex], maxSpeed * Time.deltaTime), lookRotation);
-            //}
+            if (currentWayPointIndex <= 0 && currentSegmentIndex <= 0)
+                return;
+
+            if (interpolateSpeedStart)
+            {
+                speedCurveMultiplier = startSpeedCurve.Evaluate(currentAccelerationValue);
+                currentAccelerationValue += Time.deltaTime / timeToReachMaxSpeed;
+            }
+            
+            Vector3 targetDirection = (CalculationHelper.Float3ToVector3(activePath.Waypoints[currentSegmentIndex].Waypoints[currentWayPointIndex]) - transform.position).normalized;
+            Quaternion lookRotation = Quaternion.LookRotation(targetDirection);
+            
+            if (useSmoothRotation)
+            {
+                transform.SetPositionAndRotation(Vector3.MoveTowards(transform.position, transform.position + transform.forward, (speedCurveMultiplier * maxSpeed) * Time.deltaTime), Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationStrength));
+            }
+            else
+            {
+                transform.SetPositionAndRotation(Vector3.MoveTowards(transform.position, activePath.Waypoints[currentSegmentIndex].Waypoints[currentWayPointIndex], maxSpeed * Time.deltaTime), lookRotation);
+            }
         }
 
         public void CancelPath()
@@ -134,10 +157,13 @@ namespace Pathfinding
 
             if (showPath && activePath.Waypoints.Length > 0)
             {
-                //for (int i = 0; i < activePath.Waypoints.Length - 1; i++)
-                //{
-                //    Gizmos.DrawLine(activePath.Waypoints[i], activePath.Waypoints[i + 1]);
-                //}
+                for (int i = 0; i < activePath.Waypoints.Length; i++)
+                {
+                    for (int j = 0; j < activePath.Waypoints[i].Waypoints.Length - 1; j++)
+                    {
+                        Gizmos.DrawLine(activePath.Waypoints[i].Waypoints[j], activePath.Waypoints[i].Waypoints[j + 1]);
+                    }
+                }
             }
         }
     }
