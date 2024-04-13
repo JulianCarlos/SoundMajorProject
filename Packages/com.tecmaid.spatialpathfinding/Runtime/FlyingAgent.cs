@@ -93,38 +93,53 @@ namespace Pathfinding
 
         private void CheckWaypointPosition()
         {
-            //if (math.distance(transform.position, activePath.Waypoints[currentSegmentIndex].Waypoints[^1]) <= stoppingDistance ))
-            //{
-            //
-            //}
-            if (math.distance(transform.position, activePath.Waypoints[currentSegmentIndex].Waypoints[currentWayPointIndex]) <= distanceUntilWaypointReached)
+            if (currentWayPointIndex <= 0 && !IsTraversing)
             {
-                if (currentWayPointIndex == 0)
+                IsTraversing = true;
+                currentSegmentIndex--;
+                currentWayPointIndex = activePath.Waypoints[currentSegmentIndex].Waypoints.Length - 1;
+
+                if (currentSegmentIndex <= 0 && currentWayPointIndex <= 0)
                 {
-                    if (currentSegmentIndex > 0)
-                    {
-                        IsTraversing = true;
-                        currentSegmentIndex--;
-                        currentWayPointIndex = activePath.Waypoints[currentSegmentIndex].Waypoints.Length - 1;
-                    }
-                    else
-                    {
-                        PathingManager.OnAgentFinishedPathing(this);
-                        return;
-                    }
-                }
-                else
-                {
-                    IsTraversing = false;
-                    currentWayPointIndex--;
+                    PathingManager.OnAgentFinishedPathing(this);
+                    return;
                 }
             }
+            else if (math.distance(transform.position, activePath.Waypoints[currentSegmentIndex].Waypoints[currentWayPointIndex]) <= distanceUntilWaypointReached)
+            {
+                IsTraversing = true;
+                currentWayPointIndex--;
+            }
+
+
+            //if (math.distance(transform.position, activePath.Waypoints[currentSegmentIndex].Waypoints[currentWayPointIndex]) <= distanceUntilWaypointReached)
+            //{
+            //    if (currentWayPointIndex == 0)
+            //    {
+            //        if (currentSegmentIndex > 0)
+            //        {
+            //            IsTraversing = true;
+            //            currentSegmentIndex--;
+            //            currentWayPointIndex = activePath.Waypoints[currentSegmentIndex].Waypoints.Length - 1;
+            //        }
+            //        else
+            //        {
+            //            PathingManager.OnAgentFinishedPathing(this);
+            //            return;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        IsTraversing = false;
+            //        currentWayPointIndex--;
+            //    }
+            //}
         }
 
         private void ApplyRotationAndPosition()
         {
-            if (currentWayPointIndex <= 0 && currentSegmentIndex <= 0)
-                return;
+            //if (currentWayPointIndex <= 0 || currentSegmentIndex <= 0)
+            //    return;
 
             if (interpolateSpeedStart)
             {
