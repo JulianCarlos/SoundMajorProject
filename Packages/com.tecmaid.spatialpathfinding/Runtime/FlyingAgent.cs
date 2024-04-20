@@ -93,54 +93,29 @@ namespace Pathfinding
 
         private void CheckWaypointPosition()
         {
-            if (currentWayPointIndex <= 0 && !IsTraversing)
+            if (currentWayPointIndex <= 0 && !IsTraversing && math.distance(transform.position, activePath.Waypoints[currentSegmentIndex].Waypoints[currentWayPointIndex]) <= stoppingDistance)
             {
-                IsTraversing = true;
-                currentSegmentIndex--;
-                currentWayPointIndex = activePath.Waypoints[currentSegmentIndex].Waypoints.Length - 1;
-
                 if (currentSegmentIndex <= 0 && currentWayPointIndex <= 0)
                 {
                     PathingManager.OnAgentFinishedPathing(this);
                     return;
                 }
+                else
+                {
+                    IsTraversing = true;
+                    currentSegmentIndex--;
+                    currentWayPointIndex = activePath.Waypoints[currentSegmentIndex].Waypoints.Length - 1;
+                }
             }
             else if (math.distance(transform.position, activePath.Waypoints[currentSegmentIndex].Waypoints[currentWayPointIndex]) <= distanceUntilWaypointReached)
             {
-                IsTraversing = true;
+                IsTraversing = false;
                 currentWayPointIndex--;
             }
-
-
-            //if (math.distance(transform.position, activePath.Waypoints[currentSegmentIndex].Waypoints[currentWayPointIndex]) <= distanceUntilWaypointReached)
-            //{
-            //    if (currentWayPointIndex == 0)
-            //    {
-            //        if (currentSegmentIndex > 0)
-            //        {
-            //            IsTraversing = true;
-            //            currentSegmentIndex--;
-            //            currentWayPointIndex = activePath.Waypoints[currentSegmentIndex].Waypoints.Length - 1;
-            //        }
-            //        else
-            //        {
-            //            PathingManager.OnAgentFinishedPathing(this);
-            //            return;
-            //        }
-            //    }
-            //    else
-            //    {
-            //        IsTraversing = false;
-            //        currentWayPointIndex--;
-            //    }
-            //}
         }
 
         private void ApplyRotationAndPosition()
         {
-            //if (currentWayPointIndex <= 0 || currentSegmentIndex <= 0)
-            //    return;
-
             if (interpolateSpeedStart)
             {
                 speedCurveMultiplier = startSpeedCurve.Evaluate(currentAccelerationValue);
@@ -168,15 +143,17 @@ namespace Pathfinding
 
         private void OnDrawGizmos()
         {
-            Gizmos.color = Color.green;
-
             if (showPath && activePath.Waypoints.Length > 0)
             {
                 for (int i = 0; i < activePath.Waypoints.Length; i++)
                 {
                     for (int j = 0; j < activePath.Waypoints[i].Waypoints.Length - 1; j++)
                     {
+                        Gizmos.color = Color.green;
                         Gizmos.DrawLine(activePath.Waypoints[i].Waypoints[j], activePath.Waypoints[i].Waypoints[j + 1]);
+
+                        Gizmos.color = Color.cyan;
+                        Gizmos.DrawWireSphere(activePath.Waypoints[i].Waypoints[j], 1f);
                     }
                 }
             }

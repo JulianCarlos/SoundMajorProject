@@ -795,13 +795,14 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   gridGenerationMethod: 0
+  gridUpdateMode: 0
   agentLayerInput: FlyingAgent
   volumeLayerInput: NavigationVolume
   movableAgents: []
   calculableAgents: []
   modifiers: 0
-  calculationTimeStep: 15
-  updateGridTimeStep: 15
+  calculationTimeStep: 0.2
+  updateGridTimeStep: 0.2
   movableExecutionTime: 0
   calculateExecutionTime: 0
 --- !u!4 &656600415

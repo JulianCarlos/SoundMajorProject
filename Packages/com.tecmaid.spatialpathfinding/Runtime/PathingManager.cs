@@ -233,7 +233,6 @@ namespace Pathfinding
 
         private void Update()
         {
-            CalculateAllAgentPaths();
             MoveAllAgents();
         }
 
