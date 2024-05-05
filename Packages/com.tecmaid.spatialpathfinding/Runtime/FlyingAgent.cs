@@ -71,7 +71,7 @@ namespace Pathfinding
                 return;
 
             CheckWaypointPosition();
-            ApplyRotationAndPosition();
+            ApplyPositionAndRotation();
         }
 
         private void RequestPath(float3 targetPos)
@@ -114,24 +114,52 @@ namespace Pathfinding
             }
         }
 
-        private void ApplyRotationAndPosition()
+        private void ApplyPositionAndRotation()
         {
             if (interpolateSpeedStart)
             {
                 speedCurveMultiplier = startSpeedCurve.Evaluate(currentAccelerationValue);
                 currentAccelerationValue += Time.deltaTime / timeToReachMaxSpeed;
             }
-            
-            Vector3 targetDirection = (CalculationHelper.Float3ToVector3(activePath.Waypoints[currentSegmentIndex].Waypoints[currentWayPointIndex]) - transform.position).normalized;
-            Quaternion lookRotation = Quaternion.LookRotation(targetDirection);
-            
+
+            ApplyPosition();
+
+            if (!IsTraversing && currentWayPointIndex > 0)
+            {
+                Vector3 targetDirection = (CalculationHelper.Float3ToVector3(activePath.Waypoints[currentSegmentIndex].Waypoints[currentWayPointIndex]) - transform.position).normalized;
+                
+                if (targetDirection != Vector3.zero)
+                {
+                    Quaternion lookRotation = Quaternion.LookRotation(targetDirection);
+
+                    ApplyRotation(lookRotation);
+                }
+            }
+        }
+
+        private void ApplyPosition()
+        {
             if (useSmoothRotation)
             {
-                transform.SetPositionAndRotation(Vector3.MoveTowards(transform.position, transform.position + transform.forward, (speedCurveMultiplier * maxSpeed) * Time.deltaTime), Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationStrength));
+                transform.position = Vector3.MoveTowards(transform.position, transform.position + transform.forward, (speedCurveMultiplier * maxSpeed) * Time.deltaTime);
             }
             else
             {
-                transform.SetPositionAndRotation(Vector3.MoveTowards(transform.position, activePath.Waypoints[currentSegmentIndex].Waypoints[currentWayPointIndex], maxSpeed * Time.deltaTime), lookRotation);
+                transform.position = Vector3.MoveTowards(transform.position, activePath.Waypoints[currentSegmentIndex].Waypoints[currentWayPointIndex], maxSpeed * Time.deltaTime);
+            }
+        }
+
+        private void ApplyRotation(Quaternion lookRotation)
+        {
+            if (useSmoothRotation)
+            {
+                if (lookRotation != null)
+                    transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationStrength);
+            }
+            else
+            {
+                if (lookRotation != null)
+                    transform.rotation = lookRotation;
             }
         }
 
