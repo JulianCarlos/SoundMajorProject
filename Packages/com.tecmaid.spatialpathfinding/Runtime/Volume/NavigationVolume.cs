@@ -7,6 +7,7 @@ using Pathfinding.Helpers;
 using System.Diagnostics;
 using Unity.Jobs;
 using Unity.Profiling;
+using System;
 
 namespace Pathfinding
 {
@@ -41,6 +42,7 @@ namespace Pathfinding
         [SerializeField] private double generationTime = 0;
 
         private List<NavigationObstacle> navigationObstacles = new List<NavigationObstacle>();
+        private List<int> dynamicallyBlockedCells = new List<int>();
 
         private NativeArray<bool> obscuredCells;
         private NativeArray<int3> directions = new NativeArray<int3>(6, Allocator.Persistent);
@@ -49,6 +51,10 @@ namespace Pathfinding
         private RaycastHit directionHit;
 
         private short directionCount;
+
+        private int indexX;
+        private int indexY;
+        private int indexZ;
 
         private void Awake()
         {
@@ -79,7 +85,7 @@ namespace Pathfinding
 
             if (PathingManager.Instance.GridGenerationMethod == GridGenerationMethod.Simple)
             {
-                CheckObscuredCells();
+                CheckAllObscuredCells();
                 GetAllCellNeighborsSimple();
             }
             else if (PathingManager.Instance.GridGenerationMethod == GridGenerationMethod.Directional)
@@ -89,6 +95,99 @@ namespace Pathfinding
 
             calculateExecutionStopwatch.Stop();
             UnityEngine.Debug.Log(calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency));
+        }
+
+        public void UpdateCells()
+        {
+            DetectionBox.enabled = false;
+
+            NavigationObstacle obstacleBounds;
+
+            for (int i = 0; i < navigationObstacles.Count; i++)
+            {
+                obstacleBounds = navigationObstacles[i];
+
+                int3 minIndex = FindNearestCell(obstacleBounds.GetMinCorner());
+                int3 maxIndex = FindNearestCell(obstacleBounds.GetMaxCorner());
+
+                AddIntersectingCells(minIndex, maxIndex);
+            }
+
+            for (int x = 0; x < dynamicallyBlockedCells.Count; x++)
+            {
+                if (!CheckObscuredCell(dynamicallyBlockedCells[x]))
+                {
+                    dynamicallyBlockedCells.Remove(dynamicallyBlockedCells[x]);
+                }
+            }
+
+            GetAllCellNeighborsSimple();
+
+            DetectionBox.enabled = true;
+        }
+
+        private void AddIntersectingCells(int3 minIndex, int3 maxIndex)
+        {
+            for (int x = minIndex.x; x <= maxIndex.x; x++)
+            {
+                for (int y = minIndex.y; y <= maxIndex.y; y++)
+                {
+                    for (int z = minIndex.z; z <= maxIndex.z; z++)
+                    {
+                        int flattenIndex = CalculationHelper.FlattenIndex(new int3(x, y, z), VolumeWidth, VolumeHeight);
+
+                        if (!dynamicallyBlockedCells.Contains(flattenIndex))
+                        {
+                            dynamicallyBlockedCells.Add(flattenIndex);
+                        }
+                    }
+                }
+            }
+        }
+
+        private int3 FindNearestCell(float3 position)
+        {
+            int index;
+            float tempDistance;
+            float distanceX = float.MaxValue;
+            float distanceY = float.MaxValue;
+            float distanceZ = float.MaxValue;
+
+            for (int x = 0; x < VolumeWidth; x++)
+            {
+                index = CalculationHelper.FlattenIndex(new int3(x, 0, 0), VolumeWidth, VolumeHeight);
+                tempDistance = CalculationHelper.CalculateSquaredDistance(Cells[index].CellPos, position);
+
+                if (tempDistance < distanceX)
+                {
+                    distanceX = tempDistance;
+                    indexX = x;
+                }
+            }
+            for (int y = 0; y < VolumeHeight; y++)
+            {
+                index = CalculationHelper.FlattenIndex(new int3(0, y, 0), VolumeWidth, VolumeHeight);
+                tempDistance = CalculationHelper.CalculateSquaredDistance(Cells[index].CellPos, position);
+
+                if (tempDistance < distanceY)
+                {
+                    distanceY = tempDistance;
+                    indexY = y;
+                }
+            }
+            for (int z = 0; z < VolumeDepth; z++)
+            {
+                index = CalculationHelper.FlattenIndex(new int3(0, 0, z), VolumeWidth, VolumeHeight);
+                tempDistance = CalculationHelper.CalculateSquaredDistance(Cells[index].CellPos, position);
+
+                if (tempDistance < distanceZ)
+                {
+                    distanceZ = tempDistance;
+                    indexZ = z;
+                }
+            }
+
+            return new int3(indexX, indexY, indexZ);
         }
 
         public float GetDetectionRadius()
@@ -118,16 +217,23 @@ namespace Pathfinding
             }
         }
 
-        private void CheckObscuredCells()
+        private void CheckAllObscuredCells()
         {
             DetectionBox.enabled = false;
 
             for (int i = 0; i < TotalCells; i++)
             {
-                obscuredCells[i] = Physics.CheckBox(Cells[i].CellPos, 0.5f * cellSize * Vector3.one, Quaternion.identity, detectionMask);
+                CheckObscuredCell(i);
             }
 
             DetectionBox.enabled = true;
+        }
+
+        private bool CheckObscuredCell(int i)
+        {
+            obscuredCells[i] = Physics.CheckBox(Cells[i].CellPos, 0.5f * cellSize * Vector3.one, Quaternion.identity, detectionMask);
+
+            return obscuredCells[i];
         }
 
         private void GetAllCellNeighborsSimple()
@@ -248,6 +354,32 @@ namespace Pathfinding
 
         private void OnDrawGizmos()
         {
+            //Check obscured Area
+            for (int i = 0; i < obscuredCells.Length; i++)
+            {
+                if (obscuredCells[i] == true)
+                {
+                    Gizmos.color = Color.red;
+                    Gizmos.DrawWireSphere(Cells[i].CellPos, 1f);
+                }
+                else
+                {
+                    //Gizmos.color = Color.green;
+                }
+            
+            }
+
+            Gizmos.color = Color.cyan;
+
+            for (int i = 0; i < dynamicallyBlockedCells.Count; i++)
+            {
+                Gizmos.DrawLine(Cells[dynamicallyBlockedCells[i]].CellPos, (Vector3)Cells[dynamicallyBlockedCells[i]].CellPos + Vector3.up);
+            }
+
+
+
+
+
             if (visualMode == VisualMode.None)
                 return;
 

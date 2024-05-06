@@ -25,6 +25,16 @@ namespace Pathfinding
             localCollider = GetComponent<Collider>();
         }
 
+        public Vector3 GetMinCorner()
+        {
+            return transform.position - bounds.extents / 2;
+        }
+
+        public Vector3 GetMaxCorner()
+        {
+            return transform.position + bounds.extents / 2;
+        }
+
         private void OnValidate()
         {
             localCollider = GetComponent<Collider>();

@@ -121,6 +121,11 @@ namespace Pathfinding
         [SerializeField] private List<FlyingAgent> calculableAgents = new List<FlyingAgent>();
 
         /// <summary>
+        /// The current volumes inside the Scene
+        /// </summary>
+        [SerializeField] private NavigationVolume[] totalVolumes;
+
+        /// <summary>
         /// Modifier for modifying the finished path
         /// </summary>
         [SerializeField] private Modifiers modifiers = Modifiers.NONE;
@@ -203,6 +208,11 @@ namespace Pathfinding
         private WaitForSeconds calculationTimeStepWait;
 
         /// <summary>
+        /// Cached Waitforseconds to reduce GC
+        /// </summary>
+        private WaitForSeconds updateGridTimeStepWait;
+
+        /// <summary>
         /// The volume of the agent requesting the path
         /// </summary>
         private NavigationVolume originVolume;
@@ -224,11 +234,15 @@ namespace Pathfinding
             OnAgentFinishedPathing += RemoveAgentFromMovable;
 
             calculationTimeStepWait = new WaitForSeconds(calculationTimeStep);
+            updateGridTimeStepWait = new WaitForSeconds(updateGridTimeStep);
         }
 
         private void Start()
         {
+            totalVolumes = FindObjectsOfType<NavigationVolume>();
+
             StartCoroutine(nameof(CalculateAllAgentPaths));
+            StartCoroutine(nameof(UpdateAllVolumeCells));
         }
 
         private void Update()
@@ -328,6 +342,22 @@ namespace Pathfinding
                 calculateExecutionStopwatch.Stop();
                 calculateExecutionTime = calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
                 calculateExecutionStopwatch.Reset();
+            }
+        }
+
+        /// <summary>
+        /// Responsible for calculating path of each <see cref="NavigationVolume"/> inside the <see cref="totalVolumes"/> list
+        /// </summary>
+        private IEnumerator UpdateAllVolumeCells()
+        {
+            while (true)
+            {
+                yield return updateGridTimeStepWait;
+
+                for (int i = 0; i < totalVolumes.Length; i++)
+                {
+                    totalVolumes[i].UpdateCells();
+                }
             }
         }
 
