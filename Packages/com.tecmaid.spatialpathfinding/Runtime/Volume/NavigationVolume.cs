@@ -40,6 +40,8 @@ namespace Pathfinding
 
         [SerializeField] private double generationTime = 0;
 
+        private List<NavigationObstacle> navigationObstacles = new List<NavigationObstacle>();
+
         private NativeArray<bool> obscuredCells;
         private NativeArray<int3> directions = new NativeArray<int3>(6, Allocator.Persistent);
         private NativeArray<int> tempNeighbors = new NativeArray<int>(6, Allocator.Persistent);
@@ -64,6 +66,7 @@ namespace Pathfinding
             DetectionBox = GetComponent<BoxCollider>();
             
             CollectAgents();
+            CollectObstacles();
         }
 
         private void Start()
@@ -101,6 +104,17 @@ namespace Pathfinding
             for (int i = 0; i < overlappedAgents.Length; i++)
             {
                 overlappedAgents[i].GetComponent<FlyingAgent>().SetActiveVolume(this);
+            }
+        }
+
+        public void CollectObstacles()
+        {
+            int layerIndex = LayerMask.GetMask("Obstacle");
+
+            Collider[] obstacles = Physics.OverlapBox(transform.position, cellSize * 0.5f * new Vector3(VolumeWidth, VolumeHeight, VolumeDepth), Quaternion.identity, layerIndex);
+            for (int i = 0; i < obstacles.Length; i++)
+            {
+                this.navigationObstacles.Add(obstacles[i].GetComponent<NavigationObstacle>());
             }
         }
 
