@@ -227,7 +227,7 @@ GameObject:
   - component: {fileID: 246786001}
   - component: {fileID: 246786000}
   - component: {fileID: 246785999}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: NavigationVolume
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -611,7 +611,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3

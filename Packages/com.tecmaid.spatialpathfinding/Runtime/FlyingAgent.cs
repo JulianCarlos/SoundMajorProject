@@ -181,7 +181,7 @@ namespace Pathfinding
                         Gizmos.DrawLine(activePath.Waypoints[i].Waypoints[j], activePath.Waypoints[i].Waypoints[j + 1]);
 
                         Gizmos.color = Color.cyan;
-                        Gizmos.DrawWireSphere(activePath.Waypoints[i].Waypoints[j], 1f);
+                        Gizmos.DrawWireSphere(activePath.Waypoints[i].Waypoints[j], 0.5f);
                     }
                 }
             }

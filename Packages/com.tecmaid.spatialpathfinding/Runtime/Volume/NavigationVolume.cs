@@ -77,9 +77,6 @@ namespace Pathfinding
 
         private void Start()
         {
-            Stopwatch calculateExecutionStopwatch = new Stopwatch();
-            calculateExecutionStopwatch.Start();
-
             InitializeDirections();
             InitializeGrid();
 
@@ -93,8 +90,7 @@ namespace Pathfinding
                 GetAllCellNeighborsDirectional();
             }
 
-            calculateExecutionStopwatch.Stop();
-            UnityEngine.Debug.Log(calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency));
+            //UnityEngine.Debug.Log(calculateExecutionStopwatch.ElapsedTicks * (1000.0 / Stopwatch.Frequency));
         }
 
         public void UpdateCells()
@@ -102,17 +98,17 @@ namespace Pathfinding
             DetectionBox.enabled = false;
 
             NavigationObstacle obstacleBounds;
-
+            
             for (int i = 0; i < navigationObstacles.Count; i++)
             {
                 obstacleBounds = navigationObstacles[i];
-
+            
                 int3 minIndex = FindNearestCell(obstacleBounds.GetMinCorner());
                 int3 maxIndex = FindNearestCell(obstacleBounds.GetMaxCorner());
-
-                AddIntersectingCells(minIndex, maxIndex);
+            
+                AddCellsInsideBoundingBox(minIndex, maxIndex);
             }
-
+            
             for (int x = 0; x < dynamicallyBlockedCells.Count; x++)
             {
                 if (!CheckObscuredCell(dynamicallyBlockedCells[x]))
@@ -121,12 +117,13 @@ namespace Pathfinding
                 }
             }
 
+            //CheckAllObscuredCells();
             GetAllCellNeighborsSimple();
 
             DetectionBox.enabled = true;
         }
 
-        private void AddIntersectingCells(int3 minIndex, int3 maxIndex)
+        private void AddCellsInsideBoundingBox(int3 minIndex, int3 maxIndex)
         {
             for (int x = minIndex.x; x <= maxIndex.x; x++)
             {
@@ -334,51 +331,50 @@ namespace Pathfinding
 
         private void OnTriggerEnter(Collider other)
         {
-            FlyingAgent targetAgent = other.gameObject.GetComponent<FlyingAgent>();
-        
-            if (targetAgent != null)
+            if (other.gameObject.TryGetComponent(out FlyingAgent agent))
             {
-                targetAgent.SetActiveVolume(this);
+                agent.SetActiveVolume(this);
+            }
+            else if (other.gameObject.TryGetComponent(out NavigationObstacle obstacle))
+            {
+                navigationObstacles.Add(obstacle);
             }
         }
 
         private void OnTriggerExit(Collider other)
         {
-            FlyingAgent targetAgent = other.gameObject.GetComponent<FlyingAgent>();
-
-            if (targetAgent != null)
+            if (other.gameObject.TryGetComponent(out FlyingAgent agent))
             {
-                targetAgent.SetActiveVolume(null);
+                agent.SetActiveVolume(null);
+            }
+            else if (other.gameObject.TryGetComponent(out NavigationObstacle obstacle))
+            {
+                navigationObstacles.Remove(obstacle);
             }
         }
 
         private void OnDrawGizmos()
         {
-            //Check obscured Area
-            for (int i = 0; i < obscuredCells.Length; i++)
-            {
-                if (obscuredCells[i] == true)
-                {
-                    Gizmos.color = Color.red;
-                    Gizmos.DrawWireSphere(Cells[i].CellPos, 1f);
-                }
-                else
-                {
-                    //Gizmos.color = Color.green;
-                }
-            
-            }
+            ////Check obscured Area
+            //for (int i = 0; i < obscuredCells.Length; i++)
+            //{
+            //    if (obscuredCells[i] == true)
+            //    {
+            //        Gizmos.color = Color.red;
+            //        Gizmos.DrawWireSphere(Cells[i].CellPos, 1f);
+            //    }
+            //    else
+            //    {
+            //        //Gizmos.color = Color.green;
+            //    }
+            //}
 
-            Gizmos.color = Color.cyan;
-
-            for (int i = 0; i < dynamicallyBlockedCells.Count; i++)
-            {
-                Gizmos.DrawLine(Cells[dynamicallyBlockedCells[i]].CellPos, (Vector3)Cells[dynamicallyBlockedCells[i]].CellPos + Vector3.up);
-            }
-
-
-
-
+            //Gizmos.color = Color.cyan;
+            //
+            //for (int i = 0; i < dynamicallyBlockedCells.Count; i++)
+            //{
+            //    Gizmos.DrawLine(Cells[dynamicallyBlockedCells[i]].CellPos, (Vector3)Cells[dynamicallyBlockedCells[i]].CellPos + Vector3.up);
+            //}
 
             if (visualMode == VisualMode.None)
                 return;
