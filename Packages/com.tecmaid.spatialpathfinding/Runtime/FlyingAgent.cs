@@ -24,7 +24,6 @@ namespace Pathfinding
         [SerializeField] private AnimationCurve stopSpeedCurve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 1));
         [SerializeField] private float decelerationDistance = 1f;
         [SerializeField] private float stoppingDistance = 1f;
-        [SerializeField] private float distanceUntilWaypointReached = 1f;
         [SerializeField] private bool autoBreak = false;
 
         [SerializeField, Min(1)] private float rotationStrength = 10f;
@@ -107,7 +106,7 @@ namespace Pathfinding
                     currentWayPointIndex = activePath.Waypoints[currentSegmentIndex].Waypoints.Length - 1;
                 }
             }
-            else if (math.distance(transform.position, activePath.Waypoints[currentSegmentIndex].Waypoints[currentWayPointIndex]) <= distanceUntilWaypointReached)
+            else if (math.distance(transform.position, activePath.Waypoints[currentSegmentIndex].Waypoints[currentWayPointIndex]) <= stoppingDistance)
             {
                 IsTraversing = false;
                 currentWayPointIndex--;

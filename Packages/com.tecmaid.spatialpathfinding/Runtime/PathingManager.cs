@@ -15,7 +15,6 @@ namespace Pathfinding
     {
         #region Static Accessors
 
-        /// <summary>
         /// The Main Instance of this object
         /// </summary>
         /// <remarks>
@@ -505,7 +504,7 @@ namespace Pathfinding
                 aStarHandle = targetJob.Schedule();
                 aStarHandle.Complete();
 
-                if(targetJob.WalkPoints.Length > 0)
+                if (targetJob.WalkPoints.Length > 0)
                     wayPoints.Add(new NavigationPathSegment(targetJob.WalkPoints));
 
                 targetJob.WalkPoints.Dispose();

@@ -23,6 +23,8 @@ public struct AStarJob : IJob
     [WriteOnly] public NativeList<float3> WalkPoints;
     [WriteOnly] public NativeArray<TempData> TempData;
 
+    private int closestCellIndex;
+
     private int endPoint;
     private int currentPoint;
     private int startingPoint;
@@ -42,9 +44,8 @@ public struct AStarJob : IJob
         SearchOrigin();
 
         //WalkPoints[0] = TargetPos;
-
-        if (WalkPoints.Length > 0)
-            WalkPoints[^1] = InitialPos;
+        //if (WalkPoints.Length > 0)
+        //    WalkPoints[^1] = InitialPos;
     }
 
     private void FindPoints(float3 player, float3 target)
@@ -119,6 +120,11 @@ public struct AStarJob : IJob
         {
             currentPoint = OpenCells[ClosedCellsCount];
 
+            if (math.distance(Cells[currentPoint].CellPos, targetPos) <= math.distance(Cells[closestCellIndex].CellPos, targetPos))
+            {
+                closestCellIndex = currentPoint;
+            }
+
             ClosedCellsCount++;
             OpenCellsCount--;
 
@@ -141,6 +147,7 @@ public struct AStarJob : IJob
 
     private void SearchOrigin()
     {
+        currentPoint = closestCellIndex;
         var data = TempData[currentPoint];
 
         while (currentPoint != startingPoint)

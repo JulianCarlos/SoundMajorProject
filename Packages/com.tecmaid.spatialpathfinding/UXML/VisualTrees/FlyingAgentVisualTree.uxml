@@ -17,7 +17,6 @@
                 <uie:PropertyField binding-path="stopSpeedCurve" class="VariableContainer" />
                 <uie:PropertyField binding-path="decelerationDistance" class="VariableContainer" />
                 <uie:PropertyField binding-path="stoppingDistance" class="VariableContainer" />
-                <uie:PropertyField binding-path="distanceUntilWaypointReached" class="VariableContainer" />
                 <uie:PropertyField binding-path="autoBreak" class="VariableContainer" />
             </ui:Foldout>
         </ui:VisualElement>
