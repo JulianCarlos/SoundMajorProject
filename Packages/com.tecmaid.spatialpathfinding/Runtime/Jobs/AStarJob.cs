@@ -43,9 +43,8 @@ public struct AStarJob : IJob
         MoveToTarget(TargetPos);
         SearchOrigin();
 
-        //WalkPoints[0] = TargetPos;
-        //if (WalkPoints.Length > 0)
-        //    WalkPoints[^1] = InitialPos;
+        if (WalkPoints.Length > 0)
+            WalkPoints[^1] = InitialPos;
     }
 
     private void FindPoints(float3 player, float3 target)

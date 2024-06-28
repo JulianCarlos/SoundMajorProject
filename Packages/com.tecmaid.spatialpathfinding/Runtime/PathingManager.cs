@@ -516,7 +516,7 @@ namespace Pathfinding
                 originJob = JobFactory.GenerateAStarJob(originVolume, agent.InitialPos, links[tempLinkIndex].transform.position);
                 aStarHandle = originJob.Schedule();
                 aStarHandle.Complete();
-
+ 
                 if (originJob.WalkPoints.Length > 0)
                     wayPoints.Add(new NavigationPathSegment(originJob.WalkPoints));
 

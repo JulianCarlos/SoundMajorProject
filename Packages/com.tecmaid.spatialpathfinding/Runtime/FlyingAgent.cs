@@ -39,11 +39,6 @@ namespace Pathfinding
         private float speedCurveMultiplier = 1f;
         private float currentAccelerationValue = 0f;
 
-        private void Start()
-        {
-            MoveTo(TargetPos);
-        }
-
         public void SetActiveVolume(NavigationVolume activeVolume)
         {
             this.ActiveVolume = activeVolume;
@@ -61,6 +56,7 @@ namespace Pathfinding
 
         public void MoveTo(float3 targetPos)
         {
+            TargetPos = targetPos;
             RequestPath(targetPos);
         }
 
